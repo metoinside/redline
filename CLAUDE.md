@@ -40,3 +40,13 @@ When choosing between options, pick the one that makes the output more trustwort
 - Append the question to `QUESTIONS.md` with the date, what you need, and your recommendation.
 - Skip only the work that depends on the answer, and keep building the rest.
 - Never treat an unanswered question as a yes.
+
+## Agent skills
+
+### Issue tracker
+
+Not chosen yet; see `QUESTIONS.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` plus `docs/adr/` at the repo root. See `docs/agents/domain.md`.
