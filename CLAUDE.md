@@ -45,7 +45,11 @@ When choosing between options, pick the one that makes the output more trustwort
 
 ### Issue tracker
 
-Not chosen yet; see `QUESTIONS.md`.
+GitHub Issues on `metoinside/redline`, via `gh`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default vocabulary: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
 
 ### Domain docs
 
