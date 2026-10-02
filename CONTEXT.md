@@ -44,6 +44,18 @@ _Avoid_: high/medium/low, score, rating
 The exact sentence a flag or claim comes from, matching the stored document text word for word.
 _Avoid_: quote, reference, source (alone)
 
+**Clean result**:
+An analysis with nothing to negotiate. It lists each renewal-and-exit clause type as found with low exposure, or as "we found none".
+_Avoid_: all clear, safe, no issues
+
+**Outside terms**:
+Terms a document brings in from another document it doesn't contain, such as online terms of service or an order form.
+_Avoid_: linked terms, external policy
+
+**Outside-terms notice**:
+A cited sentence showing that the document brings in outside terms Redline has not read. It is not a flag, and while one exists the result cannot be clean.
+_Avoid_: warning, missing-document flag
+
 **Red line**:
 A term the buyer has said they will not accept. Their red lines are an input to every analysis.
 _Avoid_: preference, rule, dealbreaker

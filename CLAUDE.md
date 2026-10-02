@@ -1,5 +1,5 @@
 # Redline
-A web app. Someone uploads a contract, lease, freelance agreement or terms of service. They get back:
+A web app for small business owners signing vendor, SaaS and service contracts (see ADR 0002). Any document can be uploaded, but only vendor contracts are tuned and tested. They get back:
 1. A plain-English summary.
 2. The clauses that could hurt them, ranked by severity, each with its exact source sentence.
 3. A drafted counter-offer for each flagged clause.
