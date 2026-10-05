@@ -1,7 +1,7 @@
 ---
 version: 1
 slug: "landing-index-html"
-primary_target: "landing/index.html"
+primary_target: "app/(marketing)/page.tsx"
 related_targets: []
 ---
 
@@ -38,4 +38,4 @@ SIGNATURE INTERACTION: As each cited sentence reaches the reading line, a red pe
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 
 ## Unresolved
-- Sign-in and upload routes don't exist yet (#2, #3). The action links to `/sign-in?next=/new`.
+- Sign-in and upload routes don't exist yet (#2, #3). The action links to `/new`.

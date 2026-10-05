@@ -20,3 +20,8 @@ Questions logged during work, waiting for an answer. Newest at the bottom.
 - **Decision:** the owner chose upload **and** paste for the app shell. Pasted text becomes the stored document text, and citations are checked against it exactly as for an upload.
 - **Need:** the spec (issue #1) and ticket #3 cover upload only. Someone has to add paste to #3's acceptance criteria.
 - **Recommendation:** add paste to #3 rather than a new ticket, and have the same normalisation as extraction applied to pasted text, so citations stay verbatim (ADR 0001).
+
+## 2026-10-05: Dependencies added during the unattended build
+- **Need:** `CLAUDE.md` says to ask before adding a dependency. The unattended build prompt said to decide and record instead of stopping, so the build added: next, react, react-dom, typescript and the React/Node types, vitest, tsx, @supabase/supabase-js, @supabase/ssr, @electric-sql/pglite (dev, for row-level security tests), pdfjs-dist and mammoth.
+- **Recommendation:** keep them. Each is either the settled stack or the smallest library for its job; `BUILD-REPORT.md` gives the reason for each. OpenRouter is called with `fetch`, so no SDK was added.
+- **Until answered:** the packages stay installed. Remove any you reject and the ticket that needs it reopens.
