@@ -5,6 +5,7 @@
       "id": "c1",
       "clauseType": "multi_year_term",
       "sentence": "The Initial Subscription Term begins on the Effective Date and continues for thirty-six (36) months, and Customer may not terminate this Agreement for convenience at any time during the Initial Subscription Term.",
+      "statement": "The contract runs for 36 months from the Effective Date, and you can’t end it for convenience during that time.",
       "expectedTier": "negotiate",
       "exposure": {
         "lockIn": "thirty-six (36) months",
@@ -16,6 +17,7 @@
       "id": "c2",
       "clauseType": "auto_renewal",
       "sentence": "Upon expiration of the Initial Subscription Term or any renewal term, this Agreement shall automatically renew at the Subscription Fee then in effect, which for the first renewal term shall be no less than $48,000 per year.",
+      "statement": "When a term ends, the contract renews on its own at the fee then in effect, which is at least $48,000 a year for the first renewal.",
       "expectedTier": "negotiate",
       "exposure": {
         "money": "$48,000 per year"
@@ -26,6 +28,7 @@
       "id": "c3",
       "clauseType": "rollover",
       "sentence": "Each renewal term shall be equal in length to the Initial Subscription Term of thirty-six (36) months.",
+      "statement": "Every renewal term runs for 36 months, the same length as the first term.",
       "expectedTier": "negotiate",
       "exposure": {
         "lockIn": "thirty-six (36) months"
@@ -36,6 +39,7 @@
       "id": "c4",
       "clauseType": "notice_window",
       "sentence": "To prevent renewal, Customer must deliver written notice of non-renewal by certified mail to Provider's legal department, and that notice must be received no later than ninety (90) days before the end of the then-current term.",
+      "statement": "To stop a renewal, you have to send written notice by certified mail to Provider’s legal department, and it has to arrive at least 90 days before the current term ends.",
       "expectedTier": "negotiate",
       "exposure": {
         "exitDifficulty": "no later than ninety (90) days before the end of the then-current term"
@@ -46,6 +50,7 @@
       "id": "c5",
       "clauseType": "early_termination_fee",
       "sentence": "If Customer terminates this Agreement for convenience during any renewal term, Customer shall pay Provider an early termination fee equal to one hundred percent (100%) of the Subscription Fees remaining for the balance of that renewal term.",
+      "statement": "If you end the contract for convenience during a renewal term, you owe every Subscription Fee left in that term.",
       "expectedTier": "negotiate",
       "exposure": {
         "money": "one hundred percent (100%) of the Subscription Fees remaining for the balance of that renewal term",
@@ -57,6 +62,7 @@
       "id": "c6",
       "clauseType": "rollover",
       "sentence": "If Customer purchases additional Authorized User seats during any term, the subscription for those seats and the existing Services shall be coterminous and shall renew together for a full renewal term.",
+      "statement": "Seats you add during a term are tied to the existing subscription and renew with it for a full renewal term.",
       "expectedTier": "negotiate",
       "exposure": {},
       "readings": [
@@ -69,6 +75,7 @@
       "id": "c7",
       "clauseType": "auto_renewal",
       "sentence": "The Priority Support add-on renews together with the Services, and Customer can cancel the Priority Support add-on at any time without charge from the billing page of its account.",
+      "statement": "The Priority Support add-on renews with the Services, and you can cancel it at any time without charge from the billing page of your account.",
       "expectedTier": "know",
       "exposure": {},
       "why": "The add-on renews on its own, but the clause cites no sum, period or fee, and the buyer cancels it at any time without charge."

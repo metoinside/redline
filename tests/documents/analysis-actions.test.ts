@@ -4,6 +4,7 @@ import { normalizeText } from "@/lib/extraction/normalize";
 import { loadFixture } from "../fixtures/index";
 import { expectCitationsVerbatim } from "../support/citations";
 import { analysisPayload, curlyQuotes } from "../support/model-payloads";
+import { CLAUSE_TYPES } from "../fixtures/index";
 
 // The server entry for a document kept in the browser: the real action, the
 // real engine and the real OpenRouter client. Only the network is faked, by a
@@ -36,12 +37,14 @@ afterEach(() => {
 });
 
 describe("analysing a document kept in the browser", () => {
-  it("returns the auto-renewal flags with citations that match the stored text", async () => {
+  it("returns flags of all five types, with tiers and citations that match the stored text", async () => {
     answerWith(200, analysisPayload(sidecar));
     const result = await analyseBrowserDocument(contract);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.run.analysis.flags.map((f) => f.clauseType)).toEqual(["auto_renewal", "auto_renewal"]);
+    expect(new Set(result.run.analysis.flags.map((f) => f.clauseType))).toEqual(new Set(CLAUSE_TYPES));
+    const expected = sidecar.clauses.map((c) => c.expectedTier).sort((a, b) => (a === b ? 0 : a === "negotiate" ? -1 : 1));
+    expect(result.run.analysis.flags.map((f) => f.tier)).toEqual(expected);
     expectCitationsVerbatim(result.run.analysis, contract);
     expect(Number.isNaN(Date.parse(result.run.ranAt))).toBe(false);
   });
@@ -52,7 +55,7 @@ describe("analysing a document kept in the browser", () => {
     const result = await analyseBrowserDocument(sent);
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.run.analysis.flags).toHaveLength(2);
+    expect(result.run.analysis.flags).toHaveLength(sidecar.clauses.length);
     expectCitationsVerbatim(result.run.analysis, normalizeText(sent));
   });
 
@@ -62,7 +65,8 @@ describe("analysing a document kept in the browser", () => {
     expect(serialised).not.toContain("test-key-not-real");
     expect(serialised).not.toContain("model-named-by-env");
     expect(serialised).not.toContain("droppedByReason");
-    expect(serialised).not.toContain("multi_year_term");
+    expect(serialised).not.toContain("exposureDropped");
+    expect(serialised).not.toContain("wording");
   });
 
   it("says the model isn't set up, and calls nothing, when the key is missing", async () => {
@@ -77,6 +81,13 @@ describe("analysing a document kept in the browser", () => {
     expect(await analyseBrowserDocument(contract)).toEqual({ ok: false, reason: "model-failed" });
     answerWith(200, { not: "clauses" });
     expect(await analyseBrowserDocument(contract)).toEqual({ ok: false, reason: "model-failed" });
+  });
+
+  it("shows nothing when the wording still hedges after the retry, and says why", async () => {
+    const hedged = analysisPayload(sidecar, { map: (item) => ({ ...item, statement: "This might renew.", readings: ["This might renew."] }) });
+    answerWith(200, hedged);
+    expect(await analyseBrowserDocument(contract)).toEqual({ ok: false, reason: "wording-failed" });
+    expect(calls).toBe(2);
   });
 
   it("refuses text that isn't a document before calling the model", async () => {

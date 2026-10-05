@@ -6,12 +6,12 @@ Unattended build started 2026-10-05. This file is updated as the build runs; the
 
 | Ticket | Status | Notes |
 |---|---|---|
-| Scaffold (Next.js app, landing moved in) | in progress | |
-| Fixtures | not started | |
-| #2 Sign in and an empty library | not started | |
-| #3 Upload a contract and see its extracted text | not started | |
-| #4 First flag with a checked citation | not started | |
-| #5 All five clause types, tiers and exposure | not started | |
+| Scaffold (Next.js app, landing moved in) | done (18f8000) | Landing is now `app/(marketing)/`; the old `landing/` folder is gone |
+| Fixtures | done (157f676) | 7 planted clauses, all five types; sentences checked verbatim |
+| #2 Sign in and an empty library | done except deploy (9386235) | Not verified live: Vercel deploy, sign-in against Supabase |
+| #3 Upload a contract and see its extracted text | done (f4930ec) | Paste added to its criteria. Saving to the library not verified live |
+| #4 First flag with a checked citation | done (11e43e5) | Real model not verified: the key returns 401 |
+| #5 All five clause types, tiers and exposure | in progress | |
 | #6 Summary and notice obligations | not started | |
 | #7 Outside-terms notices and the clean result | not started | |
 | #8 Counter-offers for each flag | not started | |

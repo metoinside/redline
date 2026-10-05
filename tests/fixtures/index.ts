@@ -29,6 +29,8 @@ export interface FixtureClause {
   id: string;
   clauseType: ClauseType;
   sentence: string;
+  /** What the sentence does, in plain words: what the model should say about it. */
+  statement: string;
   expectedTier: ExpectedTier;
   exposure: FixtureExposure;
   /** Present only for a clause that reads two ways. */

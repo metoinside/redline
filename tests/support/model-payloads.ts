@@ -6,8 +6,10 @@ import type { FixtureClause, FixtureSidecar } from "../fixtures/index";
 // Builds what the model would return for a fixture, from its sidecar labels,
 // so the scripted client can stand in for the model. A test starts from the
 // sidecar's "right answer" and bends it: drop a clause, retype one, alter a
-// quote, add one the document doesn't contain. Later tickets add the parts of
-// the payload they introduce (summary, notice obligations, outside terms) here.
+// quote, add one the document doesn't contain. Each clause carries the
+// sidecar's statement, exposure fragments and readings (one, or the two the
+// sidecar lists for a clause that reads two ways). Later tickets add the parts
+// of the payload they introduce (summary, notice obligations, outside terms) here.
 
 export type PayloadOptions = {
   /** Keep only clauses of these types. Default: every clause in the sidecar. */
@@ -26,12 +28,44 @@ export function analysisPayload(sidecar: FixtureSidecar, options: PayloadOptions
   for (const clause of sidecar.clauses) {
     if (options.clauseTypes && !options.clauseTypes.includes(clause.clauseType)) continue;
     if (options.omit?.includes(clause.id)) continue;
-    const item: ModelAnalysisItem = { clause_type: clause.clauseType, sentence: clause.sentence };
+    const item = modelItem(clause);
     const mapped = options.map ? options.map(item, clause) : item;
     if (mapped) items.push(mapped);
   }
   items.push(...(options.extra ?? []));
   return { clauses: items as ModelAnalysisItem[] };
+}
+
+/** One clause as the model would report it, from its sidecar labels. */
+export function modelItem(clause: FixtureClause): ModelAnalysisItem {
+  return {
+    clause_type: clause.clauseType,
+    sentence: clause.sentence,
+    statement: clause.statement,
+    exposure: {
+      money: clause.exposure.money ?? null,
+      lock_in: clause.exposure.lockIn ?? null,
+      exit_difficulty: clause.exposure.exitDifficulty ?? null,
+    },
+    readings: clause.readings ? [...clause.readings] : [clause.statement],
+  };
+}
+
+/** An item for any sentence, with a plain statement, one reading and no exposure unless given. */
+export function itemFor(
+  clauseType: string,
+  sentence: string,
+  overrides: Partial<ModelAnalysisItem> = {},
+): ModelAnalysisItem {
+  const statement = overrides.statement ?? "This sentence sets a renewal or exit term.";
+  return {
+    clause_type: clauseType,
+    sentence,
+    statement,
+    exposure: { money: null, lock_in: null, exit_difficulty: null },
+    readings: [statement],
+    ...overrides,
+  };
 }
 
 /** A scripted client that answers each call with the next step, in order. */

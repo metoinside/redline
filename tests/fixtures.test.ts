@@ -19,7 +19,7 @@ function citedSentences(sidecar: FixtureSidecar): string[] {
 
 function sidecarProse(sidecar: FixtureSidecar): string[] {
   return [
-    ...sidecar.clauses.flatMap((c) => [c.why, ...(c.readings ?? [])]),
+    ...sidecar.clauses.flatMap((c) => [c.statement, c.why, ...(c.readings ?? [])]),
     ...sidecar.noticeObligations.flatMap((n) => [n.description, n.deadline]),
     ...sidecar.decoys.map((d) => d.why),
     ...sidecar.questions.flatMap((q) => (q.answerable ? [q.answer] : [])),

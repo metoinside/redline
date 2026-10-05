@@ -298,19 +298,27 @@ p { margin: 0; }
    above the work area and can still be clicked. */
 .work { position: relative; z-index: 0; }
 .flag-tabs { margin: 0 0 22px; }
+.flag-groups { display: grid; gap: 14px; }
+.flag-group-head { font-weight: 700; font-size: 0.82rem; color: var(--ink); }
+.flag-group-note { font-size: 0.82rem; color: var(--graphite); margin-bottom: 8px; max-width: 46rem; }
 .flag-tabs ul { list-style: none; margin: 0; padding: 0 0 6px; display: flex; gap: 8px; overflow-x: auto; scrollbar-color: var(--manila-deep) transparent; }
+.flag-tabs li { min-width: 0; }
+/* Fixed tier colours (DESIGN.md): red is Negotiate before signing, yellow is Know before signing. */
 .flag-tab {
   display: grid; gap: 1px; text-align: left; white-space: nowrap;
+  width: min(64vw, 240px);
   padding: 10px 14px 10px 16px;
-  font: inherit; color: var(--ink);
-  background: var(--sheet);
+  font: inherit;
   border: 0; border-radius: 6px; cursor: pointer;
-  box-shadow: inset 0 0 0 1px var(--graphite);
+  box-shadow: 0 8px 14px -12px rgba(60, 40, 10, 0.6);
   transition: transform 0.35s var(--ease-out), box-shadow 0.2s ease;
 }
+.flag-tab--negotiate { background-color: var(--red); color: var(--sheet); }
+.flag-tab--know { background-color: var(--tab-yellow); color: var(--ink); }
 .flag-tab-type { font-weight: 700; font-size: 1rem; line-height: 1.2; }
-.flag-tab-line { font-weight: 500; font-size: 0.86rem; color: var(--graphite); }
-.flag-tab.is-selected { box-shadow: inset 0 0 0 2px var(--ink); }
+.flag-tab-line { font-weight: 500; font-size: 0.86rem; overflow: hidden; text-overflow: ellipsis; }
+.flag-tab-tier { font-weight: 700; font-size: 0.76rem; }
+.flag-tab.is-selected { box-shadow: 0 0 0 3px var(--ink), 0 8px 14px -12px rgba(60, 40, 10, 0.6); }
 
 /* ---------- Margin comments ---------- */
 .margin { display: grid; gap: 12px; margin-bottom: 22px; }
@@ -322,8 +330,19 @@ p { margin: 0; }
   font-size: 0.98rem; line-height: 1.5;
 }
 .comment.is-selected { display: block; }
-.comment h3 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
+.comment h3 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; font-weight: 700; font-size: 1rem; margin-bottom: 2px; }
+.comment-swatch { flex: none; width: 12px; height: 12px; border-radius: 2px; align-self: center; }
+.comment--negotiate .comment-swatch { background: var(--red); }
+.comment--know .comment-swatch { background: var(--tab-yellow); box-shadow: inset 0 0 0 1px var(--ink); }
 .comment-clause { font-weight: 600; font-size: 0.82rem; color: var(--graphite); }
+.comment-tier { font-weight: 700; font-size: 0.82rem; margin-bottom: 6px; }
+.comment-exposure { margin: 8px 0 0; display: grid; gap: 4px; }
+.comment-exposure div { display: grid; gap: 0; }
+.comment-exposure dt { font-weight: 600; font-size: 0.82rem; color: var(--graphite); }
+.comment-exposure dd { margin: 0; font-family: var(--doc); font-size: 0.98rem; line-height: 1.45; color: var(--ink); }
+.comment-none { margin-top: 8px; color: var(--graphite); font-size: 0.92rem; }
+.comment-readings { margin-top: 8px; }
+.comment-readings ol { margin: 4px 0 0; padding-left: 1.3em; display: grid; gap: 4px; }
 .doc-body--margin { display: flex; flex-direction: column; }
 .doc-body--margin .margin { order: -1; }
 
@@ -336,19 +355,24 @@ p { margin: 0; }
     width: 196px; margin: 0;
     z-index: -1;
   }
-  .flag-tabs ul {
+  .flag-groups {
     position: sticky; top: 24px;
-    display: grid; justify-items: start; gap: 10px;
-    padding: 132px 0 0; overflow: visible;
+    gap: 18px;
+    padding: 132px 0 0;
   }
+  /* On the folder now, beside the sheet: folder ink, not graphite. */
+  .flag-group-head, .flag-group-note { padding-left: 26px; color: var(--manila-ink); }
+  .flag-group-note { color: var(--manila-dim); }
+  .flag-tabs ul { display: grid; justify-items: start; gap: 10px; overflow: visible; padding: 0; }
   .flag-tabs li { animation: tab-out 0.7s var(--ease-out) both; animation-delay: calc(0.3s + var(--i, 0) * 140ms); }
   .flag-tab {
+    width: 196px;
     padding: 10px 14px 10px 26px;
     border-radius: 0 6px 6px 0;
-    box-shadow: inset 0 0 0 1px var(--graphite), var(--desk-shadow);
+    /* The 14px end on the paper is the adhesive. */
+    background-image: linear-gradient(to right, rgba(255, 255, 255, 0.4) 0 14px, transparent 14px);
   }
   .flag-tab:hover { transform: translateX(4px); }
-  .flag-tab.is-selected { box-shadow: inset 0 0 0 2px var(--ink), var(--desk-shadow); }
 
   .doc-body--margin {
     display: grid;

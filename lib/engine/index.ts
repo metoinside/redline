@@ -1,7 +1,8 @@
 // The analysis engine's public API, for server code (server actions, route
 // handlers, scripts). Client components must not import this file, because it
-// re-exports the OpenRouter client; they import ./types, ./stored or
-// ./citations directly (tests/engine/server-boundary.test.ts).
+// re-exports the OpenRouter client; they import ./types, ./stored,
+// ./citations, ./exposure, ./tiers or ./wording directly
+// (tests/engine/server-boundary.test.ts).
 
 export * from "./types";
 export * from "./model";
@@ -11,10 +12,21 @@ export {
   ALLOWED_CLAUSE_TYPES,
   ANALYSIS_SCHEMA,
   ANALYSIS_TASK,
+  MAX_ATTEMPTS,
   type AnalyseInput,
   type ModelAnalysisItem,
   type ModelAnalysisPayload,
 } from "./analyse";
-export { readStoredAnalysis } from "./stored";
+export { checkExposure, hasFigure, parseMoneyAmount, type ExposureCheck } from "./exposure";
+export { assignTier, rankFlags, type TierInput } from "./tiers";
+export {
+  BANNED_TERMS,
+  HEDGING_TERMS,
+  MARKET_TERMS,
+  WordingDefectsError,
+  findWordingDefects,
+  type WordingPiece,
+} from "./wording";
+export { checkStoredAnalysis, readStoredAnalysis, type StoredAnalysisCheck } from "./stored";
 export { createOpenRouterClient, isModelConfigured, OPENROUTER_URL, type OpenRouterOptions } from "./openrouter";
 export { ScriptedModelClient, type ScriptStep } from "./scripted";

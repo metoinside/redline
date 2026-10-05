@@ -8,6 +8,7 @@ import { checkDocumentText } from "@/lib/documents/new-document";
 import { analyse } from "@/lib/engine/analyse";
 import { ModelError } from "@/lib/engine/model";
 import { createOpenRouterClient, isModelConfigured } from "@/lib/engine/openrouter";
+import { WordingDefectsError } from "@/lib/engine/wording";
 import type { Analysis, AnalysisDiagnostics, RedLine } from "@/lib/engine/types";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createServerSupabase, getCurrentUser } from "@/lib/supabase/server";
@@ -17,6 +18,8 @@ export type AnalysisRun = { analysis: Analysis; ranAt: string };
 export type RunAnalysisFailure =
   | "model-off"
   | "model-failed"
+  /** The model's wording still hedged or compared with the market after a retry. Nothing is shown or saved. */
+  | "wording-failed"
   | "accounts-off"
   | "signed-out"
   | "not-found"
@@ -37,6 +40,12 @@ async function runEngine(
     const { analysis, diagnostics } = await analyse({ text, redLines, client: createOpenRouterClient() });
     return { ok: true, analysis, diagnostics };
   } catch (err) {
+    if (err instanceof WordingDefectsError) {
+      // The terms only, never the model's text.
+      const terms = [...new Set(err.attempts.flatMap((a) => a.defects.map((d) => d.term)))];
+      console.error(`[analysis] wording check failed after ${err.attempts.length} attempts: ${terms.join(", ")}`);
+      return { ok: false, reason: "wording-failed" };
+    }
     if (err instanceof ModelError) {
       // The kind and status only: messages are already free of the key and model id.
       console.error(`[analysis] model call failed: ${err.kind}${"status" in err ? ` ${String(err.status)}` : ""}`);
