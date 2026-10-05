@@ -74,3 +74,6 @@ Thumbs.db
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Impeccable review captures (regenerated on every review)
+.impeccable/review/

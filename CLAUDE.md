@@ -34,6 +34,7 @@ When choosing between options, pick the one that makes the output more trustwort
 - Keep credentials in `.env.local`, which is gitignored. Never commit a secret: a key is public the moment it is pushed and has to be rotated.
 - Before every commit, check the staged files for `.env*` files, keys and tokens.
 - Ask before adding a dependency.
+- All copy a user reads in this product, meaning the landing page, UI labels, error messages and empty states, has to be run through the humanizer skill before it is committed. Copy that reads as though a model wrote it is a defect, not a matter of taste.
 
 ## When I'm not watching
 - Builds often run unattended. When something needs my approval (a dependency, out-of-scope work, a PRD conflict), do not stop the build.
