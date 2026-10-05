@@ -1,588 +1,143 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-05T15:05:07+00:00",
+  "generatedAt": "2026-10-05T18:00:00+00:00",
   "title": "Design System: Redline",
   "extensions": {
     "colorMeta": {
-      "guide": {
-        "role": "primary",
-        "displayName": "Interstate Guide Green",
-        "canonical": "oklch(43.4% 0.102 157.7)",
-        "tonalRamp": [
-          "oklch(15% 0.102 157.7)",
-          "oklch(26% 0.102 157.7)",
-          "oklch(38% 0.102 157.7)",
-          "oklch(50% 0.102 157.7)",
-          "oklch(62% 0.102 157.7)",
-          "oklch(74% 0.102 157.7)",
-          "oklch(85% 0.102 157.7)",
-          "oklch(95% 0.102 157.7)"
-        ]
-      },
-      "guide-deep": {
-        "role": "primary",
-        "displayName": "Deep Guide Green",
-        "canonical": "oklch(37.0% 0.086 158.4)",
-        "tonalRamp": [
-          "oklch(15% 0.086 158.4)",
-          "oklch(26% 0.086 158.4)",
-          "oklch(38% 0.086 158.4)",
-          "oklch(50% 0.086 158.4)",
-          "oklch(62% 0.086 158.4)",
-          "oklch(74% 0.086 158.4)",
-          "oklch(85% 0.086 158.4)",
-          "oklch(95% 0.086 158.4)"
-        ]
-      },
-      "regulatory": {
-        "role": "secondary",
-        "displayName": "Regulatory Red",
-        "canonical": "oklch(48.9% 0.190 25.4)",
-        "tonalRamp": [
-          "oklch(15% 0.190 25.4)",
-          "oklch(26% 0.190 25.4)",
-          "oklch(38% 0.190 25.4)",
-          "oklch(50% 0.190 25.4)",
-          "oklch(62% 0.190 25.4)",
-          "oklch(74% 0.190 25.4)",
-          "oklch(85% 0.190 25.4)",
-          "oklch(95% 0.190 25.4)"
-        ]
-      },
-      "warning": {
-        "role": "secondary",
-        "displayName": "Warning Yellow",
-        "canonical": "oklch(85.7% 0.165 86.5)",
-        "tonalRamp": [
-          "oklch(15% 0.165 86.5)",
-          "oklch(26% 0.165 86.5)",
-          "oklch(38% 0.165 86.5)",
-          "oklch(50% 0.165 86.5)",
-          "oklch(62% 0.165 86.5)",
-          "oklch(74% 0.165 86.5)",
-          "oklch(85% 0.165 86.5)",
-          "oklch(95% 0.165 86.5)"
-        ]
-      },
-      "construction": {
-        "role": "secondary",
-        "displayName": "Construction Orange",
-        "canonical": "oklch(68.4% 0.185 44.9)",
-        "tonalRamp": [
-          "oklch(15% 0.185 44.9)",
-          "oklch(26% 0.185 44.9)",
-          "oklch(38% 0.185 44.9)",
-          "oklch(50% 0.185 44.9)",
-          "oklch(62% 0.185 44.9)",
-          "oklch(74% 0.185 44.9)",
-          "oklch(85% 0.185 44.9)",
-          "oklch(95% 0.185 44.9)"
-        ]
-      },
-      "marking": {
-        "role": "tertiary",
-        "displayName": "Road-Marking Yellow",
-        "canonical": "oklch(83.4% 0.158 89.0)",
-        "tonalRamp": [
-          "oklch(15% 0.158 89.0)",
-          "oklch(26% 0.158 89.0)",
-          "oklch(38% 0.158 89.0)",
-          "oklch(50% 0.158 89.0)",
-          "oklch(62% 0.158 89.0)",
-          "oklch(74% 0.158 89.0)",
-          "oklch(85% 0.158 89.0)",
-          "oklch(95% 0.158 89.0)"
-        ]
-      },
-      "legend": {
-        "role": "neutral",
-        "displayName": "Legend White",
-        "canonical": "oklch(100.0% 0.000 89.9)",
-        "tonalRamp": [
-          "oklch(15% 0.000 89.9)",
-          "oklch(26% 0.000 89.9)",
-          "oklch(38% 0.000 89.9)",
-          "oklch(50% 0.000 89.9)",
-          "oklch(62% 0.000 89.9)",
-          "oklch(74% 0.000 89.9)",
-          "oklch(85% 0.000 89.9)",
-          "oklch(95% 0.000 89.9)"
-        ]
-      },
-      "legend-soft": {
-        "role": "neutral",
-        "displayName": "Soft Legend",
-        "canonical": "oklch(94.1% 0.016 160.6)",
-        "tonalRamp": [
-          "oklch(15% 0.016 160.6)",
-          "oklch(26% 0.016 160.6)",
-          "oklch(38% 0.016 160.6)",
-          "oklch(50% 0.016 160.6)",
-          "oklch(62% 0.016 160.6)",
-          "oklch(74% 0.016 160.6)",
-          "oklch(85% 0.016 160.6)",
-          "oklch(95% 0.016 160.6)"
-        ]
-      },
-      "sign-ink": {
-        "role": "neutral",
-        "displayName": "Sign Ink",
-        "canonical": "oklch(18.4% 0.005 145.4)",
-        "tonalRamp": [
-          "oklch(15% 0.005 145.4)",
-          "oklch(26% 0.005 145.4)",
-          "oklch(38% 0.005 145.4)",
-          "oklch(50% 0.005 145.4)",
-          "oklch(62% 0.005 145.4)",
-          "oklch(74% 0.005 145.4)",
-          "oklch(85% 0.005 145.4)",
-          "oklch(95% 0.005 145.4)"
-        ]
-      },
-      "asphalt": {
-        "role": "neutral",
-        "displayName": "Asphalt",
-        "canonical": "oklch(28.4% 0.004 106.6)",
-        "tonalRamp": [
-          "oklch(15% 0.004 106.6)",
-          "oklch(26% 0.004 106.6)",
-          "oklch(38% 0.004 106.6)",
-          "oklch(50% 0.004 106.6)",
-          "oklch(62% 0.004 106.6)",
-          "oklch(74% 0.004 106.6)",
-          "oklch(85% 0.004 106.6)",
-          "oklch(95% 0.004 106.6)"
-        ]
-      },
-      "road-text": {
-        "role": "neutral",
-        "displayName": "Road Text",
-        "canonical": "oklch(93.2% 0.007 115.7)",
-        "tonalRamp": [
-          "oklch(15% 0.007 115.7)",
-          "oklch(26% 0.007 115.7)",
-          "oklch(38% 0.007 115.7)",
-          "oklch(50% 0.007 115.7)",
-          "oklch(62% 0.007 115.7)",
-          "oklch(74% 0.007 115.7)",
-          "oklch(85% 0.007 115.7)",
-          "oklch(95% 0.007 115.7)"
-        ]
-      },
-      "road-dim": {
-        "role": "neutral",
-        "displayName": "Road Dim",
-        "canonical": "oklch(75.0% 0.011 95.2)",
-        "tonalRamp": [
-          "oklch(15% 0.011 95.2)",
-          "oklch(26% 0.011 95.2)",
-          "oklch(38% 0.011 95.2)",
-          "oklch(50% 0.011 95.2)",
-          "oklch(62% 0.011 95.2)",
-          "oklch(74% 0.011 95.2)",
-          "oklch(85% 0.011 95.2)",
-          "oklch(95% 0.011 95.2)"
-        ]
-      },
-      "lane": {
-        "role": "neutral",
-        "displayName": "Lane White",
-        "canonical": "oklch(93.2% 0.007 115.7)",
-        "tonalRamp": [
-          "oklch(15% 0.007 115.7)",
-          "oklch(26% 0.007 115.7)",
-          "oklch(38% 0.007 115.7)",
-          "oklch(50% 0.007 115.7)",
-          "oklch(62% 0.007 115.7)",
-          "oklch(74% 0.007 115.7)",
-          "oklch(85% 0.007 115.7)",
-          "oklch(95% 0.007 115.7)"
-        ]
-      },
-      "sky": {
-        "role": "neutral",
-        "displayName": "Overcast Sky",
-        "canonical": "oklch(89.9% 0.009 225.1)",
-        "tonalRamp": [
-          "oklch(15% 0.009 225.1)",
-          "oklch(26% 0.009 225.1)",
-          "oklch(38% 0.009 225.1)",
-          "oklch(50% 0.009 225.1)",
-          "oklch(62% 0.009 225.1)",
-          "oklch(74% 0.009 225.1)",
-          "oklch(85% 0.009 225.1)",
-          "oklch(95% 0.009 225.1)"
-        ]
-      },
-      "sky-ink": {
-        "role": "neutral",
-        "displayName": "Sky Ink",
-        "canonical": "oklch(25.1% 0.015 235.6)",
-        "tonalRamp": [
-          "oklch(15% 0.015 235.6)",
-          "oklch(26% 0.015 235.6)",
-          "oklch(38% 0.015 235.6)",
-          "oklch(50% 0.015 235.6)",
-          "oklch(62% 0.015 235.6)",
-          "oklch(74% 0.015 235.6)",
-          "oklch(85% 0.015 235.6)",
-          "oklch(95% 0.015 235.6)"
-        ]
-      },
-      "steel": {
-        "role": "neutral",
-        "displayName": "Gantry Steel",
-        "canonical": "oklch(58.1% 0.014 236.8)",
-        "tonalRamp": [
-          "oklch(15% 0.014 236.8)",
-          "oklch(26% 0.014 236.8)",
-          "oklch(38% 0.014 236.8)",
-          "oklch(50% 0.014 236.8)",
-          "oklch(62% 0.014 236.8)",
-          "oklch(74% 0.014 236.8)",
-          "oklch(85% 0.014 236.8)",
-          "oklch(95% 0.014 236.8)"
-        ]
-      },
-      "steel-dark": {
-        "role": "neutral",
-        "displayName": "Gantry Steel Dark",
-        "canonical": "oklch(43.4% 0.012 238.8)",
-        "tonalRamp": [
-          "oklch(15% 0.012 238.8)",
-          "oklch(26% 0.012 238.8)",
-          "oklch(38% 0.012 238.8)",
-          "oklch(50% 0.012 238.8)",
-          "oklch(62% 0.012 238.8)",
-          "oklch(74% 0.012 238.8)",
-          "oklch(85% 0.012 238.8)",
-          "oklch(95% 0.012 238.8)"
-        ]
-      },
-      "exit-sub": {
-        "role": "neutral",
-        "displayName": "Exit Sub",
-        "canonical": "oklch(43.6% 0.061 162.1)",
-        "tonalRamp": [
-          "oklch(15% 0.061 162.1)",
-          "oklch(26% 0.061 162.1)",
-          "oklch(38% 0.061 162.1)",
-          "oklch(50% 0.061 162.1)",
-          "oklch(62% 0.061 162.1)",
-          "oklch(74% 0.061 162.1)",
-          "oklch(85% 0.061 162.1)",
-          "oklch(95% 0.061 162.1)"
-        ]
-      },
-      "exit-hover": {
-        "role": "neutral",
-        "displayName": "Exit Hover",
-        "canonical": "oklch(98.0% 0.012 162.1)",
-        "tonalRamp": [
-          "oklch(15% 0.012 162.1)",
-          "oklch(26% 0.012 162.1)",
-          "oklch(38% 0.012 162.1)",
-          "oklch(50% 0.012 162.1)",
-          "oklch(62% 0.012 162.1)",
-          "oklch(74% 0.012 162.1)",
-          "oklch(85% 0.012 162.1)",
-          "oklch(95% 0.012 162.1)"
-        ]
-      },
-      "plate-text": {
-        "role": "neutral",
-        "displayName": "Plate Text",
-        "canonical": "oklch(30.9% 0.010 229.2)",
-        "tonalRamp": [
-          "oklch(15% 0.010 229.2)",
-          "oklch(26% 0.010 229.2)",
-          "oklch(38% 0.010 229.2)",
-          "oklch(50% 0.010 229.2)",
-          "oklch(62% 0.010 229.2)",
-          "oklch(74% 0.010 229.2)",
-          "oklch(85% 0.010 229.2)",
-          "oklch(95% 0.010 229.2)"
-        ]
-      }
+      "red": { "role": "primary", "displayName": "Redline Red", "canonical": "#c8102e", "tonalRamp": ["#3d0510", "#62081a", "#8a0b24", "#c8102e", "#de4a5e", "#ec8592", "#f6c0c7", "#fbe6e9"] },
+      "tab-yellow": { "role": "secondary", "displayName": "Tab Yellow", "canonical": "#f5cf3a", "tonalRamp": ["#3f3208", "#6b5510", "#9c7d17", "#cfa821", "#f5cf3a", "#f8dc72", "#fbeaa9", "#fdf6dc"] },
+      "tab-blue": { "role": "secondary", "displayName": "Tab Blue", "canonical": "#2459c4", "tonalRamp": ["#0b1a3b", "#122c63", "#1a3f8c", "#2459c4", "#5582d6", "#88a9e3", "#bccff0", "#e5edf9"] },
+      "manila": { "role": "neutral", "displayName": "Folder Manila", "canonical": "#e5c887", "tonalRamp": ["#3a2f17", "#5a4a2c", "#8a7240", "#c9a961", "#e5c887", "#eed8a8", "#f5e7c8", "#fbf4e6"] },
+      "manila-deep": { "role": "neutral", "displayName": "Folder Crease", "canonical": "#c9a961" },
+      "manila-ink": { "role": "neutral", "displayName": "Folder Ink", "canonical": "#2b2418" },
+      "manila-dim": { "role": "neutral", "displayName": "Folder Ink, Dim", "canonical": "#5a4a2c" },
+      "sheet": { "role": "neutral", "displayName": "Bond White", "canonical": "#ffffff" },
+      "ink": { "role": "neutral", "displayName": "Document Ink", "canonical": "#1c1a17", "tonalRamp": ["#1c1a17", "#34312c", "#4a4640", "#5f5a53", "#87827a", "#b1aca3", "#e4ded3", "#f7f5f1"] },
+      "graphite": { "role": "neutral", "displayName": "Graphite", "canonical": "#5f5a53" },
+      "rule": { "role": "neutral", "displayName": "Sheet Rule", "canonical": "#e4ded3" }
     },
     "typographyMeta": {
-      "display": {
-        "displayName": "Display",
-        "purpose": "Hero headline on the gantry only."
-      },
-      "headline": {
-        "displayName": "Headline",
-        "purpose": "Section headings on guide signs and the limits section."
-      },
-      "title": {
-        "displayName": "Title",
-        "purpose": "Headings on the road above the contract."
-      },
-      "sign-legend": {
-        "displayName": "Sign Legend",
-        "purpose": "Exit panel legend; heavy sign register."
-      },
-      "flag-type": {
-        "displayName": "Flag Type",
-        "purpose": "Clause type on a flag sign."
-      },
-      "body": {
-        "displayName": "Body",
-        "purpose": "Interface copy, tabular figures on."
-      },
-      "document": {
-        "displayName": "Document",
-        "purpose": "Contract sentences and citations only."
-      },
-      "document-title": {
-        "displayName": "Document Title",
-        "purpose": "The contract's own title."
-      },
-      "label": {
-        "displayName": "Label",
-        "purpose": "The contract's own section heads; distance-marker label."
-      },
-      "tier": {
-        "displayName": "Tier",
-        "purpose": "Tier bar at the foot of a flag sign."
-      }
+      "display": { "displayName": "Display", "purpose": "The hero headline across the folder." },
+      "headline": { "displayName": "Headline", "purpose": "Section statements, about 24ch wide." },
+      "title": { "displayName": "Title", "purpose": "The document's title on the sheet; the desk heading at clamp(1.3rem, 1.9vw, 1.6rem)." },
+      "document": { "displayName": "Document", "purpose": "Contract clauses on the white sheet; 72ch for unflagged clauses, 36rem beside a margin comment." },
+      "document-heading": { "displayName": "Document heading", "purpose": "Numbered clause headings in small caps." },
+      "body": { "displayName": "Body", "purpose": "Interface copy, margin comments and tabs, with tabular figures." },
+      "action": { "displayName": "Action", "purpose": "The primary action's legend; the wordmark uses the same weight at 1.6rem." },
+      "label": { "displayName": "Label", "purpose": "Clause numbers and the sheet label, in graphite." }
     },
     "shadows": [
-      {
-        "name": "hanging-sign",
-        "value": "0 18px 36px -18px rgba(10, 30, 20, 0.55)",
-        "purpose": "Under guide-green signs."
-      },
-      {
-        "name": "exit-panel",
-        "value": "0 10px 22px -12px rgba(0, 0, 0, 0.6)",
-        "purpose": "Primary action at rest."
-      },
-      {
-        "name": "exit-panel-hover",
-        "value": "0 16px 28px -14px rgba(0, 0, 0, 0.65)",
-        "purpose": "Primary action on hover."
-      },
-      {
-        "name": "plate",
-        "value": "0 10px 20px -14px rgba(0, 0, 0, 0.5)",
-        "purpose": "Regulatory plates on the post."
-      },
-      {
-        "name": "strip",
-        "value": "0 14px 24px -18px rgba(0, 0, 0, 0.9)",
-        "purpose": "Sticky sign strip over the road."
-      },
-      {
-        "name": "beam",
-        "value": "0 6px 10px -6px rgba(0, 0, 0, 0.35)",
-        "purpose": "Gantry beams."
-      },
-      {
-        "name": "ring-guide",
-        "value": "inset 0 0 0 6px #00613a, inset 0 0 0 9px #ffffff",
-        "purpose": "Inset border of a guide sign."
-      },
-      {
-        "name": "ring-regulatory",
-        "value": "inset 0 0 0 5px #b3121f",
-        "purpose": "Inset border of a Negotiate-before-signing flag sign."
-      },
-      {
-        "name": "ring-ink",
-        "value": "inset 0 0 0 3px #111311, inset 0 0 0 5px <face>",
-        "purpose": "Inset border of warning and construction signs."
-      },
-      {
-        "name": "focus-ring",
-        "value": "outline: 3px solid #f2c230; outline-offset: 3px",
-        "purpose": "Keyboard focus on every interactive element."
-      },
-      {
-        "name": "active-sign-halo",
-        "value": "0 0 0 3px #f2c230",
-        "purpose": "The selected flag sign."
-      }
+      { "name": "desk", "value": "0 1px 2px rgba(60, 40, 10, 0.12), 0 26px 44px -26px rgba(60, 40, 10, 0.5)", "purpose": "Every white sheet resting on manila." },
+      { "name": "action-rest", "value": "inset 0 0 0 2px #1c1a17, 0 14px 24px -16px rgba(60, 40, 10, 0.55)", "purpose": "Primary action at rest: ink border as an inset ring plus a small desk shadow." },
+      { "name": "action-hover", "value": "inset 0 0 0 2px #1c1a17, 0 20px 30px -18px rgba(60, 40, 10, 0.6)", "purpose": "Primary action lifted 2px on hover." },
+      { "name": "tab", "value": "0 8px 14px -12px rgba(60, 40, 10, 0.6)", "purpose": "Flag tabs standing off the sheet." },
+      { "name": "tab-active", "value": "0 0 0 3px #1c1a17, 0 8px 14px -12px rgba(60, 40, 10, 0.6)", "purpose": "The selected flag tab." },
+      { "name": "focus", "value": "outline: 3px solid #1c1a17; outline-offset: 3px", "purpose": "Global focus-visible ring; white on the ink footer." }
     ],
     "motion": [
-      {
-        "name": "ease-out",
-        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
-        "purpose": "All transitions and the re-rank animation."
-      },
-      {
-        "name": "sign-light",
-        "value": "filter 0.6s ease-out; from brightness(0.55) saturate(0.75) to none",
-        "purpose": "A flag sign lights when its citation crosses the reading line (-30% / -45% root margin)."
-      },
-      {
-        "name": "retroreflective-sweep",
-        "value": "0.9s ease-out, 105deg white gradient translateX(-110% to 110%)",
-        "purpose": "One sweep across a sign as it lights."
-      },
-      {
-        "name": "citation-wipe",
-        "value": "background-size 0.8s ease-out",
-        "purpose": "Road-marking highlight wipes across a lit citation."
-      },
-      {
-        "name": "rerank",
-        "value": "650ms FLIP, ease-out",
-        "purpose": "Signs re-order lit-first, then by tier and money."
-      },
-      {
-        "name": "exit-lift",
-        "value": "transform 0.35s ease-out, translateY(-2px)",
-        "purpose": "Exit panel and flag-sign hover lift."
-      },
-      {
-        "name": "reduced-motion",
-        "value": "no transitions, no sweep, all signs and citations lit",
-        "purpose": "prefers-reduced-motion: reduce."
-      }
+      { "name": "ease-out", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "The single easing curve for every mark and lift." },
+      { "name": "pen-draw", "value": "background-size 0.9s ease-out", "purpose": "The red underline drawing under a cited sentence as it reaches the reading line." },
+      { "name": "tab-slide", "value": "transform 0.7s ease-out, opacity 0.4s ease-out", "purpose": "A flag tab sliding 28px out from under the sheet's edge." },
+      { "name": "tab-rerank", "value": "650ms FLIP translate, ease-out", "purpose": "Lit tabs re-sorting ahead of tucked ones in tier-then-money order." },
+      { "name": "action-lift", "value": "transform 0.35s ease-out, box-shadow 0.35s ease-out", "purpose": "Primary action rising 2px; arrow moving 4px right." },
+      { "name": "reduced-motion", "value": "transitions off; all marks drawn, all tabs out", "purpose": "prefers-reduced-motion: reduce." }
     ],
     "breakpoints": [
-      {
-        "name": "strip-3col",
-        "value": "1100px"
-      },
-      {
-        "name": "stack",
-        "value": "860px"
-      },
-      {
-        "name": "phone",
-        "value": "640px"
-      }
+      { "name": "narrow-rail", "value": "1100px" },
+      { "name": "stack", "value": "860px" },
+      { "name": "phone", "value": "640px" }
     ]
   },
   "components": [
     {
-      "name": "Exit Panel",
+      "name": "Primary Action",
       "kind": "button",
-      "refersTo": "exit-panel",
-      "description": "The primary action: a white exit sign on guide green.",
-      "html": "<div class=\"ds-guide-bg\"><a class=\"ds-exit\" href=\"#\"><span class=\"ds-exit-text\"><span class=\"ds-exit-legend\">Try it on a document</span><span class=\"ds-exit-sub\">PDF, DOCX or pasted text</span></span><svg class=\"ds-exit-arrow\" viewBox=\"0 0 48 48\" width=\"46\" height=\"46\" aria-hidden=\"true\"><path d=\"M14 34 34 14M18 14h16v16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"5\" stroke-linecap=\"square\"/></svg></a></div>",
-      "css": ".ds-guide-bg { background: #00613a; padding: 24px; } .ds-exit { font-family: Overpass, 'Helvetica Neue', Arial, sans-serif; display: inline-flex; align-items: center; gap: 18px; min-width: 300px; padding: 20px 22px 20px 26px; background: #ffffff; color: #004d2e; border-radius: 10px; text-decoration: none; box-shadow: inset 0 0 0 3px #004d2e, 0 10px 22px -12px rgba(0,0,0,0.6); transition: transform 0.35s cubic-bezier(0.16,1,0.3,1), box-shadow 0.35s cubic-bezier(0.16,1,0.3,1), background-color 0.2s; } .ds-exit-text { display: grid; gap: 2px; } .ds-exit-legend { font-weight: 800; font-size: 1.5rem; line-height: 1.1; } .ds-exit-sub { font-weight: 600; font-size: 0.95rem; color: #2f5c47; } .ds-exit-arrow { flex: none; margin-left: auto; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1); } .ds-exit:hover { transform: translateY(-2px); background: #f2fbf6; box-shadow: inset 0 0 0 3px #004d2e, 0 16px 28px -14px rgba(0,0,0,0.65); } .ds-exit:hover .ds-exit-arrow { transform: translate(3px,-3px); } .ds-exit:active { transform: translateY(0); } .ds-exit:focus-visible { outline: 3px solid #f2c230; outline-offset: 3px; }"
+      "refersTo": "button-primary",
+      "description": "The one action: a square white card with an ink ring, a red-underlined legend and a red arrow.",
+      "html": "<a class=\"ds-try\" href=\"#\"><span class=\"ds-try-legend\">Try it on a document</span><span class=\"ds-try-sub\">PDF, DOCX or pasted text</span><svg class=\"ds-try-arrow\" viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5 12h13M13 6l6 6-6 6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"square\"/></svg></a>",
+      "css": ".ds-try { display: inline-grid; grid-template-columns: auto auto; column-gap: 28px; align-items: center; padding: 16px 20px 18px 22px; background: #ffffff; color: #1c1a17; text-decoration: none; font-family: 'Libre Franklin', 'Helvetica Neue', Arial, sans-serif; box-shadow: inset 0 0 0 2px #1c1a17, 0 14px 24px -16px rgba(60, 40, 10, 0.55); transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1); } .ds-try-legend { grid-column: 1; font-weight: 800; font-size: 1.3rem; line-height: 1.15; text-decoration: underline 2.5px #c8102e; text-underline-offset: 5px; } .ds-try-sub { grid-column: 1; font-weight: 500; font-size: 0.92rem; color: #5f5a53; } .ds-try-arrow { grid-column: 2; grid-row: 1 / span 2; width: 28px; height: 28px; color: #c8102e; transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1); } .ds-try:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 2px #1c1a17, 0 20px 30px -18px rgba(60, 40, 10, 0.6); } .ds-try:hover .ds-try-arrow { transform: translateX(4px); } .ds-try:active { transform: translateY(0); } .ds-try:focus-visible { outline: 3px solid #1c1a17; outline-offset: 3px; }"
     },
     {
-      "name": "Guide Sign",
-      "kind": "card",
-      "refersTo": "sign-guide",
-      "description": "Large guide-green panel with an inset white ring; frames headings and the trust check.",
-      "html": "<div class=\"ds-sign\"><h2 class=\"ds-sign-h\">If the sentence isn’t there, the sign doesn’t go up.</h2><p class=\"ds-sign-lede\">Redline shows a flag only when the sentence it quotes appears word for word in your document.</p></div>",
-      "css": ".ds-sign { font-family: Overpass, 'Helvetica Neue', Arial, sans-serif; background: #00613a; color: #ffffff; border-radius: 14px; padding: 40px 44px; box-shadow: inset 0 0 0 6px #00613a, inset 0 0 0 9px #ffffff, 0 18px 36px -18px rgba(10,30,20,0.55); } .ds-sign-h { margin: 0; font-size: 2.4rem; font-weight: 700; line-height: 1.08; letter-spacing: 0.005em; max-width: 22ch; } .ds-sign-lede { margin: 18px 0 0; font-size: 1.15rem; line-height: 1.5; color: #e3efe8; }"
-    },
-    {
-      "name": "Flag Sign: Negotiate before signing",
-      "kind": "custom",
-      "refersTo": "flag-sign-negotiate",
-      "description": "Flag sign in the sticky strip; dim until its citation is read, then lit.",
-      "html": "<div class=\"ds-road\"><button class=\"ds-flag ds-flag--negotiate\" type=\"button\"><span class=\"ds-flag-type\">Notice window</span><span class=\"ds-flag-exp\">90 days, in writing</span><span class=\"ds-flag-tier\">Negotiate before signing</span></button></div>",
-      "css": ".ds-road { background: #2a2a28; padding: 16px; } .ds-flag { font-family: Overpass, 'Helvetica Neue', Arial, sans-serif; width: 220px; display: grid; gap: 4px; text-align: left; padding: 12px 14px 14px; border: 0; border-radius: 10px; cursor: pointer; overflow: hidden; color: #111311; transition: filter 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.5s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s; } .ds-flag-type { font-size: 1.1rem; font-weight: 700; line-height: 1.15; } .ds-flag-exp { font-size: 0.92rem; font-weight: 600; line-height: 1.25; } .ds-flag-tier { font-size: 0.8rem; font-weight: 700; line-height: 1.2; margin: 8px -14px -14px; padding: 6px 14px 5px; } .ds-flag--negotiate { background: #ffffff; box-shadow: inset 0 0 0 5px #b3121f; } .ds-flag--negotiate .ds-flag-tier { color: #ffffff; background: #b3121f; } .ds-flag:hover { transform: translateY(-2px); } .ds-flag:focus-visible { outline: 3px solid #f2c230; outline-offset: 3px; } .ds-flag:active { transform: translateY(-3px); box-shadow: inset 0 0 0 5px #b3121f, 0 0 0 3px #f2c230; }"
-    },
-    {
-      "name": "Flag Sign: Know before signing",
-      "kind": "custom",
-      "refersTo": "flag-sign-know",
-      "description": "Flag sign in the sticky strip; dim until its citation is read, then lit.",
-      "html": "<div class=\"ds-road\"><button class=\"ds-flag ds-flag--know\" type=\"button\"><span class=\"ds-flag-type\">Rollover</span><span class=\"ds-flag-exp\">Same terms carry over</span><span class=\"ds-flag-tier\">Know before signing</span></button></div>",
-      "css": ".ds-road { background: #2a2a28; padding: 16px; } .ds-flag { font-family: Overpass, 'Helvetica Neue', Arial, sans-serif; width: 220px; display: grid; gap: 4px; text-align: left; padding: 12px 14px 14px; border: 0; border-radius: 10px; cursor: pointer; overflow: hidden; color: #111311; transition: filter 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.5s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s; } .ds-flag-type { font-size: 1.1rem; font-weight: 700; line-height: 1.15; } .ds-flag-exp { font-size: 0.92rem; font-weight: 600; line-height: 1.25; } .ds-flag-tier { font-size: 0.8rem; font-weight: 700; line-height: 1.2; margin: 8px -14px -14px; padding: 6px 14px 5px; } .ds-flag--know { background: #ffc72c; box-shadow: inset 0 0 0 3px #111311, inset 0 0 0 5px #ffc72c; } .ds-flag--know .ds-flag-tier { box-shadow: inset 0 3px 0 #111311; } .ds-flag:hover { transform: translateY(-2px); } .ds-flag:focus-visible { outline: 3px solid #f2c230; outline-offset: 3px; } .ds-flag:active { transform: translateY(-3px); box-shadow: inset 0 0 0 3px #111311, inset 0 0 0 5px #ffc72c, 0 0 0 3px #f2c230; }"
-    },
-    {
-      "name": "Flag Sign: Outside terms",
-      "kind": "custom",
-      "refersTo": "flag-sign-outside",
-      "description": "Flag sign in the sticky strip; dim until its citation is read, then lit.",
-      "html": "<div class=\"ds-road\"><button class=\"ds-flag ds-flag--outside\" type=\"button\"><span class=\"ds-flag-type\">Northwind Service Terms</span><span class=\"ds-flag-exp\">Not in this document</span><span class=\"ds-flag-tier\">Outside terms</span></button></div>",
-      "css": ".ds-road { background: #2a2a28; padding: 16px; } .ds-flag { font-family: Overpass, 'Helvetica Neue', Arial, sans-serif; width: 220px; display: grid; gap: 4px; text-align: left; padding: 12px 14px 14px; border: 0; border-radius: 10px; cursor: pointer; overflow: hidden; color: #111311; transition: filter 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.5s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s; } .ds-flag-type { font-size: 1.1rem; font-weight: 700; line-height: 1.15; } .ds-flag-exp { font-size: 0.92rem; font-weight: 600; line-height: 1.25; } .ds-flag-tier { font-size: 0.8rem; font-weight: 700; line-height: 1.2; margin: 8px -14px -14px; padding: 6px 14px 5px; } .ds-flag--outside { background: #f26b1d; box-shadow: inset 0 0 0 3px #111311, inset 0 0 0 5px #f26b1d; } .ds-flag--outside .ds-flag-tier { box-shadow: inset 0 3px 0 #111311; } .ds-flag:hover { transform: translateY(-2px); } .ds-flag:focus-visible { outline: 3px solid #f2c230; outline-offset: 3px; } .ds-flag:active { transform: translateY(-3px); box-shadow: inset 0 0 0 3px #111311, inset 0 0 0 5px #f26b1d, 0 0 0 3px #f2c230; }"
-    },
-    {
-      "name": "Citation Highlight",
-      "kind": "custom",
-      "refersTo": "citation-lit",
-      "description": "The cited sentence in the document serif; a road-marking highlight wipes in when lit.",
-      "html": "<div class=\"ds-road\"><p class=\"ds-doc\"><span class=\"ds-ref\">9.2</span> <mark class=\"ds-cite\" tabindex=\"0\">To stop a renewal, a party must give written notice of non-renewal at least ninety (90) days before the end of the current term.</mark></p></div>",
-      "css": ".ds-road { background: #2a2a28; padding: 24px; } .ds-doc { margin: 0; font-family: 'Source Serif 4', Georgia, serif; font-size: 1.16rem; line-height: 1.7; color: #e8e9e4; max-width: 38rem; } .ds-ref { font-family: Overpass, 'Helvetica Neue', Arial, sans-serif; font-weight: 700; font-size: 0.85rem; color: #b0aea6; margin-right: 6px; } .ds-cite { color: #e8e9e4; padding: 0.05em 0.1em; border-radius: 2px; background: linear-gradient(#f2c230, #f2c230) no-repeat; background-size: 0% 100%; transition: background-size 0.8s cubic-bezier(0.16,1,0.3,1), color 0.4s; -webkit-box-decoration-break: clone; box-decoration-break: clone; } .ds-cite:hover, .ds-cite:focus-visible { background-size: 100% 100%; color: #111311; } .ds-cite:focus-visible { outline: 3px solid #ffffff; outline-offset: 3px; }"
-    },
-    {
-      "name": "Distance Marker",
-      "kind": "custom",
-      "refersTo": "distance-marker",
-      "description": "A notice obligation as a small guide sign: label and date.",
-      "html": "<div class=\"ds-marker\"><span class=\"ds-marker-label\">Notice by</span><span class=\"ds-marker-date\">2 Oct 2028</span></div>",
-      "css": ".ds-marker { font-family: Overpass, 'Helvetica Neue', Arial, sans-serif; display: inline-grid; padding: 8px 14px 6px; background: #00613a; color: #ffffff; border-radius: 8px; box-shadow: inset 0 0 0 3px #00613a, inset 0 0 0 5px #ffffff; line-height: 1.1; font-variant-numeric: tabular-nums; } .ds-marker-label { font-size: 0.75rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; } .ds-marker-date { font-size: 1.35rem; font-weight: 800; }"
-    },
-    {
-      "name": "Regulatory Plate",
-      "kind": "card",
-      "refersTo": "plate",
-      "description": "White plate with an ink-and-white inset ring; states a limit.",
-      "html": "<div class=\"ds-plate\"><strong>No legal advice</strong><span>It won’t tell you what the law says or how it applies to your contract.</span></div>",
-      "css": ".ds-plate { font-family: Overpass, 'Helvetica Neue', Arial, sans-serif; display: grid; gap: 6px; max-width: 420px; background: #ffffff; color: #111311; border-radius: 8px; padding: 18px 22px; box-shadow: inset 0 0 0 3px #111311, inset 0 0 0 6px #ffffff, 0 10px 20px -14px rgba(0,0,0,0.5); } .ds-plate strong { font-weight: 800; font-size: 1.2rem; line-height: 1.2; } .ds-plate span { font-size: 1rem; line-height: 1.45; color: #2b3134; }"
-    },
-    {
-      "name": "Gantry Navigation",
+      "name": "Letterhead",
       "kind": "nav",
-      "refersTo": "sign-guide",
-      "description": "Route-shield wordmark and links across the top of the hero gantry.",
-      "html": "<nav class=\"ds-nav\"><a class=\"ds-mark\" href=\"#\"><svg viewBox=\"0 0 40 44\" width=\"34\" height=\"37\" aria-hidden=\"true\"><path d=\"M20 2c6 3 12 3 17 1 2 6 2 13 0 20-3 9-9 15-17 19C12 38 6 32 3 23 1 16 1 9 3 3c5 2 11 2 17-1Z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.6\"/><text x=\"20\" y=\"30\" text-anchor=\"middle\" font-size=\"19\" font-weight=\"800\" fill=\"currentColor\">R</text></svg><span>Redline</span></a><ul><li><a href=\"#\">How it reads</a></li><li><a href=\"#\">What it won’t do</a></li><li><a href=\"#\">Sign in</a></li></ul></nav>",
-      "css": ".ds-nav { font-family: Overpass, 'Helvetica Neue', Arial, sans-serif; display: flex; align-items: center; justify-content: space-between; gap: 24px; background: #00613a; color: #ffffff; padding: 18px 28px; border-bottom: 2px solid rgba(255,255,255,0.35); } .ds-nav a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 2px; } .ds-mark { display: inline-flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 800; font-size: 1.5rem; letter-spacing: -0.01em; } .ds-nav ul { display: flex; gap: 28px; list-style: none; margin: 0; padding: 0; } .ds-nav ul a { text-decoration: none; font-weight: 600; font-size: 1rem; } .ds-nav ul a:hover { text-decoration: underline; } .ds-nav a:focus-visible { outline: 3px solid #f2c230; outline-offset: 3px; border-radius: 4px; }"
+      "refersTo": "nav-link",
+      "description": "Wordmark with its red pen stroke, plain links on manila, closed by a crease rule.",
+      "html": "<nav class=\"ds-letterhead\"><a class=\"ds-wordmark\" href=\"#\">Redline<svg viewBox=\"0 0 120 12\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><path d=\"M2 8.5C22 5 48 4.2 70 5.4c17 .9 32 2.4 47 1.6\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"3.2\" stroke-linecap=\"round\"/></svg></a><ul><li><a href=\"#\">How it reads</a></li><li><a href=\"#\">What it won’t do</a></li><li><a href=\"#\">Sign in</a></li></ul></nav>",
+      "css": ".ds-letterhead { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 22px 24px 18px; background: #e5c887; border-bottom: 1px solid #c9a961; font-family: 'Libre Franklin', 'Helvetica Neue', Arial, sans-serif; } .ds-wordmark { position: relative; display: inline-block; text-decoration: none; font-weight: 800; font-size: 1.6rem; letter-spacing: -0.01em; color: #1c1a17; padding-bottom: 6px; } .ds-wordmark svg { position: absolute; left: -2px; bottom: -2px; width: calc(100% + 6px); height: 12px; color: #c8102e; } .ds-letterhead ul { display: flex; gap: 28px; list-style: none; margin: 0; padding: 0; } .ds-letterhead ul a { text-decoration: none; font-weight: 600; font-size: 1rem; color: #2b2418; text-underline-offset: 0.22em; text-decoration-thickness: 1.5px; } .ds-letterhead ul a:hover { text-decoration: underline; text-decoration-color: #c8102e; } .ds-letterhead a:focus-visible { outline: 3px solid #1c1a17; outline-offset: 3px; }"
+    },
+    {
+      "name": "Sheet with Citation and Margin Comment",
+      "kind": "card",
+      "refersTo": "sheet",
+      "description": "The white document sheet: a flagged clause with its red pen underline, and Redline's margin comment ruled back to it with a counter-offer insertion.",
+      "html": "<article class=\"ds-sheet\"><p class=\"ds-sheet-label\">Sample contract, made up</p><h4 class=\"ds-doc-head\">9. Notices</h4><div class=\"ds-clause\"><p class=\"ds-doc\"><span class=\"ds-ref\">9.2</span> <mark class=\"ds-cite\">To stop a renewal, a party must give written notice of non-renewal at least ninety (90) days before the end of the current term.</mark></p><aside class=\"ds-comment\"><p class=\"ds-comment-type\">Notice window</p><p class=\"ds-due\"><span>Notice by</span> 2 Oct 2028</p><p>Your written notice has to arrive 90 days before the term ends.</p><p class=\"ds-counter\"><span>Counter-offer:</span> <ins>“Please shorten the notice period to 30 days.”</ins></p></aside></div></article>",
+      "css": ".ds-sheet { background: #ffffff; color: #1c1a17; padding: 18px 40px 48px; border-radius: 2px; box-shadow: 0 1px 2px rgba(60, 40, 10, 0.12), 0 26px 44px -26px rgba(60, 40, 10, 0.5); font-family: 'Libre Franklin', 'Helvetica Neue', Arial, sans-serif; font-variant-numeric: tabular-nums; } .ds-sheet-label { margin: 0 0 22px; padding-bottom: 8px; text-align: right; font-size: 0.82rem; font-weight: 600; color: #5f5a53; border-bottom: 1px solid #e4ded3; } .ds-doc-head { margin: 22px 0 8px; font-family: 'Source Serif 4', Georgia, serif; font-weight: 600; font-size: 1.02rem; font-variant-caps: small-caps; letter-spacing: 0.02em; } .ds-clause { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 16rem); column-gap: 32px; align-items: start; } .ds-doc { margin: 0; font-family: 'Source Serif 4', Georgia, serif; font-size: 1.12rem; line-height: 1.72; max-width: 36rem; } .ds-ref { font-family: 'Libre Franklin', 'Helvetica Neue', Arial, sans-serif; font-weight: 600; font-size: 0.82rem; color: #5f5a53; margin-right: 6px; } .ds-cite { color: #1c1a17; background-color: transparent; background-image: url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 8' preserveAspectRatio='none'%3E%3Cpath d='M1.5 4.6C30 3.1 58 5.2 92 3.9s70 .2 106.5-.6' fill='none' stroke='%23c8102e' stroke-width='2.4' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E\"); background-repeat: no-repeat; background-position: 0 100%; background-size: 100% 8px; padding-bottom: 4px; -webkit-box-decoration-break: clone; box-decoration-break: clone; transition: background-color 0.3s; } .ds-cite:hover { background-color: rgba(200, 16, 46, 0.08); } .ds-comment { position: relative; display: grid; gap: 8px; padding: 2px 0 4px 14px; border-left: 1px solid rgba(200, 16, 46, 0.55); font-size: 0.95rem; line-height: 1.5; } .ds-comment p { margin: 0; } .ds-comment::before { content: ''; position: absolute; right: calc(100% + 1px); top: 0.95em; width: 32px; height: 1px; background: rgba(200, 16, 46, 0.55); } .ds-comment-type { font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 9px; } .ds-comment-type::before { content: ''; width: 12px; height: 12px; border-radius: 2px; background: #c8102e; } .ds-due { justify-self: start; padding: 3px 10px; box-shadow: inset 0 0 0 1.5px #1c1a17; border-radius: 3px; font-weight: 700; font-size: 1.05rem; } .ds-due span { font-weight: 600; font-size: 0.85rem; color: #5f5a53; margin-right: 6px; } .ds-counter { color: #5f5a53; } .ds-counter span { font-weight: 700; color: #1c1a17; } .ds-counter ins { color: #1c1a17; text-decoration: underline double #c8102e; text-decoration-thickness: 1px; text-underline-offset: 3px; }"
+    },
+    {
+      "name": "Flag Tab, Negotiate",
+      "kind": "custom",
+      "refersTo": "flag-tab-negotiate",
+      "description": "Top-tier flag tab on the sheet's edge, with its translucent adhesive end.",
+      "html": "<button class=\"ds-tab ds-tab--negotiate\" type=\"button\"><span class=\"ds-tab-type\">Multi-year term</span><span class=\"ds-tab-exposure\">36 months at $18,000 a year</span><span class=\"ds-tab-tier\">Negotiate before signing</span></button>",
+      "css": ".ds-tab { position: relative; width: 240px; display: grid; gap: 1px; text-align: left; padding: 10px 14px 10px 26px; border: 0; border-radius: 0 6px 6px 0; font-family: 'Libre Franklin', 'Helvetica Neue', Arial, sans-serif; cursor: pointer; box-shadow: 0 8px 14px -12px rgba(60, 40, 10, 0.6); transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s; } .ds-tab::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 14px; background: rgba(255, 255, 255, 0.4); } .ds-tab-type { font-weight: 700; font-size: 1rem; line-height: 1.2; } .ds-tab-exposure { font-weight: 500; font-size: 0.86rem; line-height: 1.3; } .ds-tab-tier { margin-top: 5px; font-weight: 700; font-size: 0.76rem; } .ds-tab--negotiate { background: #c8102e; color: #ffffff; } .ds-tab:hover { transform: translateX(4px); } .ds-tab:focus-visible { outline: 3px solid #1c1a17; outline-offset: 3px; } .ds-tab:active { box-shadow: 0 0 0 3px #1c1a17, 0 8px 14px -12px rgba(60, 40, 10, 0.6); }"
+    },
+    {
+      "name": "Flag Tab, Know",
+      "kind": "custom",
+      "refersTo": "flag-tab-know",
+      "description": "Second-tier flag tab: yellow with ink text.",
+      "html": "<button class=\"ds-tab ds-tab--know\" type=\"button\"><span class=\"ds-tab-type\">Rollover</span><span class=\"ds-tab-exposure\">Same terms carry over</span><span class=\"ds-tab-tier\">Know before signing</span></button>",
+      "css": ".ds-tab { position: relative; width: 240px; display: grid; gap: 1px; text-align: left; padding: 10px 14px 10px 26px; border: 0; border-radius: 0 6px 6px 0; font-family: 'Libre Franklin', 'Helvetica Neue', Arial, sans-serif; cursor: pointer; box-shadow: 0 8px 14px -12px rgba(60, 40, 10, 0.6); transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s; } .ds-tab::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 14px; background: rgba(255, 255, 255, 0.4); } .ds-tab-type { font-weight: 700; font-size: 1rem; line-height: 1.2; } .ds-tab-exposure { font-weight: 500; font-size: 0.86rem; line-height: 1.3; } .ds-tab-tier { margin-top: 5px; font-weight: 700; font-size: 0.76rem; } .ds-tab--know { background: #f5cf3a; color: #1c1a17; } .ds-tab:hover { transform: translateX(4px); } .ds-tab:focus-visible { outline: 3px solid #1c1a17; outline-offset: 3px; }"
+    },
+    {
+      "name": "Flag Tab, Outside Terms",
+      "kind": "custom",
+      "refersTo": "flag-tab-outside",
+      "description": "Outside-terms notice tab: blue with white text.",
+      "html": "<button class=\"ds-tab ds-tab--outside\" type=\"button\"><span class=\"ds-tab-type\">Northwind Service Terms</span><span class=\"ds-tab-exposure\">Not in this document</span><span class=\"ds-tab-tier\">Outside terms</span></button>",
+      "css": ".ds-tab { position: relative; width: 240px; display: grid; gap: 1px; text-align: left; padding: 10px 14px 10px 26px; border: 0; border-radius: 0 6px 6px 0; font-family: 'Libre Franklin', 'Helvetica Neue', Arial, sans-serif; cursor: pointer; box-shadow: 0 8px 14px -12px rgba(60, 40, 10, 0.6); transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s; } .ds-tab::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 14px; background: rgba(255, 255, 255, 0.4); } .ds-tab-type { font-weight: 700; font-size: 1rem; line-height: 1.2; } .ds-tab-exposure { font-weight: 500; font-size: 0.86rem; line-height: 1.3; } .ds-tab-tier { margin-top: 5px; font-weight: 700; font-size: 0.76rem; } .ds-tab--outside { background: #2459c4; color: #ffffff; } .ds-tab:hover { transform: translateX(4px); } .ds-tab:focus-visible { outline: 3px solid #1c1a17; outline-offset: 3px; }"
+    },
+    {
+      "name": "Ruled List on Manila",
+      "kind": "custom",
+      "description": "Statements separated by crease rules on the folder, not boxed: used for the exclusions.",
+      "html": "<ul class=\"ds-ruled\"><li><strong>No verdict on whether to sign</strong><span>It shows what the contract says. The decision stays with you.</span></li><li><strong>No legal advice</strong><span>It won’t tell you what the law says.</span></li></ul>",
+      "css": ".ds-ruled { list-style: none; margin: 0; padding: 0 24px; background: #e5c887; font-family: 'Libre Franklin', 'Helvetica Neue', Arial, sans-serif; } .ds-ruled li { display: grid; gap: 4px; padding: 18px 0; border-top: 1px solid #c9a961; } .ds-ruled li:last-child { border-bottom: 1px solid #c9a961; } .ds-ruled strong { font-weight: 700; font-size: 1.2rem; line-height: 1.25; color: #1c1a17; } .ds-ruled span { font-size: 1.02rem; line-height: 1.5; color: #5a4a2c; max-width: 40rem; }"
     }
   ],
   "narrative": {
-    "northStar": "Exit Ahead",
-    "overview": "Redline is signed like an interstate. Guide-green panels with an inset white border and rounded corners own the frame; the contract runs underneath on asphalt; each flag is a sign hung over the road, pointing at the exact sentence it came from, and that sentence carries a road-marking highlight. Colour is never decoration here: every sign colour is a traffic meaning, and the meanings are fixed (red-and-white regulatory for *Negotiate before signing*, yellow warning for *Know before signing*, orange construction for an outside-terms notice).\n\nTwo voices share the page. Highway lettering (Overpass, heavy weights, tabular figures) sets every sign, label and interface word. A document serif (Source Serif 4) sets the contract's own sentences, so the reader can always tell Redline's voice from the document's. Density is comfortable and desk-first; signs are compact and legible at a glance, the contract is set long and loose (1.7 line height) for checking word by word.\n\nDepth is physical but quiet: signs hang from steel beams and brackets and cast a soft drop shadow; borders are painted on as inset rings, the way a real sign's border is printed inside its edge. The one signature move is the lit sign: signs sit dim until their cited sentence crosses the reading line, then light with a retroreflective sweep and rank themselves by tier, then by money.",
+    "northStar": "The Marked-up Draft",
+    "overview": "Redline looks like a contract that a careful reader has already been through. A manila folder is the ground. Bright white bond sheets sit on it under a soft, warm desk shadow, and the contract text on those sheets is black document ink set in a serif. Redline's work shows up as marks on that draft: a red pen stroke under each cited sentence, a margin comment ruled back to that sentence, a counter-offer set as a tracked insertion, and an adhesive flag tab on the sheet's right edge for each flag, in ranked order. The document is the main object. Interface words sit around it in a plain sans.\n\nThe density is a reading desk. The contract measure is generous (1.72 line height, roughly 72 characters), margin comments are compact, and the space around each sheet lets the folder show through as a frame. Motion belongs to the marking. The pen stroke draws as a sentence reaches the reading line, the tab slides out from under the sheet, and when reduced motion is on, every mark is already drawn and every tab is already out.\n\nThe world rejects cream, parchment and lamplight (manila is a folder, not aged paper), and it rejects any law-office costume: wood desks, paper texture, torn edges and handwriting typefaces. The pen stroke is a drawn SVG path. It is a mark on the document and is not a handwriting font.",
     "keyCharacteristics": [
-      "Guide-green sign panels with an inset legend-white ring and 14px corners frame the page.",
-      "Tier colours carry fixed traffic meanings and are never used decoratively.",
-      "Overpass for every sign and interface word; Source Serif 4 only for the document's text.",
-      "Citations are marked with a road-marking yellow highlight that wipes in when the sentence is reached.",
-      "Soft drop shadows under hanging signs; borders are inset rings, never CSS strokes.",
-      "Signs light (dim to full, retroreflective sweep) and re-rank as their sentence is read; reduced motion shows every sign lit."
+      "Manila folder ground, white sheet for the document, black ink for contract text.",
+      "One marking ink, Redline red, for citation underlines, counter-offer insertions and the wordmark's pen stroke.",
+      "Three tier colours with fixed meanings, carried by flag tabs and comment swatches.",
+      "Source Serif 4 for the document and headlines, Libre Franklin for interface words.",
+      "Warm brown, soft desk shadows. Nothing is flat grey and nothing has a hard offset.",
+      "Motion draws marks. It never decorates."
     ],
     "rules": [
-      {
-        "name": "The Fixed Meaning Rule",
-        "body": "Red-and-white means *Negotiate before signing*, yellow means *Know before signing*, orange means an outside-terms notice, green is the frame. A tier colour never appears where its meaning does not apply, and a meaning never borrows another tier's colour. Intended (shell brief): green also marks a clean result.",
-        "section": "colors"
-      },
-      {
-        "name": "The Marking Is Not Warning Rule",
-        "body": "Road-Marking Yellow points at a place (citation, focus, selection, active sign). Warning Yellow is a tier. Never swap them.",
-        "section": "colors"
-      },
-      {
-        "name": "The Two Voices Rule",
-        "body": "Source Serif 4 sets only the document's own sentences and its title. Everything Redline says, including clause numbers and the contract's navigational section heads, is Overpass.",
-        "section": "typography"
-      },
-      {
-        "name": "The Heavy Legend Rule",
-        "body": "Sign legends use 700-800 weight; nothing on a sign face is set lighter than 600.",
-        "section": "typography"
-      },
-      {
-        "name": "The Inset Border Rule",
-        "body": "A sign's border is an inset ring in its own legend colour, separated from the edge by the face colour: guide signs 6px face then 3px white; warning and construction signs 3px ink then 2px face; plates 3px ink then 3px white; regulatory flags a 5px red ring on white. Never a CSS border stroke.",
-        "section": "elevation"
-      }
+      { "name": "The One Ink Rule", "body": "Red is for marking: underlining a cited sentence, inserting a counter-offer, and the *Negotiate* tier. Red is never used as a background wash, a heading colour or decoration.", "section": "colors" },
+      { "name": "The Fixed Tier Colour Rule", "body": "Red means *Negotiate before signing*, yellow means *Know before signing*, blue means an outside-terms notice. These meanings never change, and these three colours are never used for any other state.", "section": "colors" },
+      { "name": "The Sheet Rule", "body": "Contract text, citations and margin comments always sit on a white sheet in document ink. Manila is the frame around the sheet. It is never the surface a buyer reads a document on.", "section": "colors" },
+      { "name": "The Two Voices Rule", "body": "Whatever the document says is set in Source Serif 4; whatever Redline says about it is set in Libre Franklin. A margin comment never uses the serif, and a contract clause never uses the sans.", "section": "typography" },
+      { "name": "The Desk Light Rule", "body": "Shadows are warm brown, soft and below the object, with a negative spread. No grey or black shadows, no hard offsets, no glow.", "section": "elevation" }
     ],
     "dos": [
-      "**Do** give every sign panel its border as an inset ring (The Inset Border Rule), with 14px, 10px or 8px corners by size.",
-      "**Do** keep tier colours to their fixed meanings: regulatory red for *Negotiate before signing*, warning yellow for *Know before signing*, construction orange for outside-terms notices.",
-      "**Do** set the document's sentences in Source Serif 4 at 1.7 line height and a 72ch measure, and everything else in Overpass.",
-      "**Do** mark a citation with the road-marking highlight and keep the 3px marking-yellow focus ring on every interactive element.",
-      "**Do** show every sign lit and skip the sweep and transitions under reduced motion.",
-      "**Do** use tabular figures for money, dates and counts."
+      "**Do** put every document on a white sheet (`sheet`) in document ink, with the desk shadow, and let manila show around it.",
+      "**Do** mark a cited sentence with the red pen underline, and set a counter-offer as an insertion with a red double underline.",
+      "**Do** give every flag one tab in its tier colour, ordered by tier and then by money, with clause type, exposure and tier on the tab.",
+      "**Do** set contract text in Source Serif 4 at 1.72 line height and no wider than 72ch, and set interface words in Libre Franklin with tabular figures.",
+      "**Do** separate content with 1px rules (`manila-deep` on manila, `rule` on white) rather than boxes.",
+      "**Do** show every mark drawn and every tab out when reduced motion is on."
     ],
     "donts": [
-      "**Don't** use a tier colour for decoration, emphasis or branding.",
-      "**Don't** swap Road-Marking Yellow and Warning Yellow.",
-      "**Don't** set Redline's own words in the document serif, or the document's sentences in Overpass.",
-      "**Don't** draw sign borders as CSS strokes or give signs a hard, unblurred offset shadow.",
-      "**Don't** use a numeric score or a high/medium/low scale in place of a tier sign.",
-      "**Don't** (intended, shell brief) carry the road costume onto working screens: no asphalt ground, lane or edge lines, or gantry steel in the Operate frame. These remain native to the landing world."
+      "**Don't** use red for anything but a mark or the *Negotiate before signing* tier: no red headings, washes or decoration.",
+      "**Don't** reuse the tier colours for any other meaning, and don't add a fourth severity colour, a score or a high/medium/low scale.",
+      "**Don't** put contract text, citations or working text on manila.",
+      "**Don't** use cream, parchment or lamplight tones. Manila is a folder, not aged paper.",
+      "**Don't** dress the page up as a law office: no wood desk, paper texture, torn edges or handwriting typefaces. The drawn pen stroke is a mark and is not a font.",
+      "**Don't** use grey or black shadows or hard offset shadows. Depth is the warm desk shadow only."
     ]
   }
 }

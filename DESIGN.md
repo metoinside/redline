@@ -1,323 +1,248 @@
 ---
 name: Redline
-description: Renewal and exit terms, signed like the road. Interstate guide and warning signage over the contract text.
+description: The lawyer's marked-up draft. White contract sheets on a manila folder, one red marking ink, and flag tabs on the sheet's edge.
 colors:
-  guide: "#00613a"
-  guide-deep: "#004d2e"
-  legend: "#ffffff"
-  legend-soft: "#e3efe8"
-  regulatory: "#b3121f"
-  warning: "#ffc72c"
-  construction: "#f26b1d"
-  sign-ink: "#111311"
-  marking: "#f2c230"
-  asphalt: "#2a2a28"
-  road-text: "#e8e9e4"
-  road-dim: "#b0aea6"
-  lane: "#e8e9e4"
-  sky: "#d8dfe2"
-  sky-ink: "#1b2328"
-  steel: "#737c82"
-  steel-dark: "#4b5257"
-  exit-sub: "#2f5c47"
-  exit-hover: "#f2fbf6"
-  plate-text: "#2b3134"
+  manila: "#e5c887"
+  manila-deep: "#c9a961"
+  manila-ink: "#2b2418"
+  manila-dim: "#5a4a2c"
+  sheet: "#ffffff"
+  ink: "#1c1a17"
+  graphite: "#5f5a53"
+  rule: "#e4ded3"
+  red: "#c8102e"
+  tab-yellow: "#f5cf3a"
+  tab-blue: "#2459c4"
 typography:
   display:
-    fontFamily: "Overpass, Helvetica Neue, Arial, sans-serif"
-    fontSize: "clamp(2.3rem, 4.4vw, 3.6rem)"
-    fontWeight: 700
-    lineHeight: 1.08
-    letterSpacing: "0.005em"
+    fontFamily: "Source Serif 4, Georgia, serif"
+    fontSize: "clamp(2.4rem, 4.6vw, 4rem)"
+    fontWeight: 650
+    lineHeight: 1.05
+    letterSpacing: "-0.015em"
   headline:
-    fontFamily: "Overpass, Helvetica Neue, Arial, sans-serif"
-    fontSize: "clamp(1.9rem, 3.6vw, 3.25rem)"
-    fontWeight: 700
+    fontFamily: "Source Serif 4, Georgia, serif"
+    fontSize: "clamp(1.9rem, 3.4vw, 3rem)"
+    fontWeight: 650
     lineHeight: 1.08
-    letterSpacing: "0.005em"
+    letterSpacing: "-0.01em"
   title:
-    fontFamily: "Overpass, Helvetica Neue, Arial, sans-serif"
-    fontSize: "clamp(1.4rem, 2vw, 1.75rem)"
-    fontWeight: 700
-    lineHeight: 1.08
-    letterSpacing: "0.005em"
-  sign-legend:
-    fontFamily: "Overpass, Helvetica Neue, Arial, sans-serif"
-    fontSize: "clamp(1.3rem, 1.7vw, 1.6rem)"
-    fontWeight: 800
-    lineHeight: 1.1
-  flag-type:
-    fontFamily: "Overpass, Helvetica Neue, Arial, sans-serif"
-    fontSize: "1.1rem"
-    fontWeight: 700
-    lineHeight: 1.15
+    fontFamily: "Source Serif 4, Georgia, serif"
+    fontSize: "1.45rem"
+    fontWeight: 600
+  document:
+    fontFamily: "Source Serif 4, Georgia, serif"
+    fontSize: "1.12rem"
+    fontWeight: 400
+    lineHeight: 1.72
+  document-heading:
+    fontFamily: "Source Serif 4, Georgia, serif"
+    fontSize: "1.02rem"
+    fontWeight: 600
+    letterSpacing: "0.02em"
+    fontFeature: "\"smcp\""
   body:
-    fontFamily: "Overpass, Helvetica Neue, Arial, sans-serif"
+    fontFamily: "Libre Franklin, Helvetica Neue, Arial, sans-serif"
     fontSize: "1.0625rem"
     fontWeight: 400
     lineHeight: 1.5
-    fontFeature: "\"tnum\" 1"
-  document:
-    fontFamily: "Source Serif 4, Georgia, serif"
-    fontSize: "1.16rem"
-    fontWeight: 400
-    lineHeight: 1.7
-  document-title:
-    fontFamily: "Source Serif 4, Georgia, serif"
+    fontFeature: "\"tnum\""
+  action:
+    fontFamily: "Libre Franklin, Helvetica Neue, Arial, sans-serif"
     fontSize: "1.3rem"
-    fontWeight: 600
-  label:
-    fontFamily: "Overpass, Helvetica Neue, Arial, sans-serif"
-    fontSize: "0.95rem"
     fontWeight: 800
-    letterSpacing: "0.05em"
-  tier:
-    fontFamily: "Overpass, Helvetica Neue, Arial, sans-serif"
-    fontSize: "0.8rem"
-    fontWeight: 700
-    lineHeight: 1.2
+    lineHeight: 1.15
+  label:
+    fontFamily: "Libre Franklin, Helvetica Neue, Arial, sans-serif"
+    fontSize: "0.82rem"
+    fontWeight: 600
 rounded:
-  cite: "2px"
-  tag: "4px"
-  plate: "8px"
-  panel: "10px"
-  sign: "14px"
+  none: "0px"
+  sheet: "2px"
+  notice: "3px"
+  tab: "6px"
 spacing:
-  sign-gap: "12px"
   gutter: "clamp(16px, 4vw, 56px)"
-  section: "clamp(64px, 9vw, 120px)"
-  section-lg: "clamp(72px, 10vw, 136px)"
-  container: "1320px"
-  container-narrow: "1120px"
+  margin-gap: "clamp(24px, 3vw, 40px)"
+  section: "clamp(72px, 10vw, 128px)"
+  content-max: "1240px"
 components:
-  sign-guide:
-    backgroundColor: "{colors.guide}"
-    textColor: "{colors.legend}"
-    rounded: "{rounded.sign}"
-    padding: "clamp(28px, 4vw, 56px) clamp(24px, 4.4vw, 64px)"
-  exit-panel:
-    backgroundColor: "{colors.legend}"
-    textColor: "{colors.guide-deep}"
-    typography: "{typography.sign-legend}"
-    rounded: "{rounded.panel}"
-    padding: "20px 22px 20px 26px"
-  exit-panel-hover:
-    backgroundColor: "{colors.exit-hover}"
-    textColor: "{colors.guide-deep}"
-  flag-sign-negotiate:
-    backgroundColor: "{colors.legend}"
-    textColor: "{colors.sign-ink}"
-    typography: "{typography.flag-type}"
-    rounded: "{rounded.panel}"
-    padding: "12px 14px 14px"
-  flag-sign-negotiate-tier:
-    backgroundColor: "{colors.regulatory}"
-    textColor: "{colors.legend}"
-    typography: "{typography.tier}"
-    padding: "6px 14px 5px"
-  flag-sign-know:
-    backgroundColor: "{colors.warning}"
-    textColor: "{colors.sign-ink}"
-    typography: "{typography.flag-type}"
-    rounded: "{rounded.panel}"
-    padding: "12px 14px 14px"
-  flag-sign-outside:
-    backgroundColor: "{colors.construction}"
-    textColor: "{colors.sign-ink}"
-    typography: "{typography.flag-type}"
-    rounded: "{rounded.panel}"
-    padding: "12px 14px 14px"
-  citation-lit:
-    backgroundColor: "{colors.marking}"
-    textColor: "{colors.sign-ink}"
+  button-primary:
+    backgroundColor: "{colors.sheet}"
+    textColor: "{colors.ink}"
+    typography: "{typography.action}"
+    rounded: "{rounded.none}"
+    padding: "16px 20px 18px 22px"
+  sheet:
+    backgroundColor: "{colors.sheet}"
+    textColor: "{colors.ink}"
     typography: "{typography.document}"
-    rounded: "{rounded.cite}"
-    padding: "0.05em 0.1em"
-  citation-outside-lit:
-    backgroundColor: "{colors.construction}"
-    textColor: "{colors.sign-ink}"
-    typography: "{typography.document}"
-    rounded: "{rounded.cite}"
-    padding: "0.05em 0.1em"
-  distance-marker:
-    backgroundColor: "{colors.guide}"
-    textColor: "{colors.legend}"
-    rounded: "{rounded.plate}"
-    padding: "8px 14px 6px"
-  plate:
-    backgroundColor: "{colors.legend}"
-    textColor: "{colors.sign-ink}"
-    rounded: "{rounded.plate}"
-    padding: "18px 22px"
-  strip-plate:
-    backgroundColor: "{colors.legend}"
-    textColor: "{colors.sign-ink}"
-    rounded: "{rounded.tag}"
-    padding: "3px 12px 2px"
+    rounded: "{rounded.sheet}"
+    padding: "clamp(14px, 1.4vw, 18px) clamp(24px, 3.6vw, 56px) clamp(40px, 5vw, 72px)"
+  flag-tab-negotiate:
+    backgroundColor: "{colors.red}"
+    textColor: "{colors.sheet}"
+    rounded: "{rounded.tab}"
+    padding: "10px 14px 10px 26px"
+  flag-tab-know:
+    backgroundColor: "{colors.tab-yellow}"
+    textColor: "{colors.ink}"
+    rounded: "{rounded.tab}"
+    padding: "10px 14px 10px 26px"
+  flag-tab-outside:
+    backgroundColor: "{colors.tab-blue}"
+    textColor: "{colors.sheet}"
+    rounded: "{rounded.tab}"
+    padding: "10px 14px 10px 26px"
+  margin-comment:
+    textColor: "{colors.ink}"
+    typography: "{typography.body}"
+    padding: "2px 0 4px 14px"
+  notice-date:
+    textColor: "{colors.ink}"
+    rounded: "{rounded.notice}"
+    padding: "3px 10px"
+  nav-link:
+    textColor: "{colors.manila-ink}"
+    typography: "{typography.body}"
 ---
-
-<!-- Recorded from the shipped landing build (landing/index.html, styles.css, app.js); finish review disposition: ship, 2026-10-05. The app shell is not built: anything marked "Intended (shell brief)" comes from .impeccable/surfaces/app-app-layout-tsx.md and is not shipped. -->
 
 # Design System: Redline
 
 ## Overview
 
-**Creative North Star: "Exit Ahead"**
+**Creative North Star: "The Marked-up Draft"**
 
-Redline is signed like an interstate. Guide-green panels with an inset white border and rounded corners own the frame; the contract runs underneath on asphalt; each flag is a sign hung over the road, pointing at the exact sentence it came from, and that sentence carries a road-marking highlight. Colour is never decoration here: every sign colour is a traffic meaning, and the meanings are fixed (red-and-white regulatory for *Negotiate before signing*, yellow warning for *Know before signing*, orange construction for an outside-terms notice).
+Redline looks like a contract that a careful reader has already been through. A manila folder is the ground. Bright white bond sheets sit on it under a soft, warm desk shadow, and the contract text on those sheets is black document ink set in a serif. Redline's work shows up as marks on that draft: a red pen stroke under each cited sentence, a margin comment ruled back to that sentence, a counter-offer set as a tracked insertion, and an adhesive flag tab on the sheet's right edge for each flag, in ranked order. The document is the main object. Interface words sit around it in a plain sans.
 
-Two voices share the page. Highway lettering (Overpass, heavy weights, tabular figures) sets every sign, label and interface word. A document serif (Source Serif 4) sets the contract's own sentences, so the reader can always tell Redline's voice from the document's. Density is comfortable and desk-first; signs are compact and legible at a glance, the contract is set long and loose (1.7 line height) for checking word by word.
+The density is a reading desk. The contract measure is generous (1.72 line height, roughly 72 characters), margin comments are compact, and the space around each sheet lets the folder show through as a frame. Motion belongs to the marking. The pen stroke draws as a sentence reaches the reading line, the tab slides out from under the sheet, and when reduced motion is on, every mark is already drawn and every tab is already out.
 
-Depth is physical but quiet: signs hang from steel beams and brackets and cast a soft drop shadow; borders are painted on as inset rings, the way a real sign's border is printed inside its edge. The one signature move is the lit sign: signs sit dim until their cited sentence crosses the reading line, then light with a retroreflective sweep and rank themselves by tier, then by money.
+The world rejects cream, parchment and lamplight (manila is a folder, not aged paper), and it rejects any law-office costume: wood desks, paper texture, torn edges and handwriting typefaces. The pen stroke is a drawn SVG path. It is a mark on the document and is not a handwriting font.
 
 **Key Characteristics:**
-- Guide-green sign panels with an inset legend-white ring and 14px corners frame the page.
-- Tier colours carry fixed traffic meanings and are never used decoratively.
-- Overpass for every sign and interface word; Source Serif 4 only for the document's text.
-- Citations are marked with a road-marking yellow highlight that wipes in when the sentence is reached.
-- Soft drop shadows under hanging signs; borders are inset rings, never CSS strokes.
-- Signs light (dim to full, retroreflective sweep) and re-rank as their sentence is read; reduced motion shows every sign lit.
+- Manila folder ground, white sheet for the document, black ink for contract text.
+- One marking ink, Redline red, for citation underlines, counter-offer insertions and the wordmark's pen stroke.
+- Three tier colours with fixed meanings, carried by flag tabs and comment swatches.
+- Source Serif 4 for the document and headlines, Libre Franklin for interface words.
+- Warm brown, soft desk shadows. Nothing is flat grey and nothing has a hard offset.
+- Motion draws marks. It never decorates.
 
 ## Colors
 
-A signage palette: saturated, flat, high-contrast sign faces over neutral road and sky grounds.
+The palette is a folder, a sheet, and the marks on it: two warm tans with their own inks, white paper with black ink, one red, and two tab colours.
 
 ### Primary
-- **Interstate Guide Green** (`guide`): the frame. Hero gantry, the trust-check sign, the closing sign, and the notice-obligation distance marker. Always carries legend-white text and the inset white ring.
-- **Deep Guide Green** (`guide-deep`): the exit panel's legend and its inset ring; the green used when text sits on white.
+- **Redline Red** (`red`): the only marking ink. It draws the pen underline under cited sentences (an 8px-high SVG stroke), the double underline on counter-offer insertions, the stroke under the wordmark, the underline and arrow on the primary action, the hairline rule and leader on margin comments (at 55% opacity), and the soft highlight on the selected citation (8% opacity). It is also the fill of the *Negotiate before signing* tab, and the colour of the final "No flag" outcome in the citation check.
 
-### Secondary (tier colours, fixed meanings)
-- **Regulatory Red** (`regulatory`): *Negotiate before signing* only. Appears as the 5px inset ring of a white flag sign, the tier bar under it, and the note swatch.
-- **Warning Yellow** (`warning`): *Know before signing* only. The face of a warning flag sign and its note swatch.
-- **Construction Orange** (`construction`): outside-terms notices only. The face of the outside-terms sign, its note swatch, and its citation highlight.
-
-### Tertiary
-- **Road-Marking Yellow** (`marking`): the highlight on a lit citation, the keyboard focus ring (3px), text selection, the active-sign halo, the solid left edge line, and the skip link. Deliberately distinct from Warning Yellow: marking is "this is where to look", warning is a tier.
+### Secondary
+- **Tab Yellow** (`tab-yellow`): the *Know before signing* tier, as a tab fill with ink text and as the comment swatch (with a 1px ink inset so it holds on white). It doubles as the text-selection colour.
+- **Tab Blue** (`tab-blue`): the outside-terms notice, as a tab fill with white text and as the comment swatch.
 
 ### Neutral
-- **Legend White** (`legend`): sign legends, white sign faces (regulatory flags, plates, exit panel, strip plate) and every inset sign ring.
-- **Soft Legend** (`legend-soft`): lede and secondary copy on guide green.
-- **Sign Ink** (`sign-ink`): text and black rings on white, yellow and orange sign faces; text on a lit citation.
-- **Asphalt** (`asphalt`): the ground under the contract, the sticky sign strip and the footer.
-- **Road Text** (`road-text`) and **Road Dim** (`road-dim`): contract text and notes on asphalt; clause numbers, contract section heads and synthetic-sample notes on asphalt.
-- **Lane White** (`lane`): the dashed right edge line on the road.
-- **Overcast Sky** (`sky`) and **Sky Ink** (`sky-ink`): page ground and body text outside the road (the limits section).
-- **Gantry Steel** (`steel`, `steel-dark`): beams, brackets and the sign post, always as a two-tone metal gradient.
-- **Exit Sub** (`exit-sub`), **Exit Hover** (`exit-hover`), **Plate Text** (`plate-text`): the exit panel's sub-legend, its hover face, and secondary text on regulatory plates.
+- **Folder Manila** (`manila`): the page ground. On the landing page, interface copy (the letterhead, hero, limits and close) sits directly on it. Contract text never does.
+- **Folder Crease** (`manila-deep`): 1px rules on manila (under the letterhead, above the desk heading, between exclusions) and the scrollbar of the mobile tab strip.
+- **Folder Ink** (`manila-ink`): running interface text on manila.
+- **Folder Ink, Dim** (`manila-dim`): secondary text on manila (the desk heading's note, exclusion descriptions).
+- **Bond White** (`sheet`): the document sheet, the citation-check sheet and the primary action's face. White text on red and blue tabs.
+- **Document Ink** (`ink`): contract text, headlines, the wordmark, focus outlines and the active-tab ring.
+- **Graphite** (`graphite`): secondary text on white: clause numbers, the sheet label, the counter-offer lead-in, the action's sub-line, step notes.
+- **Sheet Rule** (`rule`): 1px rules on white (under the sheet label, between check steps).
 
 ### Named Rules
-**The Fixed Meaning Rule.** Red-and-white means *Negotiate before signing*, yellow means *Know before signing*, orange means an outside-terms notice, green is the frame. A tier colour never appears where its meaning does not apply, and a meaning never borrows another tier's colour. Intended (shell brief): green also marks a clean result.
+**The One Ink Rule.** Red is for marking: underlining a cited sentence, inserting a counter-offer, and the *Negotiate* tier. Red is never used as a background wash, a heading colour or decoration.
 
-**The Marking Is Not Warning Rule.** Road-Marking Yellow points at a place (citation, focus, selection, active sign). Warning Yellow is a tier. Never swap them.
+**The Fixed Tier Colour Rule.** Red means *Negotiate before signing*, yellow means *Know before signing*, blue means an outside-terms notice. These meanings never change, and these three colours are never used for any other state.
+
+**The Sheet Rule.** Contract text, citations and margin comments always sit on a white sheet in document ink. Manila is the frame around the sheet. It is never the surface a buyer reads a document on.
 
 ## Typography
 
-**Display Font:** Overpass (with Helvetica Neue, Arial), self-hosted variable woff2, weights 100-900.
-**Body Font:** Overpass, with tabular figures on by default.
-**Document Font:** Source Serif 4 (with Georgia), self-hosted variable woff2, weights 200-900.
+**Display Font:** Source Serif 4 (with Georgia, serif), self-hosted variable woff2, optical sizing on.
+**Body Font:** Libre Franklin (with Helvetica Neue, Arial, sans-serif), self-hosted variable woff2.
 
-**Character:** Highway lettering for everything Redline says; a sober book serif for everything the contract says. The contrast is the citation made visible.
+**Character:** The serif is the document's voice: contract text, its clause headings, and the page's large statements, set heavy (600–650) and tight. Libre Franklin is the instrument's voice: navigation, the action, margin comments, tabs and labels, with tabular figures everywhere so money and dates line up.
 
 ### Hierarchy
-- **Display** (700, `clamp(2.3rem, 4.4vw, 3.6rem)`, 1.08): the hero headline on the gantry only, max 32ch.
-- **Headline** (700, `clamp(1.9rem, 3.6vw, 3.25rem)`, 1.08): section headings on guide signs and the limits section, max 22ch where set.
-- **Title** (700, `clamp(1.4rem, 2vw, 1.75rem)`, 1.08): headings on the road above the contract.
-- **Sign Legend** (800, `clamp(1.3rem, 1.7vw, 1.6rem)`, 1.1): the exit panel's main legend. Wordmark (800, 1.5rem), plate titles (800, 1.2rem), distance-marker date (800, 1.35rem) sit in the same heavy register.
-- **Flag Type** (700, 1.1rem, 1.15): the clause type on a flag sign; exposure beneath at 600, 0.92rem.
-- **Body** (400, 1.0625rem, 1.5, tabular figures): interface copy; 1rem under 640px.
-- **Document** (Source Serif 4, 400, 1.16rem, 1.7): contract sentences and citations; 1.08rem under 640px. Unflagged clauses run to 72ch; flagged clauses sit in a 38rem column beside their note.
-- **Document Title** (Source Serif 4, 600, 1.3rem): the contract's own title.
-- **Label** (Overpass 800, 0.95rem, 0.05em, uppercase): the contract's own section headings ("1. Term and renewal"), which are real document structure. The distance marker's "Notice by" (0.75rem) uses the same register as part of the sign.
-- **Tier** (700, 0.8rem, 1.2): the tier bar at the foot of a flag sign, in sentence case.
+- **Display** (Source Serif 4 650, clamp(2.4rem, 4.6vw, 4rem), 1.05, -0.015em): the hero headline across the folder, max 17.5em wide.
+- **Headline** (Source Serif 4 650, clamp(1.9rem, 3.4vw, 3rem), 1.08, -0.01em): section statements, max about 24ch. The closing statement uses a slightly larger step (clamp(2rem, 4vw, 3.4rem), 1.06).
+- **Title** (Source Serif 4 600, 1.45rem): the document's title on the sheet. The desk heading uses the same face and weight at clamp(1.3rem, 1.9vw, 1.6rem).
+- **Document** (Source Serif 4 400, 1.12rem, 1.72; 1.06rem under 640px): contract clauses. Unflagged clauses run to 72ch; a flagged clause runs to 36rem so its margin comment fits beside it.
+- **Document heading** (Source Serif 4 600, 1.02rem, small caps, 0.02em): numbered clause headings such as "1. Term and renewal".
+- **Body** (Libre Franklin 400, 1.0625rem, 1.5; 1rem under 640px): interface copy. The lede steps up to clamp(1.05rem, 1.3vw, 1.2rem) at 1.55 and stops at 46rem.
+- **Action** (Libre Franklin 800, 1.3rem, 1.15): the primary action's legend. The wordmark is the same weight at 1.6rem, -0.01em.
+- **Label** (Libre Franklin 600, 0.82rem): clause numbers and the sheet label, in graphite. Tab and comment headings use 700 at 1rem; the tier line on a tab is 700 at 0.76rem.
 
 ### Named Rules
-**The Two Voices Rule.** Source Serif 4 sets only the document's own sentences and its title. Everything Redline says, including clause numbers and the contract's navigational section heads, is Overpass.
-
-**The Heavy Legend Rule.** Sign legends use 700-800 weight; nothing on a sign face is set lighter than 600.
+**The Two Voices Rule.** Whatever the document says is set in Source Serif 4; whatever Redline says about it is set in Libre Franklin. A margin comment never uses the serif, and a contract clause never uses the sans.
 
 ## Layout
 
-Full-bleed bands stacked as a drive: green gantry, asphalt road with the contract, guide sign, sky ground with a sign post, closing guide sign, asphalt footer. Side gutter is fluid (`gutter`); content containers cap at 1320px (gantry, sign strip, road) and 1120px (check, limits, close sign). Vertical rhythm between bands uses `section` and `section-lg`.
+Content sits in a 1240px column with a fluid gutter (`spacing.gutter`). Large sections are separated by `spacing.section` of vertical space rather than by bands of colour.
 
-- **Sign strip:** six flag signs in a six-column grid with a 12px gap, sticky at the top of the road under a steel beam; three columns at 1100px or less; a horizontal scroll-snap row (each sign 62% wide) at 640px or less.
-- **Clause grid:** a flagged clause is two columns, the document sentence (max 38rem) and its note, gap `clamp(24px, 4vw, 64px)`, separated by a 1px road-text rule at 28% opacity. Below 860px the note stacks under the sentence.
-- **Hero gantry:** a grid with nav across the top (separated by a 2px white rule at 35%), headline, then lede and exit panel side by side, bottom-aligned; one column below 860px with the exit panel stretched full width.
-- **Limits:** two columns (0.9fr / 1.1fr) with sticky copy and a post of stacked plates; one column below 860px.
-- **Road edge lines:** solid marking-yellow at left, dashed lane-white at right (46px dash, 46px gap), 6px wide (4px on phones), centred in the gutter.
-- Breakpoints: 1100px, 860px, 640px.
+The desk is a two-column grid: the sheet (flexible) and a tab rail (248px; 210px under 1100px). The rail tucks 14px under the sheet's right edge, so the tabs read as stuck to the paper. The tab list is sticky 24px from the top. Inside the sheet, a flagged clause is itself two columns: the clause text, then its margin comment (up to 16rem; 14rem under 1100px), separated by `spacing.margin-gap`. A 1px red leader crosses that gap from the comment back to the sentence.
 
-**Accepted deviations (finish review, 2026-10-05).** The one-sentence contract preamble runs to 90ch, against 72ch for other unflagged clauses, so the first cited sentence sits above the fold at 1440x900. The first-viewport promise (gantry plus first marked sentence) is not met at 1280x800. Both are recorded deviations, not rules: new surfaces use the 72ch measure.
+Breakpoints: 1100px narrows the rail and margin; 860px stacks everything into one column; 640px tightens type and step rows. At 860px the tab rail becomes a sticky, horizontally scrolling strip above the sheet on a manila band. Tabs snap into place, each at min(64%, 240px), with rounded tops and the adhesive band along the bottom edge. Margin comments drop under their clause, and their leaders are hidden.
+
+Lists such as the citation-check steps and the exclusions are ruled rows (1px rules, 16–18px vertical padding), not cards.
 
 ## Elevation & Depth
 
-Hybrid and physical. Signs hang, so they cast soft, offset-down drop shadows with a negative spread (never a hard offset block); the sticky strip casts a long dark shadow onto the road. Sign borders are inset `box-shadow` rings painted inside the face. Nothing floats without a reason to hang.
+Depth is physical: paper on a folder. Sheets and tabs cast soft, warm brown shadows (rgba(60, 40, 10, …)) that fall downward with a negative spread, as if lit from above a desk. Nothing else is raised. Rules and tonal contrast between manila and white do all other separation.
 
 ### Shadow Vocabulary
-- **Hanging sign** (`0 18px 36px -18px rgba(10, 30, 20, 0.55)`): under guide-green signs.
-- **Exit panel** (`0 10px 22px -12px rgba(0, 0, 0, 0.6)`; hover `0 16px 28px -14px rgba(0, 0, 0, 0.65)`): the primary action.
-- **Plate** (`0 10px 20px -14px rgba(0, 0, 0, 0.5)`): regulatory plates on the post.
-- **Strip** (`0 14px 24px -18px rgba(0, 0, 0, 0.9)`): the sticky sign strip over the road.
-- **Beam** (`0 6px 10px -6px rgba(0, 0, 0, 0.35)`): gantry beams.
+- **Desk shadow** (`box-shadow: 0 1px 2px rgba(60, 40, 10, 0.12), 0 26px 44px -26px rgba(60, 40, 10, 0.5)`): every white sheet resting on manila.
+- **Action lift** (`box-shadow: inset 0 0 0 2px #1c1a17, 0 14px 24px -16px rgba(60, 40, 10, 0.55)`; on hover `0 20px 30px -18px rgba(60, 40, 10, 0.6)` with a 2px rise): the primary action, a white card with a 2px ink border drawn as an inset ring.
+- **Tab shadow** (`box-shadow: 0 8px 14px -12px rgba(60, 40, 10, 0.6)`): flag tabs. The selected tab adds a 3px ink ring (`0 0 0 3px #1c1a17`).
 
 ### Named Rules
-**The Inset Border Rule.** A sign's border is an inset ring in its own legend colour, separated from the edge by the face colour: guide signs 6px face then 3px white; warning and construction signs 3px ink then 2px face; plates 3px ink then 3px white; regulatory flags a 5px red ring on white. Never a CSS border stroke.
+**The Desk Light Rule.** Shadows are warm brown, soft and below the object, with a negative spread. No grey or black shadows, no hard offsets, no glow.
 
 ## Shapes
 
-Rounded rectangles only, scaled by sign size: 14px for large guide signs, 10px for flag signs and the exit panel, 8px for plates and the distance marker, 4px for the small strip plate and the focus ring, 2px for citation highlights, 3px for note swatches. Steel is the only other form: beams (16px, two-tone hard-stop gradient), 12px brackets from beam to sign, and a 14px round-edged post.
+Paper is nearly square. Sheets have a 2px radius (`rounded.sheet`). On mobile, only the bottom corners are rounded, because the tab strip sits on top. The primary action is square (`rounded.none`). Flag tabs are rounded only on the edge away from the paper (`rounded.tab`, 0 6px 6px 0 on desktop, 6px 6px 0 0 on mobile). Their 14px end on the paper is a 40%-white band that reads as the adhesive. The notice date is a small 3px-radius box with a 1.5px ink inset. Comment swatches are 12px squares with a 2px radius. Rules are always 1px. The only curves that are not geometric are the pen strokes: the citation underline and the wordmark stroke, both round-capped SVG paths.
 
 ## Components
 
-### Exit Panel (primary action)
-Tactile and unmistakable: a white exit sign on green.
-- **Shape:** 10px corners, min width 300px (full width below 860px).
-- **Default:** legend-white face, deep-green 3px inset ring and text, two-line legend (Sign Legend, then a 600 sub-legend in `exit-sub`), a 46px diagonal arrow drawn in SVG at right.
-- **Hover:** lifts 2px, face to `exit-hover`, deeper shadow, arrow nudges 3px up-right (0.35s, `ease-out`). **Active:** returns to rest. **Focus:** global 3px marking-yellow ring, 3px offset.
-
-### Flag Sign (signature)
-A small sign in the strip, one per flag or outside-terms notice, ranked.
-- **Anatomy:** clause type (Flag Type), exposure (600, 0.92rem), tier bar bleeding to the sign's edges at the foot.
-- **Negotiate before signing:** white face, 5px regulatory ring, red tier bar with white text.
-- **Know before signing:** warning-yellow face, ink and yellow rings, tier bar ruled with a 3px ink line.
-- **Outside terms:** construction-orange face, same ring and bar treatment as warning.
-- **States:** dim at rest (`brightness(0.55) saturate(0.75)`); lit when its citation is read, with a white retroreflective sweep (0.9s). Hover lifts 2px; active lifts 3px and gains a 3px marking-yellow halo. Selecting a sign scrolls to its citation and focuses it. Signs re-order with a 650ms FLIP animation, tier first, then money. Reduced motion: all lit, no sweep, no transitions.
-
-### Citation Highlight
-- **Style:** document serif text; a marking-yellow background wipes left to right (0.8s) when lit, text turns sign-ink; highlights clone across line breaks. Outside-terms citations wipe in construction orange.
-- **Active:** 3px legend-white outline, 3px offset.
-
-### Flag Note
-- **Style:** beside the citation, a 1px left rule; title at 800 with a 14px tier swatch (3px radius) in the tier's colour; explanation; counter-offer with its label in road-text 700 and the wording in road-dim.
-
-### Distance Marker (notice obligation)
-- **Style:** a small guide-green sign (8px, inset 3px face then 2px white ring) with an uppercase "Notice by" label and the date at 800, 1.35rem. Sits in the flag note.
-
-### Regulatory Plate
-- **Style:** white plate, 8px corners, ink-and-white inset ring, title 800 1.2rem, body 1rem in `plate-text`; stacked 14px apart on a single steel post.
+### Buttons
+The primary action is a sheet of paper with an instruction on it.
+- **Shape:** square corners (0), 2px ink border drawn as an inset ring.
+- **Primary:** white face, ink text. The legend is in the action style, underlined 2.5px in red with a 5px offset. A graphite sub-line underneath names the formats ("PDF, DOCX or pasted text"). A 28px red arrow sits in a second column. The padding is uneven on purpose (16px 20px 18px 22px).
+- **Hover / Focus:** rises 2px with a deeper desk shadow and the arrow moves 4px right, over 0.35s on the ease-out curve. Active returns to rest. Focus is the global 3px ink outline at a 3px offset. Under 860px it stretches to full width.
+- There is no secondary button style. Other actions are text links.
 
 ### Navigation
-- **Style:** inside the hero gantry: route-shield wordmark (SVG shield, 800 1.5rem) at left, links at 600 1rem at right, underline on hover; wraps below 640px.
+- **Letterhead:** wordmark left (800 weight, ink, with a red pen stroke drawn under it), links right in Libre Franklin 600 at 1rem, manila ink, no underline. On hover the link gets an underline in red. A 1px folder-crease rule closes the row. Under 640px it wraps.
 
-### Strip Plate
-- **Style:** a small white tag with a 2px ink ring, centred on the strip's beam, labelling the sample contract as made up (700, 0.78rem).
+### Cards / Containers
+- **Sheet:** white, 2px radius, desk shadow. It has no border. A right-aligned graphite label at the top states what the sheet is, closed by a sheet rule.
+- **Folder:** manila is the container for everything else. Sections on it are separated by 1px crease rules, never by boxes.
 
-### Intended, not shipped (shell brief)
-The app shell is unbuilt. Its brief says the Operate frame takes only type, palette, density and one move from this world: Overpass for interface and Source Serif 4 for contract text and citations; guide green for the navigation rail; the tier colours with the meanings above, plus green for a clean result; the document read on a light ground; flags as sign panels in a sticky strip over the document, selecting one scrolls to its citation with the marking highlight; notice obligations as distance markers in the margin; standard web layout, navigation and controls. No input, table or light-ground document component exists yet, so none is specified here.
+### Citation (signature)
+The cited sentence in the contract, in document ink, carries a red pen underline drawn as a background image. When it reaches the reading line, the background width grows from 0 to 100% over 0.9s. The selected citation takes an 8% red wash. It always shows its clause number in the label style.
+
+### Margin Comment (signature)
+This is Redline's note beside a flagged clause, ruled with a 1px red hairline on its left and joined to the sentence by a red leader. It contains a heading with a 12px tier swatch, a sentence on the exposure, and the counter-offer. The counter-offer has a bold "Counter-offer:" lead-in in graphite and ink, and its wording is set as a tracked insertion with a 1px red double underline. A notice obligation adds its deadline as a notice-date box ("Notice by" in graphite 0.85rem, then the date in 700 weight).
+
+### Flag Tab (signature)
+Each flag gets one tab on the sheet's edge, ordered by tier and then by money. The tab carries three lines: clause type (700, 1rem), exposure (500, 0.86rem) and tier (700, 0.76rem). Its fill is the tier colour. Tabs start tucked under the sheet (28px left, transparent) and slide out over 0.7s when their citation is marked. Lit tabs re-sort ahead of tucked ones with a 650ms FLIP move. On hover a tab moves 4px out. Selecting a tab scrolls to its sentence, focuses it, and rings the tab in ink. On mobile, unlit tabs show at 45% opacity rather than hiding.
+
+### App shell (intended, not shipped)
+The signed-in shell is not built. Its brief carries this world into an Operate frame. Manila is used only for the frame (navigation rail and page ground), never behind working text. The document sits on a white sheet. Red stays the only marking ink. Flag tabs keep their fixed tier colours. A clean result shows no tab colour and is stated in plain words. Notice obligations sit in the margin as dated comments. Library tables use tabular figures. Layout, navigation and controls are standard web components. None of this exists in code yet. The next documentation pass should take it from the build.
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** give every sign panel its border as an inset ring (The Inset Border Rule), with 14px, 10px or 8px corners by size.
-- **Do** keep tier colours to their fixed meanings: regulatory red for *Negotiate before signing*, warning yellow for *Know before signing*, construction orange for outside-terms notices.
-- **Do** set the document's sentences in Source Serif 4 at 1.7 line height and a 72ch measure, and everything else in Overpass.
-- **Do** mark a citation with the road-marking highlight and keep the 3px marking-yellow focus ring on every interactive element.
-- **Do** show every sign lit and skip the sweep and transitions under reduced motion.
-- **Do** use tabular figures for money, dates and counts.
+- **Do** put every document on a white sheet (`sheet`) in document ink, with the desk shadow, and let manila show around it.
+- **Do** mark a cited sentence with the red pen underline, and set a counter-offer as an insertion with a red double underline.
+- **Do** give every flag one tab in its tier colour, ordered by tier and then by money, with clause type, exposure and tier on the tab.
+- **Do** set contract text in Source Serif 4 at 1.72 line height and no wider than 72ch, and set interface words in Libre Franklin with tabular figures.
+- **Do** separate content with 1px rules (`manila-deep` on manila, `rule` on white) rather than boxes.
+- **Do** show every mark drawn and every tab out when reduced motion is on.
 
 ### Don't:
-- **Don't** use a tier colour for decoration, emphasis or branding.
-- **Don't** swap Road-Marking Yellow and Warning Yellow.
-- **Don't** set Redline's own words in the document serif, or the document's sentences in Overpass.
-- **Don't** draw sign borders as CSS strokes or give signs a hard, unblurred offset shadow.
-- **Don't** use a numeric score or a high/medium/low scale in place of a tier sign.
-- **Don't** (intended, shell brief) carry the road costume onto working screens: no asphalt ground, lane or edge lines, or gantry steel in the Operate frame. These remain native to the landing world.
+- **Don't** use red for anything but a mark or the *Negotiate before signing* tier: no red headings, washes or decoration.
+- **Don't** reuse the tier colours for any other meaning, and don't add a fourth severity colour, a score or a high/medium/low scale.
+- **Don't** put contract text, citations or working text on manila.
+- **Don't** use cream, parchment or lamplight tones. Manila is a folder, not aged paper.
+- **Don't** dress the page up as a law office: no wood desk, paper texture, torn edges or handwriting typefaces. The drawn pen stroke is a mark and is not a font.
+- **Don't** use grey or black shadows or hard offset shadows. Depth is the warm desk shadow only.
