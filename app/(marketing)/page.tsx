@@ -204,7 +204,7 @@ export default function LandingPage() {
 
         <section className="close" aria-labelledby="close-title">
           <h2 id="close-title">Read your next contract before it renews.</h2>
-          <p>Sign in, then upload a PDF or DOCX or paste the text. The file stays in your browser and only its text is saved.</p>
+          <p>Upload a PDF or DOCX or paste the text, with or without an account. The file stays in your browser and only its text is saved.</p>
           <a className="try" href="/new">
             <span className="try-legend">Try it on a document</span>
             <span className="try-sub">PDF, DOCX or pasted text</span>

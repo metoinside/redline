@@ -1,5 +1,6 @@
 import type { PGlite } from "@electric-sql/pglite";
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { MAX_DOCUMENT_CHARS, MAX_TITLE_CHARS } from "@/lib/extraction/limits";
 import { asAnon, asUser, createDatabase, createUser } from "./harness";
 
 // Runs the real migration SQL and the real policies in Postgres (PGlite).
@@ -20,7 +21,7 @@ async function addDocument(owner: string, title: string): Promise<string> {
     owner,
     async (tx) => {
       const { rows } = await tx.query<{ id: string }>(
-        "insert into public.documents (title, body) values ($1, $2) returning id",
+        "insert into public.documents (title, body, source_kind) values ($1, $2, 'paste') returning id",
         [title, `${title} body text.`],
       );
       return rows[0].id;
@@ -100,7 +101,7 @@ describe("documents row-level security, user A against user B's rows", () => {
   it("A cannot insert a document owned by B", async () => {
     await expect(
       asUser(db, A, (tx) =>
-        tx.query("insert into public.documents (user_id, title, body) values ($1, 'planted', 'planted')", [B]),
+        tx.query("insert into public.documents (user_id, title, body, source_kind) values ($1, 'planted', 'planted', 'paste')", [B]),
       ),
     ).rejects.toThrow(/row-level security/);
   });
@@ -117,7 +118,7 @@ describe("documents row-level security, user A on A's own rows", () => {
   it("A can insert, select, update and delete A's own documents", async () => {
     const result = await asUser(db, A, async (tx) => {
       const inserted = await tx.query<{ id: string; user_id: string }>(
-        "insert into public.documents (title, body) values ('New MSA', 'The term is 12 months.') returning id, user_id",
+        "insert into public.documents (title, body, source_kind) values ('New MSA', 'The term is 12 months.', 'pdf') returning id, user_id",
       );
       const newId = inserted.rows[0].id;
 
@@ -152,7 +153,7 @@ describe("documents for signed-out visitors", () => {
   it("anon cannot read or write documents at all", async () => {
     await expect(asAnon(db, (tx) => tx.query("select * from public.documents"))).rejects.toThrow(/permission denied/);
     await expect(
-      asAnon(db, (tx) => tx.query("insert into public.documents (user_id, title, body) values ($1, 't', 'b')", [A])),
+      asAnon(db, (tx) => tx.query("insert into public.documents (user_id, title, body, source_kind) values ($1, 't', 'b', 'paste')", [A])),
     ).rejects.toThrow(/permission denied/);
   });
 });
@@ -169,6 +170,30 @@ describe("documents table shape", () => {
       { column_name: "title", data_type: "text" },
       { column_name: "body", data_type: "text" },
       { column_name: "created_at", data_type: "timestamp with time zone" },
+      { column_name: "source_kind", data_type: "text" },
     ]);
+  });
+
+  it("records where the text came from as pdf, docx or paste, and nothing else", async () => {
+    const insert = (kind: string | null) =>
+      asUser(db, A, (tx) =>
+        tx.query("insert into public.documents (title, body, source_kind) values ('t', 'b', $1)", [kind]),
+      );
+    for (const kind of ["pdf", "docx", "paste"]) await expect(insert(kind)).resolves.toBeDefined();
+    await expect(insert("png")).rejects.toThrow(/documents_source_kind_check/);
+    await expect(insert(null)).rejects.toThrow(/not-null|null value/);
+  });
+
+  it("refuses an empty title or body, and a title or body longer than the app allows", async () => {
+    const insert = (title: string, body: string) =>
+      asUser(db, A, (tx) =>
+        tx.query("insert into public.documents (title, body, source_kind) values ($1, $2, 'paste')", [title, body]),
+      );
+    await expect(insert("", "Some text.")).rejects.toThrow(/documents_title_length_check/);
+    await expect(insert("Contract", "")).rejects.toThrow(/documents_body_length_check/);
+    await expect(insert("Contract", "x".repeat(MAX_DOCUMENT_CHARS + 1))).rejects.toThrow(/documents_body_length_check/);
+    await expect(insert("Contract", "x".repeat(MAX_DOCUMENT_CHARS))).resolves.toBeDefined();
+    await expect(insert("t".repeat(MAX_TITLE_CHARS + 1), "Some text.")).rejects.toThrow(/documents_title_length_check/);
+    await expect(insert("t".repeat(MAX_TITLE_CHARS), "Some text.")).resolves.toBeDefined();
   });
 });

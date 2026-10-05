@@ -54,7 +54,9 @@ export default async function LibraryPage() {
           <tbody>
             {(data as DocumentRow[]).map((doc) => (
               <tr key={doc.id}>
-                <td>{doc.title}</td>
+                <td>
+                  <a href={`/documents/${doc.id}`}>{doc.title}</a>
+                </td>
                 <td className="date">
                   <time dateTime={doc.created_at}>{dateFormat.format(new Date(doc.created_at))}</time>
                 </td>

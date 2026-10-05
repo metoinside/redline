@@ -20,7 +20,10 @@ export const viewport: Viewport = {
 };
 
 // Later tickets add their own entries here, once their pages exist.
-const NAV = [{ href: "/library", label: "Library" }];
+const NAV = [
+  { href: "/new", label: "Add a document" },
+  { href: "/library", label: "Library" },
+];
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   preload("/fonts/libre-franklin-latin.woff2", { as: "font", type: "font/woff2", crossOrigin: "" });
