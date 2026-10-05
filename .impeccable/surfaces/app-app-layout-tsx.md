@@ -28,15 +28,16 @@ The buyer comes back to do one of five jobs, and each gets its own area in the f
 - A flag naming the red line it breaches.
 
 ## World in an Operate frame
-The world lends only type, palette, density and one signature move. Layout, navigation and controls stay standard web components.
-- **Type:** Overpass for the interface; a document serif for contract text and citations.
+The world (Marked-up Draft, chosen 2026-10-05; see the landing brief's direction contract) lends only type, palette, density and one signature move. Layout, navigation and controls stay standard web components.
+- **Type:** Libre Franklin for the interface; Source Serif 4 for contract text and citations.
 - **Palette:**
-  - guide green for the navigation rail and the frame;
-  - tier colours with fixed meanings: red-and-white means *Negotiate before signing*, yellow means *Know before signing*, orange means an outside-terms notice, green means a clean result;
-  - the document read on a light ground for long sessions at a desk.
+  - manila only for the frame (navigation rail and page ground around the document), never behind working text;
+  - the document on a white sheet, black ink, for long reading sessions at a desk;
+  - Redline red is the one marking ink: citation underlines and counter-offer insertions;
+  - tier colours with fixed meanings, carried by flag tabs: red means *Negotiate before signing*, yellow means *Know before signing*, blue means an outside-terms notice. A clean result shows no tab colour; it is stated in plain words.
 - **Density:** comfortable for reading at a desk; tables in the library use tabular figures.
-- **Signature move:** the result's flags hang as sign panels in a sticky strip over the document, in ranked order. Selecting one scrolls the document to its sentence and marks it with the road-marking highlight. Notice obligations sit in the document margin as distance markers ("Notice by 2 Oct 2028").
-- **Never:** a costume of a dashboard or a road. No lane lines, no asphalt texture, and no gantry steel on working screens.
+- **Signature move:** the result's flags stand as tabs on the document sheet's edge, in ranked order. Selecting one scrolls the document to its sentence and marks it with the red underline; its margin comment holds the exposure and the counter-offer. Notice obligations sit in the margin as dated comments ("Notice by 2 Oct 2028").
+- **Never:** a costume of a law office. No wood desk, no handwriting fonts, no paper texture or torn edges on working screens.
 
 ## Constraints
 - Every citation shown has passed the verbatim check. A failed one is never rendered.

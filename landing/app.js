@@ -1,19 +1,20 @@
-// Signs light as their cited sentence crosses the reading line, then rank
-// themselves: lit signs move ahead of unlit ones, in tier-then-money order.
+// A red pen stroke draws under each cited sentence as it reaches the reading
+// line, and its flag tab slides out from the sheet's edge. Out tabs move ahead
+// of tucked ones, in tier-then-money order.
 (function () {
-  const list = document.querySelector(".signs");
+  const list = document.querySelector(".tabs");
   if (!list) return;
   const items = Array.from(list.children);
-  const signFor = new Map();
+  const tabFor = new Map();
   items.forEach((li) => {
-    const btn = li.querySelector(".flag-sign");
-    signFor.set(btn.dataset.target, { li, btn });
+    const btn = li.querySelector(".tab");
+    tabFor.set(btn.dataset.target, { li, btn });
   });
 
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const phone = window.matchMedia("(max-width: 640px)");
+  const phone = window.matchMedia("(max-width: 860px)");
 
-  // On phones the signs scroll sideways, so bring the sign that just lit into view.
+  // On narrow screens the tabs scroll sideways, so bring the tab that just came out into view.
   function reveal(li) {
     if (!phone.matches) return;
     list.scrollTo({
@@ -45,7 +46,7 @@
   }
 
   function light(id, scroll = true) {
-    const entry = signFor.get(id);
+    const entry = tabFor.get(id);
     const mark = document.getElementById(id);
     if (!entry || entry.btn.classList.contains("is-lit")) return;
     entry.btn.classList.add("is-lit");
@@ -55,20 +56,20 @@
   }
 
   if (reduced || !("IntersectionObserver" in window)) {
-    signFor.forEach((_, id) => light(id, false));
+    tabFor.forEach((_, id) => light(id, false));
   } else {
-    // Start in document order, so the ranking is visible as signs light.
+    // Start in document order, so the ranking is visible as tabs come out.
     items
       .slice()
       .sort((a, b) => {
-        const ma = document.getElementById(a.querySelector(".flag-sign").dataset.target);
-        const mb = document.getElementById(b.querySelector(".flag-sign").dataset.target);
+        const ma = document.getElementById(a.querySelector(".tab").dataset.target);
+        const mb = document.getElementById(b.querySelector(".tab").dataset.target);
         return ma.compareDocumentPosition(mb) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
       })
       .forEach((li) => list.appendChild(li));
 
     // The first cited sentence is marked from the start.
-    light(items[0].querySelector(".flag-sign").dataset.target);
+    light(items[0].querySelector(".tab").dataset.target);
 
     const io = new IntersectionObserver(
       (entries) => {
@@ -81,16 +82,16 @@
       },
       { rootMargin: "-30% 0px -45% 0px" }
     );
-    signFor.forEach((_, id) => {
+    tabFor.forEach((_, id) => {
       const mark = document.getElementById(id);
       if (mark) io.observe(mark);
     });
   }
 
-  // Selecting a sign takes you to its sentence.
+  // Selecting a tab takes you to its sentence.
   let active = null;
   list.addEventListener("click", (ev) => {
-    const btn = ev.target.closest(".flag-sign");
+    const btn = ev.target.closest(".tab");
     if (!btn) return;
     const id = btn.dataset.target;
     const mark = document.getElementById(id);

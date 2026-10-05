@@ -2,25 +2,6 @@
   "detector": {
     "ignoreRules": [],
     "ignoreFiles": [],
-    "ignoreValues": [
-      {
-        "rule": "cramped-padding",
-        "value": "*",
-        "files": [
-          "landing/index.html"
-        ],
-        "createdAt": "2026-10-05T15:01:47.582Z",
-        "reason": "finish reviewer 2026-10-05: section.road full-bleed sticky gantry strip is world-earned (.road-inner carries 40-80px inset); div.sign is a false positive (24-52px insets in captures)"
-      },
-      {
-        "rule": "repeating-stripes-gradient",
-        "value": "*",
-        "files": [
-          "landing/styles.css"
-        ],
-        "createdAt": "2026-10-05T15:01:47.595Z",
-        "reason": "finish reviewer 2026-10-05: dashed road edge line (.road::after) is an OWN-WORLD road marking in the Exit Ahead direction contract"
-      }
-    ]
+    "ignoreValues": []
   }
 }

@@ -1,0 +1,71 @@
+{
+  "title": "Choose the visual world for Redline (safer round)",
+  "question": "One world for both surfaces, the landing page and the app shell behind sign-in. Exit Ahead and every earlier card are out. These are the familiar directions, plus the category standard. Pick one, steer, or re-roll.",
+  "options": [
+    {
+      "id": "markup",
+      "label": "Marked-up Draft",
+      "lineage": "The lawyer's redlined draft: a printed contract marked up in one red pen",
+      "thesis": "Redline does what its name says: it marks up your draft, and every mark sits on the sentence it came from.",
+      "palette": ["#FBF8F1", "#1E1B18", "#C8102E", "#6F6A63", "#E8E1D3"],
+      "materials": ["cream bond paper", "document serif", "red pen underlines and margin notes", "counter-offers as tracked insertions"],
+      "viewport": "The headline and action sit on the first page of the sample contract, its renewal sentence underlined in red with a margin note beside it.",
+      "risk": "It is the literal reading of the name, and red ink everywhere can read as alarm or as a Word document.",
+      "wireframe": {"cols": 12, "rows": 10, "regions": [
+        {"label": "nav", "x": 0, "y": 0, "w": 12, "h": 1},
+        {"label": "headline + try it", "x": 0, "y": 1, "w": 8, "h": 3, "accent": true},
+        {"label": "contract page", "x": 0, "y": 4, "w": 8, "h": 6},
+        {"label": "margin notes", "x": 8, "y": 4, "w": 4, "h": 6}
+      ]}
+    },
+    {
+      "id": "annotated",
+      "label": "Annotated Edition",
+      "lineage": "Annotated legal reference books: the text, numbered annotations, a margin key",
+      "thesis": "Your contract set as an annotated edition: the text in one column, each flag a numbered annotation keyed to its sentence.",
+      "palette": ["#FFFFFF", "#141414", "#8A1C1C", "#5B6770", "#E9E4DA"],
+      "materials": ["book page", "section marks and small caps", "numbered marginal annotations", "hairline rules"],
+      "viewport": "A title-page headline and action above a two-column spread, contract text left and numbered annotations right, the first already keyed to its sentence.",
+      "risk": "It reads scholarly and law-firm formal, which can feel dense to an owner reading without a lawyer.",
+      "wireframe": {"cols": 12, "rows": 10, "regions": [
+        {"label": "nav", "x": 0, "y": 0, "w": 12, "h": 1},
+        {"label": "title page: headline + try it", "x": 2, "y": 1, "w": 8, "h": 3, "accent": true},
+        {"label": "contract text", "x": 0, "y": 4, "w": 7, "h": 6},
+        {"label": "numbered annotations", "x": 7, "y": 4, "w": 5, "h": 6}
+      ]}
+    },
+    {
+      "id": "statement",
+      "label": "Statement of Account",
+      "lineage": "The invoices and supplier statements a small business reads every month",
+      "thesis": "Each flag is a line on a statement: what it costs, by when, and the sentence it comes from as the reference.",
+      "palette": ["#FFFFFF", "#0E2235", "#D4371C", "#F2F4F5", "#7A8791"],
+      "materials": ["statement grid", "tabular figures", "due-by column", "clause reference numbers"],
+      "viewport": "A statement header carries the headline and action, then the flags run as line items ranked by amount, each opening onto its cited sentence.",
+      "risk": "It looks like accounting software, and the money can crowd out the citation, which is the product's real proof.",
+      "wireframe": {"cols": 12, "rows": 10, "regions": [
+        {"label": "nav", "x": 0, "y": 0, "w": 12, "h": 1},
+        {"label": "statement header: headline + try it", "x": 0, "y": 1, "w": 12, "h": 2, "accent": true},
+        {"label": "flag line items, ranked by amount", "x": 0, "y": 3, "w": 12, "h": 4},
+        {"label": "open line: cited sentence", "x": 0, "y": 7, "w": 12, "h": 3}
+      ]}
+    }
+  ],
+  "reroll": {"registers": ["safer", "bolder"]},
+  "buildPath": {"value": "code"},
+  "canon": true,
+  "canonCard": {
+    "label": "The category standard",
+    "thesis": "Legal-tech SaaS done well, sitting beside Rocket Lawyer and Genie AI: white ground, slate type, one accent.",
+    "palette": ["#FFFFFF", "#0F172A", "#2563EB", "#F1F5F9"],
+    "materials": ["clean grid", "product screenshot in a browser frame"],
+    "viewport": "Headline and action on the left, a framed screenshot of a flag and its cited sentence on the right.",
+    "risk": "It looks like the tools Redline means to be more trustworthy than.",
+    "wireframe": {"cols": 12, "rows": 10, "regions": [
+      {"label": "nav", "x": 0, "y": 0, "w": 12, "h": 1},
+      {"label": "headline + try it", "x": 0, "y": 2, "w": 5, "h": 5, "accent": true},
+      {"label": "product screenshot", "x": 6, "y": 2, "w": 6, "h": 6}
+    ]}
+  },
+  "steer": true
+}

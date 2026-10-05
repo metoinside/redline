@@ -18,21 +18,22 @@ Scope: the public landing page, static HTML/CSS in `landing/`, ported into Next.
 - The demonstration is a sample vendor contract, written for this page and labelled as made up everywhere a visitor could mistake it for a real one.
 - No prices, customers, testimonials, statistics or quotes. The research cases stay out of the page.
 - Limits are stated plainly: no verdict on whether to sign, no legal advice, no scanned or photographed documents, tuned only for vendor, SaaS and service contracts, flags only the five renewal-and-exit clause types.
+- No headline promises full recall ("every term").
 - All copy passes the humanizer skill before commit (`CLAUDE.md`). Terms follow `CONTEXT.md`.
 
 ## Direction contract
 
-THESIS: Renewal and exit, signed like the road. Each flag is a sign posted over the contract, pointing at its sentence. Refuses the category's split hero with a browser-framed screenshot of a flag list.
+THESIS: Redline marks up your draft. The page is a contract on a desk carrying Redline's marks: red-pen underlines on cited sentences, margin comments, and adhesive flag tabs on the sheet's edge, one per flag, in ranked order. Refuses the split hero with a screenshot of a flag list.
 
-OWN-WORLD: Interstate guide green panels with an inset white border and rounded corners own the frame. Asphalt carries the contract text, with yellow road-marking highlights on cited sentences. Red-and-white regulatory panels mean *Negotiate before signing*, yellow warning panels mean *Know before signing*, and orange construction panels mark outside terms. Highway lettering (Overpass) sets every sign; the contract itself is set in a document serif.
+OWN-WORLD: A manila folder ground holds bright white bond sheets with a soft desk shadow. Contract text is black document ink in Source Serif 4. Redline red is the only marking ink: underlines, tracked insertions for counter-offers. Flag tabs carry the tiers: red tab for *Negotiate before signing*, yellow tab for *Know before signing*, blue tab for an outside-terms notice. Interface words are set in Libre Franklin. No cream, no parchment, no lamplight.
 
-STORY: The visitor sees a contract under a gantry of signs, reads which clauses cost money and why, finds each sentence, learns what Redline won't do, and takes the exit: try it on a document.
+STORY: The visitor sees a contract with its renewal sentence already marked, reads which clauses cost money and why, finds each sentence, learns what Redline won't do, and tries it on a document.
 
-FIRST VIEWPORT: A full-width green gantry panel carries the route-shield wordmark, the navigation links, the headline and the exit panel (the primary action). Below it, the gantry's signs hang over the asphalt, where the sample contract begins, the first cited sentence already marked.
+FIRST VIEWPORT: On manila: a letterhead row with the wordmark (a red pen stroke under "Redline") and the links; the headline across the folder in large serif, the lede and the primary action (a red-ruled "Try it on a document" button) under it. Below, the white contract sheet starts with its ranked flag tabs standing off its right edge, the first cited sentence already underlined in red with its margin comment.
 
-FORM: Exit Ahead, interstate guide and warning signage. First on my ordered list (model pick, chosen by the owner). Seed key 03512813.
+FORM: Marked-up Draft (the lawyer's redlined draft). First of three on my familiar list in a safer re-roll, chosen by the owner on the decision page. Seed key 03512813.
 
-SIGNATURE INTERACTION: As the contract scrolls under the gantry, each cited sentence crossing the reading line lights its sign (dim to retroreflective) and the signs rank themselves by tier, then by money. Reduced motion shows every sign lit.
+SIGNATURE INTERACTION: As each cited sentence reaches the reading line, a red pen stroke draws under it and its flag tab slides out from the sheet's edge, the tabs keeping tier-then-money order. Selecting a tab scrolls to its sentence. Reduced motion shows every mark drawn and every tab out.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 
