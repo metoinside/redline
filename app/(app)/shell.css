@@ -1,0 +1,231 @@
+/* App shell. Imported only by app/(app)/layout.tsx. Manila is the frame
+   (rail and page ground); working content sits on the white sheet. */
+
+@font-face {
+  font-family: "Libre Franklin";
+  src: url("/fonts/libre-franklin-latin.woff2") format("woff2");
+  font-weight: 400 800;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Source Serif 4";
+  src: url("/fonts/source-serif-4-latin.woff2") format("woff2");
+  font-weight: 200 900;
+  font-display: swap;
+}
+
+:root {
+  --manila: #e5c887;
+  --manila-deep: #c9a961;
+  --manila-ink: #2b2418;
+  --manila-dim: #5a4a2c;
+  --sheet: #ffffff;
+  --ink: #1c1a17;
+  --graphite: #5f5a53;
+  --rule: #e4ded3;
+  --red: #c8102e;
+  --tab-yellow: #f5cf3a;
+  --tab-blue: #2459c4;
+
+  --gutter: clamp(16px, 4vw, 56px);
+  --ui: "Libre Franklin", "Helvetica Neue", Arial, sans-serif;
+  --doc: "Source Serif 4", Georgia, serif;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --desk-shadow: 0 1px 2px rgba(60, 40, 10, 0.12), 0 26px 44px -26px rgba(60, 40, 10, 0.5);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--manila);
+  color: var(--manila-ink);
+  font-family: var(--ui);
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--tab-yellow); color: var(--ink); }
+a { color: inherit; text-underline-offset: 0.22em; text-decoration-thickness: 1.5px; }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; border-radius: 2px; }
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+p { margin: 0; }
+
+.skip {
+  position: absolute; left: 12px; top: -60px; z-index: 50;
+  background: var(--ink); color: var(--sheet);
+  padding: 10px 16px; font-weight: 700;
+}
+.skip:focus { top: 12px; }
+
+/* ---------- Frame: rail + work area ---------- */
+.frame {
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.rail {
+  position: sticky; top: 0; align-self: start;
+  display: flex; flex-direction: column; gap: 28px;
+  min-height: 100vh;
+  padding: 26px 20px 24px 24px;
+  border-right: 1px solid var(--manila-deep);
+}
+
+.wordmark {
+  position: relative; display: inline-block; align-self: flex-start;
+  text-decoration: none; font-weight: 800; font-size: 1.6rem; letter-spacing: -0.01em;
+  color: var(--ink); padding-bottom: 6px;
+}
+.wordmark .stroke {
+  position: absolute; left: -2px; bottom: -2px; width: calc(100% + 6px); height: 12px;
+  color: var(--red);
+}
+
+.rail-nav ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.rail-nav a {
+  display: block; padding: 8px 10px; margin-left: -10px;
+  text-decoration: none; font-weight: 600; font-size: 1rem; color: var(--manila-ink);
+  border-radius: 2px;
+}
+.rail-nav a:hover { text-decoration: underline; text-decoration-color: var(--red); }
+.rail-nav a[aria-current="page"] { color: var(--ink); box-shadow: inset 3px 0 0 var(--ink); padding-left: 13px; }
+
+.account {
+  margin-top: auto;
+  display: grid; gap: 6px;
+  padding-top: 16px;
+  border-top: 1px solid var(--manila-deep);
+  font-size: 0.92rem;
+}
+.account-who { color: var(--manila-dim); overflow-wrap: anywhere; }
+.account-who strong { display: block; color: var(--manila-ink); font-weight: 600; }
+.account a, .link-button {
+  justify-self: start;
+  font: inherit; font-weight: 600; color: var(--manila-ink);
+  background: none; border: 0; padding: 0; cursor: pointer;
+  text-decoration: none;
+}
+.account a:hover, .link-button:hover { text-decoration: underline; text-decoration-color: var(--red); }
+
+.work {
+  padding: clamp(24px, 3.4vw, 48px) var(--gutter) clamp(48px, 6vw, 88px);
+  min-width: 0;
+}
+
+/* ---------- The sheet: every working surface ---------- */
+.sheet {
+  max-width: 960px;
+  background: var(--sheet); color: var(--ink);
+  border-radius: 2px;
+  box-shadow: var(--desk-shadow);
+  padding: clamp(22px, 2.6vw, 36px) clamp(20px, 3.6vw, 56px) clamp(32px, 4vw, 56px);
+}
+.sheet--narrow { max-width: 520px; }
+
+.sheet-head { padding-bottom: 14px; margin-bottom: 22px; border-bottom: 1px solid var(--rule); }
+.sheet-head h1 { font-weight: 700; font-size: 1.6rem; line-height: 1.15; letter-spacing: -0.005em; }
+.sheet-head p { margin-top: 6px; color: var(--graphite); max-width: 46rem; }
+
+.prose { display: grid; gap: 12px; max-width: 46rem; }
+.prose p { color: var(--ink); }
+.prose .quiet { color: var(--graphite); }
+
+/* ---------- Forms: standard controls ---------- */
+.form { display: grid; gap: 18px; }
+.field { display: grid; gap: 6px; }
+.field label { font-weight: 600; font-size: 0.95rem; color: var(--ink); }
+.field input {
+  font: inherit; color: var(--ink);
+  padding: 10px 12px;
+  background: var(--sheet);
+  border: 1px solid var(--graphite);
+  border-radius: 2px;
+  width: 100%;
+}
+.field input:focus-visible { outline: 3px solid var(--ink); outline-offset: 1px; }
+.field .hint { font-size: 0.88rem; color: var(--graphite); }
+
+.form-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; margin-top: 4px; }
+
+.action {
+  display: inline-flex; align-items: center;
+  padding: 12px 18px 13px 18px;
+  font: inherit; font-weight: 800; font-size: 1.05rem; line-height: 1.15;
+  color: var(--ink); background: var(--sheet);
+  border: 0; border-radius: 0; cursor: pointer; text-decoration: none;
+  box-shadow: inset 0 0 0 2px var(--ink), 0 14px 24px -16px rgba(60, 40, 10, 0.55);
+  transition: transform 0.35s var(--ease-out), box-shadow 0.35s var(--ease-out);
+}
+.action span { text-decoration: underline 2.5px var(--red); text-underline-offset: 5px; }
+.action:hover { transform: translateY(-2px); box-shadow: inset 0 0 0 2px var(--ink), 0 20px 30px -18px rgba(60, 40, 10, 0.6); }
+.action:active { transform: translateY(0); }
+.action:disabled { cursor: progress; opacity: 0.6; transform: none; }
+
+.text-action {
+  font: inherit; font-weight: 600; color: var(--ink);
+  background: none; border: 0; padding: 0; cursor: pointer;
+  text-decoration: underline; text-decoration-color: var(--graphite);
+  text-underline-offset: 0.22em; text-decoration-thickness: 1.5px;
+}
+.text-action:hover { text-decoration-color: var(--red); }
+.text-action:disabled { cursor: progress; opacity: 0.6; }
+
+.message {
+  padding: 12px 14px;
+  border-left: 3px solid var(--ink);
+  background: #f7f5f1;
+  color: var(--ink);
+}
+.message strong { display: block; margin-bottom: 2px; }
+
+/* ---------- Library ---------- */
+.doc-table { width: 100%; border-collapse: collapse; }
+.doc-table th {
+  text-align: left; font-weight: 600; font-size: 0.82rem; color: var(--graphite);
+  padding: 0 12px 8px 0; border-bottom: 1px solid var(--rule);
+}
+.doc-table td { padding: 14px 12px 14px 0; border-bottom: 1px solid var(--rule); vertical-align: baseline; }
+.doc-table td:first-child { font-weight: 600; overflow-wrap: anywhere; }
+.doc-table .date { white-space: nowrap; color: var(--graphite); width: 1%; }
+
+.empty { display: grid; gap: 14px; justify-items: start; padding: 8px 0 4px; max-width: 40rem; }
+.empty h2 { font-weight: 700; font-size: 1.2rem; }
+.empty p { color: var(--graphite); }
+
+/* ---------- Narrow screens: rail becomes a top bar ---------- */
+@media (max-width: 860px) {
+  .frame { grid-template-columns: minmax(0, 1fr); }
+  .rail {
+    position: static; min-height: 0;
+    flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px 24px;
+    padding: 16px var(--gutter) 14px;
+    border-right: 0; border-bottom: 1px solid var(--manila-deep);
+  }
+  .rail-nav ul { display: flex; gap: 16px; }
+  .rail-nav a { margin-left: 0; padding: 6px 0; }
+  .rail-nav a[aria-current="page"] { box-shadow: inset 0 -3px 0 var(--ink); padding-left: 0; }
+  .account {
+    margin-top: 0; margin-left: auto;
+    padding-top: 0; border-top: 0;
+    display: flex; align-items: baseline; gap: 6px 16px; flex-wrap: wrap;
+  }
+  .account-who strong { display: inline; margin-right: 6px; }
+}
+
+@media (max-width: 640px) {
+  body { font-size: 1rem; }
+  .account { margin-left: 0; width: 100%; }
+  .form-actions { flex-direction: column; align-items: stretch; }
+  .action { justify-content: center; }
+  .text-action { align-self: center; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .action { transition: none; }
+  .action:hover { transform: none; }
+}
