@@ -1,0 +1,149 @@
+{
+  "title": "Choose the visual world for Redline",
+  "question": "One world for both surfaces: the landing page and the app shell behind sign-in. Keep the roll, take the pick, adopt a challenger, or re-roll.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "Duplicate Book",
+      "kicker": "THE ROLL",
+      "lineage": "Carbonless duplicate order and invoice books, the kind every trade counter and back office keeps",
+      "thesis": "Every flag is a carbon copy of the sentence it came from: the same words, pressed through.",
+      "palette": ["#F4DE52", "#F3A6BC", "#FFFFFF", "#26348B", "#D0202A", "#7E7A70"],
+      "materials": ["NCR carbonless sheets: white original, canary and pink copies", "carbon-blue typed ink", "perforated tear lines and numbering-machine serials"],
+      "viewport": "An open duplicate book fills the screen: the white contract sheet on top, its renewal sentence pressed through onto a canary copy below as Flag No. 0001 with the tier box ticked, and a tear-off slip at the foot holding the upload and paste control.",
+      "risk": "Tips into office-supply nostalgia if the copy colours go timid; carbon blue on pink needs checked contrast.",
+      "raised": [
+        {"from": "variable-font-specimen", "raise": "Hierarchy by scale contrast alone: the cited sentence sets large, labels small, no ornament."},
+        {"from": "brand-identity-canon-art-paul-magazine-program", "raise": "One spot ink: serial-number red is the only emphasis colour, kept for the top tier and the action."},
+        {"from": "signals-instruments-darkroom-safelight-bay", "raise": "Fixed stations in printed order, like the book's numbered boxes: original, copy, tier, counter-offer."},
+        {"from": "pop-culture-shelf-vertical-video-feed-surface", "raise": "An opened flag owns the whole sheet; the next flag waits one tear away."},
+        {"from": "metal-forging-patina-blacksmith-scale-shower", "raise": "Exposure is measured, never described: money, lock-in and notice in ruled boxes with tabular figures."},
+        {"from": "galaxies-nebulae-deep-time-accretion-disk-threshold", "raise": "Each notice deadline is drawn as a perforation on the term line: the point where the buyer can no longer act."}
+      ],
+      "wireframe": {"cols": 12, "rows": 10, "regions": [
+        {"label": "book header + serial", "x": 0, "y": 0, "w": 12, "h": 1},
+        {"label": "white original: contract sentence", "x": 0, "y": 1, "w": 7, "h": 4},
+        {"label": "canary copy: Flag No. 0001, tier box", "x": 2, "y": 4, "w": 10, "h": 3, "accent": true},
+        {"label": "pink copy: Negotiate before signing", "x": 7, "y": 1, "w": 5, "h": 3},
+        {"label": "tear-off slip: upload or paste", "x": 0, "y": 8, "w": 12, "h": 2, "accent": true}
+      ]}
+    },
+    {
+      "id": "model-pick",
+      "label": "Exit Ahead",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "Interstate guide and warning signs: green panels, distance legends, yellow diamonds",
+      "thesis": "Renewal and exit, signed like the road: every deadline a distance, every flag a sign you cannot miss.",
+      "palette": ["#00613A", "#FFFFFF", "#FFC72C", "#111111", "#B3121F"],
+      "materials": ["retroreflective sheeting on extruded aluminium panels", "highway-gothic style lettering", "gantry steel and lane lines"],
+      "viewport": "A green overhead gantry spans the top of the page with the sample contract's real terms as legends ('AUTO-RENEWAL 12 MONTHS', 'NOTICE 90 DAYS'); the contract sentence runs below like the road surface, and the action is the exit panel.",
+      "risk": "The most familiar card here: wayfinding is a well-used metaphor and the exit pun can tip into cute.",
+      "wireframe": {"cols": 12, "rows": 10, "regions": [
+        {"label": "gantry: flag legends", "x": 0, "y": 0, "w": 12, "h": 3, "accent": true},
+        {"label": "road: cited contract sentence", "x": 0, "y": 3, "w": 8, "h": 5},
+        {"label": "warning diamonds: Know before signing", "x": 8, "y": 3, "w": 4, "h": 5},
+        {"label": "exit panel: try it on a document", "x": 6, "y": 8, "w": 6, "h": 2, "accent": true}
+      ]}
+    },
+    {
+      "id": "challenger-variable-font-specimen",
+      "label": "Type Specimen",
+      "verdict": "declined",
+      "lineage": "interactive variable-font specimen sheets",
+      "thesis": "Drag an axis and the contract's sentences thicken by exposure.",
+      "palette": ["#FAFAF7", "#111111", "#E0301E"],
+      "materials": ["flat paper", "monospace readouts"],
+      "viewport": "One giant sentence with an exposure slider under it.",
+      "case": "Buyers do not know type specimens, and a slider over the document reads as a toy: loses audience and clarity.",
+      "risk": "Type-nerd world that hides the offer.",
+      "kept": "Hierarchy by scale contrast alone.",
+      "hero": "https://impeccable.style/worlds/cards/variable-font-specimen-hero.webp"
+    },
+    {
+      "id": "challenger-darkroom",
+      "label": "Darkroom Safelight",
+      "verdict": "declined",
+      "lineage": "photographic printing darkrooms",
+      "thesis": "Flags develop out of the contract like a print in the tray.",
+      "palette": ["#C8641E", "#1A1410", "#B9B4AC"],
+      "materials": ["amber safelight", "wet silver prints"],
+      "viewport": "A contract sheet emerging under amber light.",
+      "case": "Slow emergence works against a tool that has to feel checked and immediate; no buyer recognises the room.",
+      "risk": "Moody, dark and slow for a desk tool.",
+      "kept": "Fixed stations in order.",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-darkroom-safelight-bay-hero.webp"
+    },
+    {
+      "id": "challenger-art-paul",
+      "label": "Magazine Program",
+      "verdict": "declined",
+      "lineage": "mid-century magazine identity: serif grid, one spot colour per issue",
+      "thesis": "Each analysis printed as an issue, with the flag as the cover story.",
+      "palette": ["#FFFFFF", "#111111", "#E63B2E"],
+      "materials": ["coated stock", "commissioned illustration"],
+      "viewport": "A serif masthead over a two-column contract read.",
+      "case": "Editorial framing promises opinion, which Redline must never give; buyers do not identify with it.",
+      "risk": "Lands in the broadsheet-editorial rut.",
+      "kept": "One spot ink carries all emphasis.",
+      "hero": "https://impeccable.style/worlds/cards/brand-identity-canon-art-paul-magazine-program-hero.webp"
+    },
+    {
+      "id": "challenger-vertical-feed",
+      "label": "Vertical Feed",
+      "verdict": "declined",
+      "lineage": "full-screen vertical media feeds",
+      "thesis": "One flag per screen, snap to the next.",
+      "palette": ["#000000", "#FFFFFF", "#FE2C55"],
+      "materials": ["full-bleed media", "glyph rail"],
+      "viewport": "A single flag fills the viewport with actions on a right rail.",
+      "case": "Familiar to buyers, but it tears flags away from the document, the one thing trust depends on.",
+      "risk": "Entertainment grammar for a contract.",
+      "kept": "An opened flag owns the whole sheet.",
+      "hero": "https://impeccable.style/worlds/cards/pop-culture-shelf-vertical-video-feed-surface-hero.webp"
+    },
+    {
+      "id": "challenger-forge",
+      "label": "Forge Floor",
+      "verdict": "declined",
+      "lineage": "power-hammer forging",
+      "thesis": "Each clause struck and measured under the hammer.",
+      "palette": ["#16130F", "#E8641B", "#8A8F94"],
+      "materials": ["hot iron", "stencilled caps"],
+      "viewport": "A glowing bar with clause figures chalked beside it.",
+      "case": "Violence and heat misstate a calm reading tool; buyers do not see themselves at the anvil.",
+      "risk": "Drama where clarity is the product.",
+      "kept": "Measurements ruled in boxes with tabular figures.",
+      "hero": "https://impeccable.style/worlds/cards/metal-forging-patina-blacksmith-scale-shower-hero.webp"
+    },
+    {
+      "id": "challenger-accretion-disk",
+      "label": "Event Horizon",
+      "verdict": "declined",
+      "lineage": "black-hole accretion imagery",
+      "thesis": "The renewal date as an event horizon you cannot come back from.",
+      "palette": ["#000000", "#9CC3FF", "#E2A33A"],
+      "materials": ["void black", "photon-ring light"],
+      "viewport": "A ring of clauses orbiting a black centre.",
+      "case": "Spectacle with no tie to the buyer's world, and it hides the sentence: loses both axes.",
+      "risk": "Sci-fi costume on a contract tool.",
+      "kept": "Mark the point of no return.",
+      "hero": "https://impeccable.style/worlds/cards/galaxies-nebulae-deep-time-accretion-disk-threshold-hero.webp"
+    }
+  ],
+  "reroll": {"registers": ["safer", "bolder"]},
+  "canon": true,
+  "canonCard": {
+    "label": "The category standard",
+    "thesis": "Legal-tech SaaS, executed impeccably: white ground, slate type, one blue.",
+    "palette": ["#FFFFFF", "#0F172A", "#2563EB", "#F1F5F9"],
+    "materials": ["clean grid", "product screenshot in a browser frame"],
+    "viewport": "Headline and upload button on the left, a screenshot of the flag list on the right.",
+    "risk": "Indistinguishable from the tools Redline is meant to be more trustworthy than.",
+    "wireframe": {"cols": 12, "rows": 10, "regions": [
+      {"label": "nav", "x": 0, "y": 0, "w": 12, "h": 1},
+      {"label": "headline + CTA", "x": 0, "y": 2, "w": 5, "h": 5, "accent": true},
+      {"label": "product screenshot", "x": 6, "y": 2, "w": 6, "h": 6}
+    ]}
+  },
+  "steer": true
+}
