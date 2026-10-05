@@ -1,11 +1,20 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { AnalysedDocument, type AnalysisSource } from "@/app/(app)/documents/analysed-document";
-import { ANALYSIS_COPY, FAILURE_COPY, TIER_LABEL, clauseNumberAt } from "@/app/(app)/documents/analysis-copy";
+import {
+  ANALYSIS_COPY,
+  CLAUSE_LABEL,
+  CLEAN_COPY,
+  FAILURE_COPY,
+  OUTSIDE_COPY,
+  TIER_LABEL,
+  clauseNumberAt,
+} from "@/app/(app)/documents/analysis-copy";
 import { analyse } from "@/lib/engine/analyse";
 import type { Analysis } from "@/lib/engine/types";
 import { loadFixture } from "../fixtures/index";
 import { analysisPayload, clauseById, scriptedClient } from "../support/model-payloads";
+import { CLAUSE_TYPES } from "../fixtures/index";
 
 // What the buyer sees on the document view once an analysis exists: flags as
 // tabs grouped by tier in ranked order, each citation marked in place in the
@@ -29,8 +38,10 @@ function decode(html: string): string {
 const docTextOf = (html: string) => decode(html.match(/<div class="doc-text">([\s\S]*?)<\/div>/)![1]);
 const citesOf = (html: string) => [...html.matchAll(/<mark[^>]*class="cite[^"]*"[^>]*>([^<]*)<\/mark>/g)].map((m) => decode(m[1]));
 
-async function savedAnalysis(payload = analysisPayload(sidecar)): Promise<Analysis> {
-  return (await analyse({ text: contract, redLines: [], client: scriptedClient(payload) })).analysis;
+const { text: cleanText, sidecar: cleanSidecar } = loadFixture("clean-document");
+
+async function savedAnalysis(payload: unknown = analysisPayload(sidecar), text = contract): Promise<Analysis> {
+  return (await analyse({ text, redLines: [], client: scriptedClient(payload) })).analysis;
 }
 
 function render(source: AnalysisSource, modelConfigured = true, body = contract) {
@@ -46,20 +57,29 @@ function render(source: AnalysisSource, modelConfigured = true, body = contract)
   );
 }
 
+const panelOf = (html: string) => decode(html.match(/<section class="analysis"[\s\S]*?<\/section>\s*(?=<nav|<div class="doc-body)/)![0]);
+
+/** Claims that a clause type is not in the contract. A clean result says what Redline found, never these. */
+const ABSENCE_CLAIMS =
+  /there\s+(?:is|are)\s+(?:none|no)\b|there['’]s\s+no\b|does\s*n[o']t\s+(?:contain|have|include|exist)|doesn['’]t\s+(?:contain|have|include|exist)|contains\s+no\b|has\s+no\b|no\s+such\b|\b(?:absent|missing)\s+from\b|not\s+(?:present|in\s+the\s+contract)/i;
+
 const tabsOf = (html: string) =>
   [...html.matchAll(/<button[^>]*class="flag-tab flag-tab--(\w+)[^"]*"[^>]*>([\s\S]*?)<\/button>/g)].map((m) => ({
     colour: m[1],
     lines: [...m[2].matchAll(/<span[^>]*>([\s\S]*?)<\/span>/g)].map((l) => decode(l[1])),
   }));
 const groupsOf = (html: string) => [...html.matchAll(/<h3[^>]*class="flag-group-head"[^>]*>([^<]*)<\/h3>/g)].map((m) => decode(m[1]));
+const escapeHtml = (text: string) =>
+  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
 const commentOf = (html: string, sentence: string) => {
-  const flag = html.match(new RegExp(`<mark[^>]*data-flag="(f\\d+)"[^>]*>${sentence.slice(0, 30).replace(/[.*+?^${}()|[\]\\$]/g, "\\$&")}`))![1];
-  return decode(html.match(new RegExp(`<aside[^>]*data-flag="${flag}"[^>]*>([\\s\\S]*?)</aside>`))![1]);
+  const item = html.match(new RegExp(`<mark[^>]*data-items="([fn]\\d+)[^"]*"[^>]*>${escapeHtml(sentence.slice(0, 30)).replace(/[.*+?^${}()|[\]\\$]/g, "\\$&")}`))![1];
+  return decode(html.match(new RegExp(`<aside[^>]*data-item="${item}"[^>]*>([\\s\\S]*?)</aside>`))![1]);
 };
 
 describe("a saved document with an analysis", () => {
   it("shows every flag as a tab in its tier colour, grouped by tier in ranked order, and marks every citation in the unchanged text", async () => {
-    const analysis = await savedAnalysis();
+    // Flags only here; outside-terms notices have their own tests below.
+    const analysis = await savedAnalysis(analysisPayload(sidecar, { outsideTerms: [] }));
     const html = render({ kind: "saved", documentId: "d", latest: { analysis, ranAt: "2026-10-06T10:00:00Z" } });
 
     expect(docTextOf(html)).toBe(contract);
@@ -154,13 +174,16 @@ describe("a saved document with an analysis", () => {
     expect(ANALYSIS_COPY.vendorOnly).toMatch(/nobody has checked/);
   });
 
-  it("says plainly when no renewal or exit clause was found", async () => {
-    const analysis = await savedAnalysis({ clauses: [] });
-    const html = render({ kind: "saved", documentId: "d", latest: { analysis, ranAt: "2026-10-06T10:00:00Z" } });
-    expect(decode(html)).toContain(ANALYSIS_COPY.empty);
-    expect(ANALYSIS_COPY.empty).toMatch(/^We found no/);
+  it("shows the clean result, with every clause type as \"we found none\", when nothing was found", async () => {
+    const analysis = await savedAnalysis({ clauses: [], outside_terms: [] }, cleanText);
+    const html = render({ kind: "saved", documentId: "d", latest: { analysis, ranAt: "2026-10-06T10:00:00Z" } }, true, cleanText);
+    const panel = panelOf(html);
+    expect(panel).toContain("No renewal or exit terms to negotiate");
+    expect(checklistOf(html)).toEqual(CLAUSE_TYPES.map((t) => [CLAUSE_LABEL[t], "we found none"]));
     expect(citesOf(html)).toEqual([]);
     expect(html).not.toContain("flag-tab");
+    // No tab colour on a clean result.
+    expect(html.match(/<section class="clean-result"[\s\S]*?<\/section>/)![0]).not.toMatch(/swatch|flag-tab|tab-blue|tab-yellow/);
   });
 
   it("never shows a saved flag whose citation does not match the text at its offsets", async () => {
@@ -168,9 +191,98 @@ describe("a saved document with an analysis", () => {
     const tampered = structuredClone(analysis);
     tampered.flags[0].citation.start += 2;
     const html = render({ kind: "saved", documentId: "d", latest: { analysis: tampered, ranAt: "2026-10-06T10:00:00Z" } });
-    expect(citesOf(html)).toHaveLength(analysis.flags.length - 1);
+    expect(citesOf(html)).toHaveLength(analysis.flags.length - 1 + analysis.outsideTerms.length);
     expect(citesOf(html)).not.toContain(analysis.flags[0].citation.text);
     expect(docTextOf(html)).toBe(contract);
+  });
+});
+
+const checklistOf = (html: string) =>
+  [...html.matchAll(/<li><span class="checklist-type">([^<]*)<\/span><span class="checklist-status">([\s\S]*?)<\/span><\/li>/g)].map((m) => [
+    decode(m[1]),
+    decode(m[2]),
+  ]);
+
+describe("outside-terms notices on the document view", () => {
+  const outside = sidecar.outsideTerms[0];
+
+  it("shows a notice as a blue tab, underlines its sentence in place, and names the document to add next in its margin comment", async () => {
+    const html = render({ kind: "saved", documentId: "d", latest: { analysis: await savedAnalysis(), ranAt: "2026-10-06T10:00:00Z" } });
+    expect(citesOf(html)).toContain(outside.sentence);
+    const blue = tabsOf(html).filter((t) => t.colour === "outside");
+    expect(blue).toEqual([{ colour: "outside", lines: [OUTSIDE_COPY.label, outside.document, OUTSIDE_COPY.tabStatus] }]);
+    expect(groupsOf(html)).toEqual([TIER_LABEL.negotiate, TIER_LABEL.know, OUTSIDE_COPY.label]);
+
+    const comment = commentOf(html, outside.sentence);
+    expect(comment).toContain(OUTSIDE_COPY.comment);
+    expect(comment).toContain(`${OUTSIDE_COPY.uploadNext}${outside.document}`);
+    // A notice is not a flag: no tier, no exposure, no counter-offer.
+    expect(comment).not.toMatch(/Negotiate before signing|Know before signing|Money|Lock-in|Getting out|Counter-offer/);
+    expect(html).toMatch(/<aside[^>]*class="comment comment--outside/);
+  });
+
+  it("says the result isn't clean because outside terms weren't read, even with only Know before signing flags", async () => {
+    const payload = analysisPayload(sidecar, { omit: ["c1", "c2", "c3", "c4", "c5", "c6"] });
+    const html = render({ kind: "saved", documentId: "d", latest: { analysis: await savedAnalysis(payload), ranAt: "2026-10-06T10:00:00Z" } });
+    const panel = panelOf(html);
+    expect(panel).toContain(OUTSIDE_COPY.notClean(1));
+    expect(OUTSIDE_COPY.notClean(1)).toMatch(/Redline hasn’t read/);
+    expect(OUTSIDE_COPY.notClean(1)).toMatch(/isn’t a clean result/);
+    expect(panel).not.toContain(CLEAN_COPY.heading);
+    expect(html).not.toContain("clean-result");
+  });
+
+  it("shows only the notice when there are no flags at all", async () => {
+    const payload = analysisPayload(sidecar, { omit: sidecar.clauses.map((c) => c.id) });
+    const html = render({ kind: "saved", documentId: "d", latest: { analysis: await savedAnalysis(payload), ranAt: "2026-10-06T10:00:00Z" } });
+    expect(tabsOf(html).map((t) => t.colour)).toEqual(["outside"]);
+    expect(citesOf(html)).toEqual([outside.sentence]);
+    expect(panelOf(html)).toContain(OUTSIDE_COPY.notClean(1));
+    expect(panelOf(html)).not.toMatch(/\d+ flags?:|One flag:/);
+  });
+});
+
+describe("the clean result", () => {
+  const knowOnly = () =>
+    savedAnalysis(analysisPayload(sidecar, { omit: ["c1", "c2", "c3", "c4", "c5", "c6"], outsideTerms: [] }));
+
+  it("says there is nothing to negotiate in the PRD's words, and lists found types with a link to their sentence", async () => {
+    const html = render({ kind: "saved", documentId: "d", latest: { analysis: await knowOnly(), ranAt: "2026-10-06T10:00:00Z" } });
+    expect(CLEAN_COPY.heading).toBe("No renewal or exit terms to negotiate");
+    expect(CLEAN_COPY.none).toBe("we found none");
+    expect(CLEAN_COPY.found).toBe("found, low exposure");
+
+    const c7 = clauseById(sidecar, "c7");
+    const number = clauseNumberAt(contract, contract.indexOf(c7.sentence))!;
+    expect(checklistOf(html)).toEqual(
+      CLAUSE_TYPES.map((t) => [CLAUSE_LABEL[t], t === "auto_renewal" ? `found, low exposure${ANALYSIS_COPY.clause(number)}` : "we found none"]),
+    );
+    // The link goes to the underlined sentence.
+    const href = html.match(/<a class="checklist-cite" href="#([^"]+)"/)![1];
+    expect(html).toMatch(new RegExp(`<mark id="${href}"[^>]*>${c7.sentence.slice(0, 40).replace(/[.*+?^${}()|[\]\\$]/g, "\\$&")}`));
+    expect(panelOf(html)).not.toContain(ANALYSIS_COPY.found(0, 1));
+  });
+
+  it.each([
+    ["nothing found in the clean document", async () => ({ analysis: await savedAnalysis({ clauses: [], outside_terms: [] }, cleanText), body: cleanText })],
+    ["only Know before signing flags", async () => ({ analysis: await knowOnly(), body: contract })],
+  ])("never claims a clause type is absent from the contract (%s)", async (_label, make) => {
+    const { analysis, body } = await make();
+    const html = render({ kind: "saved", documentId: "d", latest: { analysis, ranAt: "2026-10-06T10:00:00Z" } }, true, body);
+    const page = decode(html).replace(body, "");
+    expect(page).toContain(CLEAN_COPY.heading);
+    expect(page).not.toMatch(ABSENCE_CLAIMS);
+    expect(page.toLowerCase()).not.toContain("there is none");
+    // And the copy itself, whatever is rendered.
+    for (const line of [...Object.values(CLEAN_COPY), OUTSIDE_COPY.notClean(1), OUTSIDE_COPY.notClean(2)]) {
+      expect(line).not.toMatch(ABSENCE_CLAIMS);
+    }
+  });
+
+  it("finds the absence claims it guards against", () => {
+    for (const claim of ["There is none.", "there is no auto-renewal", "The contract does not contain one", "It doesn't have a fee", "There are no rollovers", "does not exist"]) {
+      expect(claim).toMatch(ABSENCE_CLAIMS);
+    }
   });
 });
 

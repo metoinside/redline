@@ -64,6 +64,7 @@ describe("the renewal-and-exit family", () => {
   it("discards a clause type outside the family, and one written in the wrong case", async () => {
     const liabilityCap = sidecar.decoys[0].sentence;
     const { analysis, diagnostics } = await run({
+      outside_terms: [],
       clauses: [itemFor("liability_cap", liabilityCap), itemFor("AUTO_RENEWAL", clauseById(sidecar, "c2").sentence)],
     });
     expect(analysis.flags).toEqual([]);
@@ -74,6 +75,7 @@ describe("the renewal-and-exit family", () => {
     const c2 = clauseById(sidecar, "c2");
     const good = modelItem(c2);
     const { analysis, diagnostics } = await run({
+      outside_terms: [],
       clauses: [
         null,
         "auto_renewal",
@@ -111,6 +113,7 @@ describe("exposure shows only what the citation says", () => {
   it("drops an exposure fragment the model invented, and it does not lift the tier", async () => {
     const c7 = clauseById(sidecar, "c7");
     const { analysis, diagnostics } = await run({
+      outside_terms: [],
       clauses: [{ ...modelItem(c7), exposure: { money: "$5,000 per year", lock_in: "twelve (12) months", exit_difficulty: null } }],
     });
     const [flag] = analysis.flags;
@@ -127,6 +130,7 @@ describe("exposure shows only what the citation says", () => {
     const c7 = clauseById(sidecar, "c7");
     expect(contract).toContain("thirty-six (36) months");
     const { analysis } = await run({
+      outside_terms: [],
       clauses: [{ ...modelItem(c7), exposure: { money: null, lock_in: "thirty-six (36) months", exit_difficulty: null } }],
     });
     expect(analysis.flags[0].exposure).toEqual({});
@@ -136,6 +140,7 @@ describe("exposure shows only what the citation says", () => {
   it("drops a money or lock-in part with no figure in it", async () => {
     const c3 = clauseById(sidecar, "c3");
     const { analysis, diagnostics } = await run({
+      outside_terms: [],
       clauses: [{ ...modelItem(c3), exposure: { money: null, lock_in: "the Initial Subscription Term", exit_difficulty: null } }],
     });
     expect(analysis.flags[0].exposure).toEqual({});
@@ -146,6 +151,7 @@ describe("exposure shows only what the citation says", () => {
   it("keeps a fragment whose quote marks or spacing differ only in ways the normalisation removes", async () => {
     const c2 = clauseById(sidecar, "c2");
     const { analysis } = await run({
+      outside_terms: [],
       clauses: [{ ...modelItem(c2), exposure: { money: " $48,000  per year ", lock_in: null, exit_difficulty: null } }],
     });
     expect(analysis.flags[0].exposure).toEqual({ money: "$48,000 per year" });
@@ -164,6 +170,7 @@ describe("tiers are set in code from the cited exposure and the readings", () =>
   it("never puts a clause with no cited sum, period or fee and one reading in Negotiate before signing", async () => {
     // Every family sentence in the contract, reported with no exposure and one reading.
     const { analysis } = await run({
+      outside_terms: [],
       clauses: sidecar.clauses.map((c) => ({
         ...modelItem(c),
         exposure: { money: null, lock_in: null, exit_difficulty: null },
@@ -192,7 +199,7 @@ describe("tiers are set in code from the cited exposure and the readings", () =>
 
   it("counts two readings that say the same thing as one", async () => {
     const c7 = clauseById(sidecar, "c7");
-    const { analysis } = await run({ clauses: [{ ...modelItem(c7), readings: [c7.statement, ` ${c7.statement} `] }] });
+    const { analysis } = await run({ outside_terms: [], clauses: [{ ...modelItem(c7), readings: [c7.statement, ` ${c7.statement} `] }] });
     expect(analysis.flags[0].readings).toEqual([c7.statement]);
     expect(analysis.flags[0].tier).toBe("know");
   });
@@ -229,6 +236,7 @@ describe("flags are grouped by tier and ordered by money", () => {
     const s = (n: number) => text.split("\n\n")[n - 1].replace(/^\d\. /, "").trim();
     const { analysis } = await run(
       {
+        outside_terms: [],
         clauses: [
           itemFor("auto_renewal", s(1), { exposure: { money: "$12,000 per year", lock_in: null, exit_difficulty: null } }),
           itemFor("multi_year_term", s(3), { exposure: { money: null, lock_in: "twenty-four (24) months", exit_difficulty: null } }),
@@ -351,7 +359,7 @@ describe("citations that fail the verbatim check are dropped", () => {
 
   it("drops a quote too short to show the buyer anything, even when it is in the document", async () => {
     expect(contract).toContain("automatically renew");
-    const { analysis, diagnostics } = await run({ clauses: [itemFor("auto_renewal", "automatically renew")] });
+    const { analysis, diagnostics } = await run({ outside_terms: [], clauses: [itemFor("auto_renewal", "automatically renew")] });
     expect(analysis.flags).toEqual([]);
     expect(diagnostics.dropped).toEqual([expect.objectContaining({ reason: "quote_too_short" })]);
   });
@@ -363,7 +371,7 @@ describe("citations that fail the verbatim check are dropped", () => {
 
   it("keeps a quote with curly quotes, extra spaces and no-break spaces, at the stored text's offsets", async () => {
     const c4 = clauseById(sidecar, "c4");
-    const { analysis } = await run({ clauses: [{ ...modelItem(c4), sentence: messySpacing(curlyQuotes(c4.sentence)) }] });
+    const { analysis } = await run({ outside_terms: [], clauses: [{ ...modelItem(c4), sentence: messySpacing(curlyQuotes(c4.sentence)) }] });
     const start = contract.indexOf(c4.sentence);
     expect(analysis.flags[0].citation).toEqual({ text: c4.sentence, start, end: start + c4.sentence.length });
     expect(analysis.flags[0].tier).toBe("negotiate");
@@ -372,6 +380,7 @@ describe("citations that fail the verbatim check are dropped", () => {
   it("shows one flag when the model returns the same clause twice, and two when it gives the sentence two types", async () => {
     const c2 = clauseById(sidecar, "c2");
     const { analysis, diagnostics } = await run({
+      outside_terms: [],
       clauses: [modelItem(c2), { ...modelItem(c2), sentence: curlyQuotes(c2.sentence) }, { ...modelItem(c2), clause_type: "rollover" }],
     });
     expect(analysis.flags.map((f) => f.clauseType)).toEqual(["auto_renewal", "rollover"]);

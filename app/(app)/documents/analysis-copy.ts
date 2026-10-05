@@ -4,8 +4,12 @@ import type { RunAnalysisFailure } from "./actions";
 // What the buyer reads in the analysis view. Every line here went through the
 // humanizer skill. Nothing in it says more than the flag does: its clause type,
 // its tier, the exposure its sentence cites, and the sentence itself. The
-// statement and readings on each flag come from the engine, which has already
-// run them through the wording check.
+// statement and readings on each flag, and the document named on each
+// outside-terms notice, come from the engine, which has already run them
+// through the wording check.
+//
+// The clean result says what Redline found, never that the contract lacks a
+// clause type: "we found none", never "there is none" (ADR 0006).
 
 export const CLAUSE_LABEL: Record<ClauseType, string> = {
   auto_renewal: "Auto-renewal",
@@ -48,7 +52,6 @@ export const ANALYSIS_COPY = {
   running: "Analysing the contract. This can take a minute.",
   ranOn: "Analysed",
   notSaved: "This analysis isn’t saved. It’s gone when you leave this page.",
-  empty: "We found no renewal or exit clauses in this document.",
   found: (negotiate: number, know: number) =>
     `${countOf(negotiate + know, "flag")}: ${negotiate} to negotiate before signing and ${know} to know before signing. Select a flag to go to its sentence.`,
   noExposure: "This sentence states no sum, lock-in period or fee.",
@@ -57,18 +60,46 @@ export const ANALYSIS_COPY = {
   noExposureShort: "No sum, period or fee",
   outdated: {
     title: "This analysis came from an earlier version of Redline.",
-    body: "It has no tiers or exposure, so it isn’t shown. Analyse the contract again to see them.",
+    body: "It’s missing checks Redline runs now, so it isn’t shown. Analyse the contract again.",
   },
   rejected: {
     title: "The saved analysis didn’t pass Redline’s checks, so it isn’t shown.",
     body: "Analyse the contract again to get a new one.",
   },
-  flagsLabel: "Flags",
+  flagsLabel: "Flags and outside terms",
   clause: (number: string) => `Clause ${number}`,
   modelOff: {
     title: "Analysis isn’t set up on this server.",
     body: "This copy of Redline has no model connected, so it can’t analyse documents.",
   },
+} as const;
+
+/** What the buyer reads about an outside-terms notice. A notice is not a flag: no tier, no counter-offer. */
+export const OUTSIDE_COPY = {
+  label: "Outside terms",
+  note: "These sentences bring in terms from other documents, which Redline hasn’t read.",
+  tabStatus: "Not read",
+  comment: "This sentence brings in terms from another document. Redline hasn’t read it, so none of those terms have been checked.",
+  uploadNext: "Add this next",
+  /** Why a result with notices is not clean. */
+  notClean: (n: number) =>
+    n === 1
+      ? "This contract brings in terms from another document that Redline hasn’t read, so this isn’t a clean result. Any renewal or exit terms in that document are unchecked. To check them, add it as its own document."
+      : `This contract brings in terms from ${n} other documents that Redline hasn’t read, so this isn’t a clean result. Any renewal or exit terms in them are unchecked. To check them, add each one as its own document.`,
+} as const;
+
+/**
+ * The clean result (ADR 0006). The heading and the two status phrases are
+ * the PRD's own words and stay exactly as they are.
+ */
+export const CLEAN_COPY = {
+  heading: "No renewal or exit terms to negotiate",
+  body: "We found nothing to negotiate before signing, and no sentence that brings in terms from another document.",
+  listLabel: "The five clause types we look for",
+  found: "found, low exposure",
+  none: "we found none",
+  miss: "Redline can miss a clause, so “we found none” means only that we didn’t find one.",
+  goTo: "Go to the sentence",
 } as const;
 
 export const FAILURE_COPY: Record<RunAnalysisFailure | "unreachable", { title: string; body: string }> = {

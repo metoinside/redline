@@ -14,14 +14,24 @@ import {
   type RefObject,
 } from "react";
 import { checkStoredAnalysis } from "@/lib/engine/stored";
-import { EXPOSURE_PARTS, TIERS, type Analysis, type Flag, type Tier } from "@/lib/engine/types";
+import {
+  EXPOSURE_PARTS,
+  TIERS,
+  type Analysis,
+  type Citation,
+  type Flag,
+  type OutsideTermsNotice,
+  type Tier,
+} from "@/lib/engine/types";
 import type { SourceKind } from "@/lib/extraction/limits";
 import { analyseBrowserDocument, analyseSavedDocument, type AnalysisRun, type RunAnalysisResult } from "./actions";
 import {
   ANALYSIS_COPY,
   CLAUSE_LABEL,
+  CLEAN_COPY,
   EXPOSURE_LABEL,
   FAILURE_COPY,
+  OUTSIDE_COPY,
   TIER_LABEL,
   TIER_NOTE,
   clauseNumberAt,
@@ -36,6 +46,14 @@ import { DocumentView } from "./document-view";
 // which carries the red pen underline in place, and its margin comment sits
 // beside the sentence with the plain statement, the cited exposure and, for a
 // clause that reads two ways, both readings.
+//
+// Each outside-terms notice is a blue tab after the flags. Its sentence is
+// underlined in place the same way, and its margin comment names the document
+// to add next. A notice has no tier and no counter-offer. When the engine's
+// clean-result rule says the result is clean, the panel says "No renewal or
+// exit terms to negotiate" in plain words, with no tab colour, and lists the
+// five clause types. When notices are what stops it being clean, the panel
+// says so, so the buyer never takes unread terms as checked.
 //
 // Every analysis shown here is read through checkStoredAnalysis against this
 // document's own text first, so a citation that doesn't match the text at its
@@ -61,7 +79,11 @@ const ranFormat = new Intl.DateTimeFormat("en-GB", {
   minute: "2-digit",
 });
 
-const citeId = (flag: Flag) => `cite-${flag.id}`;
+/** Anything with a citation marked in the text: a flag ("f1") or an outside-terms notice ("n1"). */
+type Marked = { id: string; citation: Citation };
+
+const rangeKey = (c: Citation) => `${c.start}:${c.end}`;
+const byPosition = (a: Marked, b: Marked) => a.citation.start - b.citation.start || a.citation.end - b.citation.end;
 
 export function AnalysedDocument({
   title,
@@ -85,12 +107,28 @@ export function AnalysedDocument({
   const [run, setRun] = useState<{ analysis: Analysis; ranAt: string } | null>(initial.run);
   const [storedNotice, setStoredNotice] = useState<StoredNotice | null>(initial.notice);
   const [failure, setFailure] = useState<Failure | null>(null);
-  const [selected, setSelected] = useState<string | null>(initial.run?.analysis.flags[0]?.id ?? null);
+  const [selected, setSelected] = useState<string | null>(firstItemId(initial.run?.analysis ?? null));
   const [running, startRunning] = useTransition();
   const bodyRef = useRef<HTMLDivElement>(null);
   const marginRef = useRef<HTMLDivElement>(null);
 
   const flags = run?.analysis.flags ?? [];
+  const notices = run?.analysis.outsideTerms ?? [];
+  const outcome = run?.analysis.outcome ?? null;
+  const items: (Flag | OutsideTermsNotice)[] = useMemo(() => [...flags, ...notices], [flags, notices]);
+
+  // One mark per cited range. Two items citing the same sentence (a sentence
+  // flagged as two clause types, or a flag on an outside-terms sentence) share it.
+  const markIds = useMemo(() => {
+    const ids = new Map<string, string>();
+    const byRange = new Map<string, string>();
+    for (const item of items) {
+      const key = rangeKey(item.citation);
+      if (!byRange.has(key)) byRange.set(key, `cite-${item.id}`);
+      ids.set(item.id, byRange.get(key)!);
+    }
+    return ids;
+  }, [items]);
 
   function start() {
     setFailure(null);
@@ -113,40 +151,50 @@ export function AnalysedDocument({
       }
       setStoredNotice(null);
       setRun(next);
-      setSelected(next.analysis.flags[0]?.id ?? null);
+      setSelected(firstItemId(next.analysis));
     });
   }
 
-  const select = useCallback((flag: Flag, { scroll }: { scroll: boolean }) => {
-    setSelected(flag.id);
-    if (!scroll) return;
-    const mark = document.getElementById(citeId(flag));
-    if (!mark) return;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    mark.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
-    mark.focus({ preventScroll: true });
-  }, []);
-
-  function onBodyClick(event: MouseEvent<HTMLDivElement>) {
-    const mark = (event.target as HTMLElement).closest("mark[data-flag]");
-    const flag = flags.find((f) => f.id === mark?.getAttribute("data-flag"));
-    if (flag) select(flag, { scroll: false });
-  }
-
-  const marks: TextMark[] = useMemo(
-    () =>
-      flags.map((flag) => ({
-        start: flag.citation.start,
-        end: flag.citation.end,
-        id: citeId(flag),
-        className: `cite${flag.id === selected ? " is-selected" : ""}`,
-        tabIndex: -1,
-        data: { flag: flag.id },
-      })),
-    [flags, selected],
+  const select = useCallback(
+    (id: string, { scroll }: { scroll: boolean }) => {
+      setSelected(id);
+      if (!scroll) return;
+      const markId = markIds.get(id);
+      const mark = markId ? document.getElementById(markId) : null;
+      if (!mark) return;
+      const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      mark.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+      mark.focus({ preventScroll: true });
+    },
+    [markIds],
   );
 
-  useMarginLayout(bodyRef, marginRef, flags);
+  function onBodyClick(event: MouseEvent<HTMLDivElement>) {
+    const mark = (event.target as HTMLElement).closest("mark[data-items]");
+    const ids = mark?.getAttribute("data-items")?.split(" ") ?? [];
+    if (ids.length === 0) return;
+    // Clicking a shared sentence again moves to the next item on it.
+    const at = selected ? ids.indexOf(selected) : -1;
+    select(ids[(at + 1) % ids.length], { scroll: false });
+  }
+
+  const marks: TextMark[] = useMemo(() => {
+    const byRange = new Map<string, Marked[]>();
+    for (const item of [...items].sort(byPosition)) {
+      const key = rangeKey(item.citation);
+      byRange.set(key, [...(byRange.get(key) ?? []), item]);
+    }
+    return [...byRange.values()].map((group) => ({
+      start: group[0].citation.start,
+      end: group[0].citation.end,
+      id: markIds.get(group[0].id),
+      className: `cite${group.some((i) => i.id === selected) ? " is-selected" : ""}`,
+      tabIndex: -1,
+      data: { items: group.map((i) => i.id).join(" ") },
+    }));
+  }, [items, markIds, selected]);
+
+  useMarginLayout(bodyRef, marginRef, items);
 
   const ranOn = run ? (
     <p className="analysis-ran">
@@ -200,10 +248,53 @@ export function AnalysedDocument({
         </p>
       )}
 
-      {run && !running && (
-        <p className="analysis-result">
-          {flags.length === 0 ? ANALYSIS_COPY.empty : ANALYSIS_COPY.found(count("negotiate"), count("know"))}
+      {run && !running && outcome && !outcome.clean && flags.length > 0 && (
+        <p className="analysis-result">{ANALYSIS_COPY.found(count("negotiate"), count("know"))}</p>
+      )}
+
+      {run && !running && outcome && !outcome.clean && outcome.outsideTermsNotices > 0 && (
+        <p className="analysis-outside">
+          <span className="comment-swatch comment-swatch--outside" aria-hidden="true" />
+          {OUTSIDE_COPY.notClean(outcome.outsideTermsNotices)}
         </p>
+      )}
+
+      {run && !running && outcome?.clean && (
+        <section className="clean-result" aria-labelledby={`${ids}-clean`}>
+          <h3 id={`${ids}-clean`}>{CLEAN_COPY.heading}</h3>
+          <p>{CLEAN_COPY.body}</p>
+          <ul className="checklist" aria-label={CLEAN_COPY.listLabel}>
+            {outcome.checklist.map((entry) => (
+              <li key={entry.clauseType}>
+                <span className="checklist-type">{CLAUSE_LABEL[entry.clauseType]}</span>
+                {entry.status === "found_low_exposure" ? (
+                  <span className="checklist-status">
+                    {CLEAN_COPY.found}
+                    {entry.found.map(({ flagId, citation }) => {
+                      const number = clauseNumberAt(body, citation.start);
+                      return (
+                        <a
+                          key={flagId}
+                          className="checklist-cite"
+                          href={`#${markIds.get(flagId) ?? ""}`}
+                          onClick={(event) => {
+                            event.preventDefault();
+                            select(flagId, { scroll: true });
+                          }}
+                        >
+                          {number ? ANALYSIS_COPY.clause(number) : CLEAN_COPY.goTo}
+                        </a>
+                      );
+                    })}
+                  </span>
+                ) : (
+                  <span className="checklist-status">{CLEAN_COPY.none}</span>
+                )}
+              </li>
+            ))}
+          </ul>
+          <p className="clean-miss">{CLEAN_COPY.miss}</p>
+        </section>
       )}
 
       <p className="analysis-scope">{ANALYSIS_COPY.scope}</p>
@@ -213,7 +304,7 @@ export function AnalysedDocument({
 
   let tabIndex = 0;
   const tabs =
-    flags.length > 0 ? (
+    items.length > 0 ? (
       <nav className="flag-tabs" aria-label={ANALYSIS_COPY.flagsLabel}>
         <div className="flag-groups">
           {byTier
@@ -231,8 +322,8 @@ export function AnalysedDocument({
                         type="button"
                         className={`flag-tab flag-tab--${flag.tier}${flag.id === selected ? " is-selected" : ""}`}
                         aria-pressed={flag.id === selected}
-                        aria-controls={citeId(flag)}
-                        onClick={() => select(flag, { scroll: true })}
+                        aria-controls={markIds.get(flag.id)}
+                        onClick={() => select(flag.id, { scroll: true })}
                       >
                         <span className="flag-tab-type">{CLAUSE_LABEL[flag.clauseType]}</span>
                         <span className="flag-tab-line">{tabExposure(flag)}</span>
@@ -243,24 +334,51 @@ export function AnalysedDocument({
                 </ul>
               </section>
             ))}
+          {notices.length > 0 && (
+            <section className="flag-group flag-group--outside" aria-labelledby={`${ids}-outside`}>
+              <h3 id={`${ids}-outside`} className="flag-group-head">
+                {OUTSIDE_COPY.label}
+              </h3>
+              <p className="flag-group-note">{OUTSIDE_COPY.note}</p>
+              <ul>
+                {notices.map((notice) => (
+                  <li key={notice.id} style={{ ["--i" as string]: tabIndex++ }}>
+                    <button
+                      type="button"
+                      className={`flag-tab flag-tab--outside${notice.id === selected ? " is-selected" : ""}`}
+                      aria-pressed={notice.id === selected}
+                      aria-controls={markIds.get(notice.id)}
+                      onClick={() => select(notice.id, { scroll: true })}
+                    >
+                      <span className="flag-tab-type">{OUTSIDE_COPY.label}</span>
+                      <span className="flag-tab-line">{notice.document}</span>
+                      <span className="flag-tab-tier">{OUTSIDE_COPY.tabStatus}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
         </div>
       </nav>
     ) : null;
 
   // In document order, so each comment can sit level with its sentence.
-  const inDocumentOrder = [...flags].sort((a, b) => a.citation.start - b.citation.start || a.citation.end - b.citation.end);
+  const inDocumentOrder = [...items].sort(byPosition);
 
   const margin =
-    flags.length > 0 ? (
+    items.length > 0 ? (
       <div className="margin" ref={marginRef}>
-        {inDocumentOrder.map((flag) => {
+        {inDocumentOrder.map((item) => {
+          if (isNotice(item)) return <NoticeComment key={item.id} notice={item} body={body} selected={item.id === selected} />;
+          const flag = item;
           const number = clauseNumberAt(body, flag.citation.start);
           const parts = EXPOSURE_PARTS.filter((part) => flag.exposure[part] !== undefined);
           return (
             <aside
               key={flag.id}
               className={`comment comment--${flag.tier}${flag.id === selected ? " is-selected" : ""}`}
-              data-flag={flag.id}
+              data-item={flag.id}
               aria-label={`${CLAUSE_LABEL[flag.clauseType]}${number ? `, ${ANALYSIS_COPY.clause(number).toLowerCase()}` : ""}`}
             >
               <h3>
@@ -317,6 +435,40 @@ export function AnalysedDocument({
   );
 }
 
+function isNotice(item: Flag | OutsideTermsNotice): item is OutsideTermsNotice {
+  return "document" in item;
+}
+
+/** The first item to select: the top-ranked flag, or the first notice when there are no flags. */
+function firstItemId(analysis: Analysis | null): string | null {
+  return analysis?.flags[0]?.id ?? analysis?.outsideTerms[0]?.id ?? null;
+}
+
+/** An outside-terms notice in the margin: what the sentence does and the document to add next. No tier, no counter-offer. */
+function NoticeComment({ notice, body, selected }: { notice: OutsideTermsNotice; body: string; selected: boolean }) {
+  const number = clauseNumberAt(body, notice.citation.start);
+  return (
+    <aside
+      className={`comment comment--outside${selected ? " is-selected" : ""}`}
+      data-item={notice.id}
+      aria-label={`${OUTSIDE_COPY.label}${number ? `, ${ANALYSIS_COPY.clause(number).toLowerCase()}` : ""}`}
+    >
+      <h3>
+        <span className="comment-swatch" aria-hidden="true" />
+        {OUTSIDE_COPY.label}
+        {number && <span className="comment-clause">{ANALYSIS_COPY.clause(number)}</span>}
+      </h3>
+      <p>{OUTSIDE_COPY.comment}</p>
+      <dl className="comment-exposure">
+        <div>
+          <dt>{OUTSIDE_COPY.uploadNext}</dt>
+          <dd className="comment-document">{notice.document}</dd>
+        </div>
+      </dl>
+    </aside>
+  );
+}
+
 /** The exposure line on a flag's tab: the first part its sentence cites, in the document's words. */
 function tabExposure(flag: Flag): string {
   const part = EXPOSURE_PARTS.find((p) => flag.exposure[p] !== undefined);
@@ -349,7 +501,7 @@ const useIsoLayoutEffect = typeof window === "undefined" ? useEffect : useLayout
 function useMarginLayout(
   bodyRef: RefObject<HTMLDivElement | null>,
   marginRef: RefObject<HTMLDivElement | null>,
-  flags: Flag[],
+  items: Marked[],
 ) {
   useIsoLayoutEffect(() => {
     const bodyEl = bodyRef.current;
@@ -365,7 +517,7 @@ function useMarginLayout(
           comment.style.top = "";
           continue;
         }
-        const mark = bodyEl.querySelector<HTMLElement>(`mark[data-flag="${comment.dataset.flag}"]`);
+        const mark = bodyEl.querySelector<HTMLElement>(`mark[data-items~="${comment.dataset.item}"]`);
         const want = mark ? mark.getBoundingClientRect().top - marginEl.getBoundingClientRect().top : floor;
         const top = Math.max(want, floor);
         comment.style.top = `${top}px`;
@@ -378,5 +530,5 @@ function useMarginLayout(
     const observer = new ResizeObserver(place);
     observer.observe(bodyEl);
     return () => observer.disconnect();
-  }, [bodyRef, marginRef, flags]);
+  }, [bodyRef, marginRef, items]);
 }

@@ -4,9 +4,10 @@
 // An Analysis is stored as JSON (analyses.result) and read back by later
 // versions of the app, so every field a later ticket adds is optional on the
 // stored shape or comes with a new schemaVersion. #5 added tier, statement,
-// exposure, moneyAmount and readings to Flag (schema version 2). Tickets
-// #6-#10 add to Flag: redLineBreached, counterOffer; and to Analysis: summary,
-// noticeObligations, outsideTerms, clean.
+// exposure, moneyAmount and readings to Flag (schema version 2). #7 added
+// outsideTerms and outcome to Analysis (schema version 3). Tickets #6, #8-#10
+// add to Flag: redLineBreached, counterOffer; and to Analysis: summary,
+// noticeObligations.
 
 /** The renewal-and-exit family (ADR 0004): the only clause types that can become flags. */
 export type ClauseType = "auto_renewal" | "notice_window" | "early_termination_fee" | "rollover" | "multi_year_term";
@@ -96,7 +97,39 @@ export interface RedLine {
   limit: string;
 }
 
-export const ANALYSIS_SCHEMA_VERSION = 2;
+/**
+ * A cited sentence showing that the document brings in terms from another
+ * document Redline has not read (ADR 0006). It is not a flag: it has no tier
+ * and no counter-offer, and it is not limited to the renewal-and-exit family.
+ */
+export interface OutsideTermsNotice {
+  /** Unique within its analysis ("n1", "n2", ...), numbered in document order. */
+  id: string;
+  citation: Citation;
+  /** The document the buyer should upload next, as the model describes it. Passed the wording check. */
+  document: string;
+}
+
+/**
+ * One line of a clean result's checklist: a clause type, and either the
+ * Know before signing flags found for it, or "we found none". Worked out in
+ * code from the verified flags, never from model text.
+ */
+export type ChecklistEntry =
+  | { clauseType: ClauseType; status: "found_low_exposure"; found: { flagId: string; citation: Citation }[] }
+  | { clauseType: ClauseType; status: "none_found" };
+
+/**
+ * The clean-result rule (ADR 0006), worked out in code: clean only when there
+ * is no Negotiate before signing flag and no outside-terms notice. A clean
+ * result carries the five-type checklist; a result that is not clean says
+ * what stopped it.
+ */
+export type AnalysisOutcome =
+  | { clean: true; checklist: ChecklistEntry[] }
+  | { clean: false; negotiateFlags: number; outsideTermsNotices: number };
+
+export const ANALYSIS_SCHEMA_VERSION = 3;
 
 /** What the buyer sees for one analysis run. */
 export interface Analysis {
@@ -107,6 +140,10 @@ export interface Analysis {
    * highest first, then flags with no sum in document order.
    */
   flags: Flag[];
+  /** Every outside-terms notice whose citation passed the check, in document order. */
+  outsideTerms: OutsideTermsNotice[];
+  /** Whether the result is clean, from the flags and notices above. Worked out again on every read. */
+  outcome: AnalysisOutcome;
 }
 
 /** Why the engine left out an item the model returned. */
@@ -165,6 +202,17 @@ export interface WordingAttempt {
 }
 
 /** How an analysis run went. Printed by the smoke script; never shown to the buyer. */
+/** Why the engine left out an outside-terms sentence the model returned. */
+export type NoticeDropReason = "malformed" | "quote_too_short" | "citation_not_found" | "duplicate";
+
+export interface DroppedNotice {
+  /** Position in the model's outside-terms list, from 0. */
+  index: number;
+  reason: NoticeDropReason;
+  /** The quote as the model wrote it, when it wrote a string. */
+  quote: string | null;
+}
+
 export interface AnalysisDiagnostics {
   /** Items the model returned (in the answer that was used). */
   returned: number;
@@ -174,6 +222,10 @@ export interface AnalysisDiagnostics {
   droppedByReason: Partial<Record<DropReason, number>>;
   /** Exposure parts removed from kept flags. */
   exposureDropped: DroppedExposure[];
+  /** Outside-terms sentences the model returned (in the answer that was used). */
+  outsideTermsReturned: number;
+  /** Outside-terms sentences left out, and why. Only verified notices reach the analysis. */
+  outsideTermsDropped: DroppedNotice[];
   /** The wording check on each answer the model gave. */
   wording: WordingAttempt[];
 }

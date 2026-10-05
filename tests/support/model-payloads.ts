@@ -1,15 +1,17 @@
-import type { ModelAnalysisItem, ModelAnalysisPayload } from "@/lib/engine/analyse";
+import type { ModelAnalysisItem, ModelAnalysisPayload, ModelOutsideTermsItem } from "@/lib/engine/analyse";
 import { ScriptedModelClient, type ScriptStep } from "@/lib/engine/scripted";
 import type { ClauseType } from "@/lib/engine/types";
-import type { FixtureClause, FixtureSidecar } from "../fixtures/index";
+import type { FixtureClause, FixtureOutsideTerms, FixtureSidecar } from "../fixtures/index";
 
 // Builds what the model would return for a fixture, from its sidecar labels,
 // so the scripted client can stand in for the model. A test starts from the
 // sidecar's "right answer" and bends it: drop a clause, retype one, alter a
 // quote, add one the document doesn't contain. Each clause carries the
 // sidecar's statement, exposure fragments and readings (one, or the two the
-// sidecar lists for a clause that reads two ways). Later tickets add the parts
-// of the payload they introduce (summary, notice obligations, outside terms) here.
+// sidecar lists for a clause that reads two ways). The outside-terms list
+// carries each sidecar outside-terms sentence with the document it names.
+// Later tickets add the parts of the payload they introduce (summary, notice
+// obligations) here.
 
 export type PayloadOptions = {
   /** Keep only clauses of these types. Default: every clause in the sidecar. */
@@ -20,6 +22,11 @@ export type PayloadOptions = {
   map?: (item: ModelAnalysisItem, clause: FixtureClause) => ModelAnalysisItem | null;
   /** Items added after the sidecar's own, in this order. Anything goes, malformed items included. */
   extra?: readonly unknown[];
+  /**
+   * The outside-terms list, in place of the sidecar's. Default: every
+   * outside-terms sentence in the sidecar. Anything goes, malformed items included.
+   */
+  outsideTerms?: readonly unknown[];
 };
 
 /** The model's answer for a fixture, built from its labels. */
@@ -33,7 +40,18 @@ export function analysisPayload(sidecar: FixtureSidecar, options: PayloadOptions
     if (mapped) items.push(mapped);
   }
   items.push(...(options.extra ?? []));
-  return { clauses: items as ModelAnalysisItem[] };
+  const outside = options.outsideTerms ?? sidecar.outsideTerms.map(outsideTermsItem);
+  return { clauses: items as ModelAnalysisItem[], outside_terms: [...outside] as ModelOutsideTermsItem[] };
+}
+
+/** One outside-terms sentence as the model would report it, from its sidecar labels. */
+export function outsideTermsItem(entry: FixtureOutsideTerms): ModelOutsideTermsItem {
+  return { sentence: entry.sentence, document: entry.document };
+}
+
+/** A whole model answer from a list of clause items, with no outside terms unless given. */
+export function answerOf(clauses: readonly unknown[], outsideTerms: readonly unknown[] = []): ModelAnalysisPayload {
+  return { clauses: [...clauses] as ModelAnalysisItem[], outside_terms: [...outsideTerms] as ModelOutsideTermsItem[] };
 }
 
 /** One clause as the model would report it, from its sidecar labels. */

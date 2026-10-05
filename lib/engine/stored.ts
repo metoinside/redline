@@ -7,21 +7,36 @@
 //  - every exposure fragment is checked again against its citation, the money
 //    amount is read again from the fragment, and the tier and order are worked
 //    out again from what survived (ADR 0003, 0005);
-//  - the wording check runs again over every statement and reading. If any
-//    defect is found, nothing from the analysis is shown: a confident, checked
-//    result or none.
+//  - every outside-terms notice's citation is checked again the same way, and
+//    a notice that fails is left out;
+//  - the wording check runs again over every statement, reading and notice
+//    description. If any defect is found, nothing from the analysis is shown:
+//    a confident, checked result or none;
+//  - whether the result is clean, and its checklist, are worked out again from
+//    the flags and notices that survived (lib/engine/clean.ts). A stored
+//    "clean" is never read.
 //
-// An analysis saved before schema version 2 (#4: auto-renewal only, with no
-// tier, exposure or readings) is not shown. It is reported as outdated so the
-// buyer can run it again: showing its flags without tiers would rank a
-// $48,000 renewal no higher than a benign one.
+// An analysis saved before schema version 3 is not shown. It is reported as
+// outdated so the buyer can run it again. Version 1 (#4) has no tiers, so its
+// $48,000 renewal would rank no higher than a benign one. Version 2 (#5) was
+// never asked about outside terms, so a clean result worked out from it could
+// be a false all-clear.
 //
 // Safe to import in the browser.
 
 import { citationMatches } from "./citations";
+import { decideOutcome } from "./clean";
 import { checkExposure, parseMoneyAmount } from "./exposure";
 import { assignTier, rankFlags } from "./tiers";
-import { ANALYSIS_SCHEMA_VERSION, isClauseType, type Analysis, type Citation, type Flag, type Readings } from "./types";
+import {
+  ANALYSIS_SCHEMA_VERSION,
+  isClauseType,
+  type Analysis,
+  type Citation,
+  type Flag,
+  type OutsideTermsNotice,
+  type Readings,
+} from "./types";
 import { findWordingDefects } from "./wording";
 
 export type StoredAnalysisCheck =
@@ -64,6 +79,16 @@ function readFlag(value: unknown, storedText: string): Flag | null {
   return { id: raw.id, clauseType: raw.clauseType, citation, tier, statement: raw.statement, exposure, moneyAmount, readings };
 }
 
+function readNotice(value: unknown, storedText: string): OutsideTermsNotice | null {
+  if (typeof value !== "object" || value === null) return null;
+  const raw = value as Record<string, unknown>;
+  if (typeof raw.id !== "string") return null;
+  const citation = readCitation(raw.citation);
+  if (!citation || !citationMatches(storedText, citation)) return null;
+  if (typeof raw.document !== "string" || raw.document.trim() === "") return null;
+  return { id: raw.id, citation, document: raw.document };
+}
+
 /** Checks a saved analysis against the text it will be shown beside, and says why when it can't be shown. */
 export function checkStoredAnalysis(value: unknown, storedText: string): StoredAnalysisCheck {
   if (typeof value !== "object" || value === null) return { ok: false, reason: "unreadable" };
@@ -72,18 +97,29 @@ export function checkStoredAnalysis(value: unknown, storedText: string): StoredA
   if (typeof version === "number" && Number.isInteger(version) && version >= 1 && version < ANALYSIS_SCHEMA_VERSION) {
     return { ok: false, reason: "outdated" };
   }
-  if (version !== ANALYSIS_SCHEMA_VERSION || !Array.isArray(raw.flags)) return { ok: false, reason: "unreadable" };
+  if (version !== ANALYSIS_SCHEMA_VERSION || !Array.isArray(raw.flags) || !Array.isArray(raw.outsideTerms)) {
+    return { ok: false, reason: "unreadable" };
+  }
 
   const flags = raw.flags.map((f) => readFlag(f, storedText)).filter((f): f is Flag => f !== null);
-  const defects = findWordingDefects(
-    flags.flatMap((f) => [
+  const notices = raw.outsideTerms
+    .map((n) => readNotice(n, storedText))
+    .filter((n): n is OutsideTermsNotice => n !== null)
+    .sort((a, b) => a.citation.start - b.citation.start || a.citation.end - b.citation.end);
+  const defects = findWordingDefects([
+    ...flags.flatMap((f) => [
       { field: `${f.id} statement`, text: f.statement },
       ...f.readings.map((r, i) => ({ field: `${f.id} reading ${i + 1}`, text: r })),
     ]),
-  );
+    ...notices.map((n) => ({ field: `${n.id} document`, text: n.document })),
+  ]);
   if (defects.length > 0) return { ok: false, reason: "wording" };
 
-  return { ok: true, analysis: { schemaVersion: ANALYSIS_SCHEMA_VERSION, flags: rankFlags(flags) } };
+  const ranked = rankFlags(flags);
+  return {
+    ok: true,
+    analysis: { schemaVersion: ANALYSIS_SCHEMA_VERSION, flags: ranked, outsideTerms: notices, outcome: decideOutcome(ranked, notices) },
+  };
 }
 
 /** The analysis to show beside `storedText`, or null when it can't be shown (see checkStoredAnalysis for why). */

@@ -1,7 +1,9 @@
 // npm run smoke: runs the adhesion fixture through the real pipeline (the real
 // analyse with the OpenRouter client) and prints each kept flag in ranked
 // order with its tier, exposure, statement, readings and source sentence,
-// then the diagnostics and how the result compares with the fixture's labels. Proves the request shape works
+// then each outside-terms notice, whether the result is clean (with its
+// checklist when it is), the diagnostics and how the result compares with the
+// fixture's labels. Proves the request shape works
 // against the real model. Never prints the key or the model id.
 
 import { loadEnvConfig } from "@next/env";
@@ -66,6 +68,31 @@ async function main(): Promise<number> {
   }
   if (analysis.flags.length === 0) console.log("  none");
 
+  console.log(`\nOutside-terms notices (${analysis.outsideTerms.length}):`);
+  for (const notice of analysis.outsideTerms) {
+    const ok = text.slice(notice.citation.start, notice.citation.end) === notice.citation.text ? "verbatim" : "MISMATCH";
+    console.log(`\n  ${notice.id} [${notice.citation.start}, ${notice.citation.end}) ${ok}`);
+    console.log(`    add next: ${notice.document}`);
+    console.log(`    source: "${notice.citation.text}"`);
+  }
+  if (analysis.outsideTerms.length === 0) console.log("  none");
+
+  const { outcome } = analysis;
+  if (outcome.clean) {
+    console.log("\nClean result: yes (no Negotiate before signing flags, no outside-terms notices)");
+    for (const entry of outcome.checklist) {
+      const status =
+        entry.status === "found_low_exposure"
+          ? `found, low exposure (${entry.found.map((f) => `${f.flagId} [${f.citation.start}, ${f.citation.end})`).join(", ")})`
+          : "we found none";
+      console.log(`  ${entry.clauseType}: ${status}`);
+    }
+  } else {
+    console.log(
+      `\nClean result: no (${outcome.negotiateFlags} Negotiate before signing flag(s), ${outcome.outsideTermsNotices} outside-terms notice(s))`,
+    );
+  }
+
   console.log("\nDiagnostics:");
   console.log(`  returned by the model: ${diagnostics.returned}`);
   console.log(`  kept: ${diagnostics.kept}`);
@@ -76,6 +103,12 @@ async function main(): Promise<number> {
   }
   console.log(`  exposure parts dropped: ${diagnostics.exposureDropped.length}`);
   for (const d of diagnostics.exposureDropped) console.log(`    #${d.index} ${d.part} ${d.reason} ${JSON.stringify(d.fragment)}`);
+  console.log(`  outside terms returned by the model: ${diagnostics.outsideTermsReturned}`);
+  console.log(`  outside terms dropped: ${diagnostics.outsideTermsDropped.length}`);
+  for (const d of diagnostics.outsideTermsDropped) {
+    const quote = d.quote === null ? "(no quote)" : `"${d.quote.length > 110 ? `${d.quote.slice(0, 107)}...` : d.quote}"`;
+    console.log(`    #${d.index} ${d.reason} ${quote}`);
+  }
   for (const a of diagnostics.wording) {
     console.log(`  wording, attempt ${a.attempt}: ${a.defects.map((d) => `${d.field} "${d.term}"`).join("; ") || "clean"}`);
   }
@@ -90,8 +123,16 @@ async function main(): Promise<number> {
     console.log(`  ${clause.id} ${clause.clauseType}: ${verdict}`);
   }
   console.log(`Labelled clauses found: ${found} of ${sidecar.clauses.length}`);
+  let noticesFound = 0;
+  for (const entry of sidecar.outsideTerms) {
+    const hit = analysis.outsideTerms.some((n) => n.citation.text === entry.sentence);
+    if (hit) noticesFound++;
+    console.log(`  outside terms "${entry.document}": ${hit ? "shown as a notice" : "MISSED"}`);
+  }
+  console.log(`Labelled outside-terms sentences found: ${noticesFound} of ${sidecar.outsideTerms.length}`);
 
-  return analysis.flags.every((f) => text.slice(f.citation.start, f.citation.end) === f.citation.text) ? 0 : 1;
+  const cited = [...analysis.flags, ...analysis.outsideTerms];
+  return cited.every((item) => text.slice(item.citation.start, item.citation.end) === item.citation.text) ? 0 : 1;
 }
 
 main().then(
