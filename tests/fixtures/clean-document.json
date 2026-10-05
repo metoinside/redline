@@ -1,0 +1,52 @@
+{
+  "document": "clean-document.txt",
+  "clauses": [],
+  "noticeObligations": [],
+  "outsideTerms": [],
+  "decoys": [
+    {
+      "sentence": "Seller warrants that the sign will be free from defects in materials and workmanship for two (2) years after installation.",
+      "why": "A warranty period is not a renewal-and-exit clause: it binds Seller and commits the buyer to nothing."
+    },
+    {
+      "sentence": "The price is fixed and shall not change unless Buyer requests a change to the work in writing and both parties sign a written change describing the new price.",
+      "why": "A fixed price for one-off work sets no term, renewal or exit cost."
+    },
+    {
+      "sentence": "Seller shall carry general liability insurance of at least $1,000,000 per occurrence while performing work at Buyer's location.",
+      "why": "An insurance amount is Seller's obligation and is none of the five clause types."
+    }
+  ],
+  "questions": [
+    {
+      "question": "What is the total price?",
+      "answerable": true,
+      "sentence": "The total price for all work under this Purchase Order is $6,850, which includes design, materials, fabrication, delivery, installation and removal of the old sign.",
+      "answer": "$6,850, covering design, materials, fabrication, delivery, installation and removal of the old sign."
+    },
+    {
+      "question": "When does the sign have to be installed?",
+      "answerable": true,
+      "sentence": "Seller shall complete installation no later than June 15, 2026.",
+      "answer": "By June 15, 2026."
+    },
+    {
+      "question": "How long is the warranty on the lights?",
+      "answerable": true,
+      "sentence": "Seller warrants the LED lighting components for five (5) years after installation.",
+      "answer": "Five years after installation."
+    },
+    {
+      "question": "Can I cancel the order and get my deposit back?",
+      "answerable": false
+    },
+    {
+      "question": "Does the sign come with ongoing maintenance or cleaning?",
+      "answerable": false
+    },
+    {
+      "question": "Do I get a discount if the sign is installed late?",
+      "answerable": false
+    }
+  ]
+}

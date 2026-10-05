@@ -1,0 +1,155 @@
+MASTER SUBSCRIPTION AGREEMENT
+
+This Master Subscription Agreement (the "Agreement") is entered into as of March 1, 2026 (the "Effective Date") by and between Halvard Cloud Systems, Inc., a Delaware corporation with offices at 400 Larkspur Avenue, Suite 1200, Wilmington, Delaware 19801 ("Provider"), and Brightwater Bakery Supply LLC, an Oregon limited liability company with offices at 77 Mill Street, Bend, Oregon 97701 ("Customer").
+
+This Agreement is offered on Provider's standard terms. Customer acknowledges that it has read this Agreement and agrees that its terms are not subject to amendment except as set out in Section 14.4.
+
+1. DEFINITIONS
+
+1.1 "Services" means the Halvard inventory and ordering platform, the related mobile applications and any support services that Provider makes available to Customer under this Agreement.
+
+1.2 "Customer Data" means all data, records and files that Customer or its Authorized Users submit to the Services.
+
+1.3 "Authorized User" means an employee or contractor of Customer whom Customer permits to use the Services under a named login.
+
+1.4 "Subscription Term" means the Initial Subscription Term together with every renewal term.
+
+1.5 "Subscription Fee" means the annual fee payable by Customer for the Services, as set out in Section 5.
+
+2. ACCESS TO THE SERVICES
+
+2.1 Subject to the terms of this Agreement, Provider grants Customer a non-exclusive, non-transferable right during the Subscription Term to permit up to twenty-five (25) Authorized Users to access and use the Services for Customer's internal business purposes.
+
+2.2 Customer shall be responsible for all acts and omissions of its Authorized Users and shall keep each login credential confidential.
+
+2.3 Customer's use of the Services is subject to the Halvard Acceptable Use Policy published at https://www.halvardcloud.example/legal/aup, as Provider updates it from time to time.
+
+2.4 Provider may modify the features of the Services at any time, provided that no modification materially reduces the core inventory and ordering functions during the then-current term.
+
+3. CUSTOMER RESPONSIBILITIES
+
+3.1 Customer shall provide accurate account and billing information and shall update that information promptly when it changes.
+
+3.2 Customer shall not resell, sublicense or rent the Services, attempt to reverse engineer any part of the Services, or use the Services to build a competing product.
+
+3.3 Customer is responsible for obtaining and maintaining the equipment and internet connections needed to access the Services.
+
+4. TERM, RENEWAL AND TERMINATION
+
+4.1 The Initial Subscription Term begins on the Effective Date and continues for thirty-six (36) months, and Customer may not terminate this Agreement for convenience at any time during the Initial Subscription Term.
+
+4.2 Upon expiration of the Initial Subscription Term or any renewal term, this Agreement shall automatically renew at the Subscription Fee then in effect, which for the first renewal term shall be no less than $48,000 per year.
+
+4.3 Each renewal term shall be equal in length to the Initial Subscription Term of thirty-six (36) months.
+
+4.4 To prevent renewal, Customer must deliver written notice of non-renewal by certified mail to Provider's legal department, and that notice must be received no later than ninety (90) days before the end of the then-current term.
+
+4.5 If Customer purchases additional Authorized User seats during any term, the subscription for those seats and the existing Services shall be coterminous and shall renew together for a full renewal term.
+
+4.6 If Customer terminates this Agreement for convenience during any renewal term, Customer shall pay Provider an early termination fee equal to one hundred percent (100%) of the Subscription Fees remaining for the balance of that renewal term.
+
+4.7 The Priority Support add-on renews together with the Services, and Customer can cancel the Priority Support add-on at any time without charge from the billing page of its account.
+
+4.8 Either party may terminate this Agreement upon written notice if the other party materially breaches this Agreement and fails to cure the breach within thirty (30) days after receiving written notice describing it.
+
+4.9 Upon any termination or expiration of this Agreement, Customer's right to access the Services ends and Customer shall pay all Subscription Fees accrued through the effective date of termination.
+
+5. FEES AND PAYMENT
+
+5.1 The Subscription Fee for the Initial Subscription Term is $42,000 per year, payable annually in advance on the Effective Date and on each anniversary of the Effective Date.
+
+5.2 Provider may increase the Subscription Fees for any renewal term by up to nine percent (9%) over the Subscription Fees for the prior term, by giving Customer notice of the increase at least thirty (30) days before the renewal term begins.
+
+5.3 Customer shall pay each invoice within thirty (30) days of the invoice date in United States dollars.
+
+5.4 Overdue amounts shall accrue interest at the rate of one and one-half percent (1.5%) per month or the maximum rate permitted by law, whichever is lower.
+
+5.5 Customer must notify Provider in writing of any dispute regarding an invoice within fifteen (15) days after the invoice date, failing which the invoice is deemed accepted.
+
+5.6 If any undisputed amount remains unpaid for more than forty-five (45) days after its due date, Provider may suspend Customer's access to the Services until the amount is paid in full.
+
+5.7 All fees are exclusive of sales, use, value added and similar taxes, and Customer shall pay all such taxes other than taxes on Provider's net income.
+
+5.8 Except as expressly stated in this Agreement, all fees paid are non-refundable.
+
+6. CONFIDENTIALITY
+
+6.1 Each party shall hold the other party's Confidential Information in confidence and shall not disclose it to any third party except to its employees, contractors and advisers who need to know it and are bound by obligations of confidentiality at least as protective as this Section.
+
+6.2 "Confidential Information" means non-public information disclosed by one party to the other that is marked as confidential or that a reasonable person would understand to be confidential, and it includes Customer Data.
+
+6.3 The obligations in this Section do not apply to information that is or becomes public through no fault of the receiving party, that the receiving party already knew without restriction, or that the receiving party develops independently.
+
+7. CUSTOMER DATA
+
+7.1 As between the parties, Customer owns all Customer Data.
+
+7.2 Customer grants Provider a limited license to host, copy and process Customer Data solely to provide the Services to Customer.
+
+7.3 Provider shall maintain administrative, physical and technical safeguards designed to protect Customer Data against unauthorized access.
+
+8. INTELLECTUAL PROPERTY
+
+8.1 Provider and its licensors own all right, title and interest in the Services, including all software, designs and improvements, whether or not made at Customer's suggestion.
+
+8.2 If Customer provides suggestions or feedback about the Services, Provider may use that feedback without restriction or payment to Customer.
+
+9. WARRANTIES AND DISCLAIMERS
+
+9.1 Provider warrants that the Services will perform materially as described in this Agreement during the Subscription Term.
+
+9.2 Customer's sole remedy for a breach of the warranty in Section 9.1 is for Provider to correct the non-conforming Services within a reasonable time after Customer reports the problem.
+
+9.3 EXCEPT AS EXPRESSLY STATED IN THIS AGREEMENT, THE SERVICES ARE PROVIDED "AS IS" AND PROVIDER DISCLAIMS ALL OTHER WARRANTIES, EXPRESS OR IMPLIED, INCLUDING ANY IMPLIED WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+10. INDEMNIFICATION
+
+10.1 Customer shall defend, indemnify and hold harmless Provider and its affiliates from and against any and all claims, losses and expenses arising out of Customer Data or Customer's use of the Services in breach of this Agreement.
+
+10.2 Provider shall defend Customer against any third-party claim alleging that the Services, as provided by Provider, infringe a United States patent, copyright or trademark, and shall pay any damages finally awarded on that claim.
+
+10.3 The indemnified party shall give the indemnifying party prompt notice of the claim, sole control of its defense, and reasonable cooperation at the indemnifying party's expense.
+
+11. LIMITATION OF LIABILITY
+
+11.1 In no event shall Provider's total aggregate liability arising out of or relating to this Agreement exceed the Subscription Fees paid by Customer in the twelve (12) months preceding the event giving rise to the claim.
+
+11.2 IN NO EVENT SHALL EITHER PARTY BE LIABLE FOR ANY LOST PROFITS, LOST REVENUE, OR INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES, EVEN IF ADVISED OF THE POSSIBILITY OF THOSE DAMAGES.
+
+12. NOTICES
+
+12.1 Notices to Provider shall be sent to Halvard Cloud Systems, Inc., Attention: Legal Department, 400 Larkspur Avenue, Suite 1200, Wilmington, Delaware 19801.
+
+12.2 Notices to Customer shall be sent to the billing contact named in Customer's account.
+
+12.3 A notice is effective when received, except that a notice sent by certified mail is deemed received three (3) business days after it is mailed.
+
+13. GOVERNING LAW AND DISPUTES
+
+13.1 This Agreement shall be governed by the laws of the State of Delaware, without regard to its conflict of laws principles.
+
+13.2 Each party submits to the exclusive jurisdiction of the state and federal courts located in New Castle County, Delaware, for any dispute arising out of this Agreement.
+
+14. GENERAL
+
+14.1 Customer may not assign this Agreement without Provider's prior written consent, and Provider may assign this Agreement to an affiliate or to a successor in a merger or sale of its business.
+
+14.2 Neither party is liable for any delay or failure to perform caused by events beyond its reasonable control, other than Customer's obligation to pay fees.
+
+14.3 If any provision of this Agreement is held unenforceable, the remaining provisions remain in full force and effect.
+
+14.4 This Agreement is the entire agreement between the parties regarding its subject matter, and it can be amended only by a written document signed by authorized representatives of both parties.
+
+14.5 No failure or delay by either party in exercising any right under this Agreement operates as a waiver of that right.
+
+14.6 Sections 4.6, 4.9, 5, 6, 8, 10, 11 and 13 survive any termination or expiration of this Agreement.
+
+IN WITNESS WHEREOF, the parties have executed this Agreement as of the Effective Date.
+
+HALVARD CLOUD SYSTEMS, INC.
+
+By: Dana Whitcombe, Vice President, Sales
+
+BRIGHTWATER BAKERY SUPPLY LLC
+
+By: Rosa Delgado, Owner

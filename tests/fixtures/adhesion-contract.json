@@ -1,0 +1,163 @@
+{
+  "document": "adhesion-contract.txt",
+  "clauses": [
+    {
+      "id": "c1",
+      "clauseType": "multi_year_term",
+      "sentence": "The Initial Subscription Term begins on the Effective Date and continues for thirty-six (36) months, and Customer may not terminate this Agreement for convenience at any time during the Initial Subscription Term.",
+      "expectedTier": "negotiate",
+      "exposure": {
+        "lockIn": "thirty-six (36) months",
+        "exitDifficulty": "Customer may not terminate this Agreement for convenience at any time during the Initial Subscription Term"
+      },
+      "why": "The buyer cannot leave before a cited period of 36 months."
+    },
+    {
+      "id": "c2",
+      "clauseType": "auto_renewal",
+      "sentence": "Upon expiration of the Initial Subscription Term or any renewal term, this Agreement shall automatically renew at the Subscription Fee then in effect, which for the first renewal term shall be no less than $48,000 per year.",
+      "expectedTier": "negotiate",
+      "exposure": {
+        "money": "$48,000 per year"
+      },
+      "why": "The agreement renews on its own for a cited amount of at least $48,000 per year."
+    },
+    {
+      "id": "c3",
+      "clauseType": "rollover",
+      "sentence": "Each renewal term shall be equal in length to the Initial Subscription Term of thirty-six (36) months.",
+      "expectedTier": "negotiate",
+      "exposure": {
+        "lockIn": "thirty-six (36) months"
+      },
+      "why": "Each renewal runs for a term as long as the original 36-month term."
+    },
+    {
+      "id": "c4",
+      "clauseType": "notice_window",
+      "sentence": "To prevent renewal, Customer must deliver written notice of non-renewal by certified mail to Provider's legal department, and that notice must be received no later than ninety (90) days before the end of the then-current term.",
+      "expectedTier": "negotiate",
+      "exposure": {
+        "exitDifficulty": "no later than ninety (90) days before the end of the then-current term"
+      },
+      "why": "The notice method (written, by certified mail) and period (90 days) are stated, and the deadline falls before the renewal."
+    },
+    {
+      "id": "c5",
+      "clauseType": "early_termination_fee",
+      "sentence": "If Customer terminates this Agreement for convenience during any renewal term, Customer shall pay Provider an early termination fee equal to one hundred percent (100%) of the Subscription Fees remaining for the balance of that renewal term.",
+      "expectedTier": "negotiate",
+      "exposure": {
+        "money": "one hundred percent (100%) of the Subscription Fees remaining for the balance of that renewal term",
+        "exitDifficulty": "early termination fee"
+      },
+      "why": "The clause cites a formula for the fee: all Subscription Fees left in the renewal term."
+    },
+    {
+      "id": "c6",
+      "clauseType": "rollover",
+      "sentence": "If Customer purchases additional Authorized User seats during any term, the subscription for those seats and the existing Services shall be coterminous and shall renew together for a full renewal term.",
+      "expectedTier": "negotiate",
+      "exposure": {},
+      "readings": [
+        "The added seats end on the existing term's end date, and then all seats renew together for one renewal term.",
+        "Buying seats restarts the whole subscription, so the existing Services run on to the end of a new full term alongside the added seats."
+      ],
+      "why": "The clause reads two ways, and under one reading buying seats restarts the lock-in, so it goes in the top tier by ADR 0005."
+    },
+    {
+      "id": "c7",
+      "clauseType": "auto_renewal",
+      "sentence": "The Priority Support add-on renews together with the Services, and Customer can cancel the Priority Support add-on at any time without charge from the billing page of its account.",
+      "expectedTier": "know",
+      "exposure": {},
+      "why": "The add-on renews on its own, but the clause cites no sum, period or fee, and the buyer cancels it at any time without charge."
+    }
+  ],
+  "noticeObligations": [
+    {
+      "sentence": "To prevent renewal, Customer must deliver written notice of non-renewal by certified mail to Provider's legal department, and that notice must be received no later than ninety (90) days before the end of the then-current term.",
+      "description": "Send written notice of non-renewal by certified mail to Provider's legal department to stop the agreement renewing.",
+      "deadline": "Received 90 days before the end of the then-current term"
+    },
+    {
+      "sentence": "Customer must notify Provider in writing of any dispute regarding an invoice within fifteen (15) days after the invoice date, failing which the invoice is deemed accepted.",
+      "description": "Dispute an invoice in writing, or the invoice counts as accepted.",
+      "deadline": "15 days after the invoice date"
+    }
+  ],
+  "outsideTerms": [
+    {
+      "sentence": "Customer's use of the Services is subject to the Halvard Acceptable Use Policy published at https://www.halvardcloud.example/legal/aup, as Provider updates it from time to time.",
+      "document": "Halvard Acceptable Use Policy (https://www.halvardcloud.example/legal/aup)"
+    }
+  ],
+  "decoys": [
+    {
+      "sentence": "In no event shall Provider's total aggregate liability arising out of or relating to this Agreement exceed the Subscription Fees paid by Customer in the twelve (12) months preceding the event giving rise to the claim.",
+      "why": "A liability cap is not one of the five renewal-and-exit clause types."
+    },
+    {
+      "sentence": "Customer shall defend, indemnify and hold harmless Provider and its affiliates from and against any and all claims, losses and expenses arising out of Customer Data or Customer's use of the Services in breach of this Agreement.",
+      "why": "An indemnity is not one of the five renewal-and-exit clause types."
+    },
+    {
+      "sentence": "Provider may increase the Subscription Fees for any renewal term by up to nine percent (9%) over the Subscription Fees for the prior term, by giving Customer notice of the increase at least thirty (30) days before the renewal term begins.",
+      "why": "A price increase changes the fee, not whether or how the agreement renews or ends, and the notice in it is Provider's duty."
+    },
+    {
+      "sentence": "This Agreement shall be governed by the laws of the State of Delaware, without regard to its conflict of laws principles.",
+      "why": "Governing law is not one of the five renewal-and-exit clause types."
+    },
+    {
+      "sentence": "Overdue amounts shall accrue interest at the rate of one and one-half percent (1.5%) per month or the maximum rate permitted by law, whichever is lower.",
+      "why": "Late-payment interest is a payment term, not a renewal-and-exit clause."
+    },
+    {
+      "sentence": "Either party may terminate this Agreement upon written notice if the other party materially breaches this Agreement and fails to cure the breach within thirty (30) days after receiving written notice describing it.",
+      "why": "Termination for breach carries no fee and sets no lock-in, so it is none of the five clause types."
+    }
+  ],
+  "questions": [
+    {
+      "question": "How much is the subscription fee during the first three years?",
+      "answerable": true,
+      "sentence": "The Subscription Fee for the Initial Subscription Term is $42,000 per year, payable annually in advance on the Effective Date and on each anniversary of the Effective Date.",
+      "answer": "$42,000 per year, paid annually in advance."
+    },
+    {
+      "question": "How do I stop the contract from renewing?",
+      "answerable": true,
+      "sentence": "To prevent renewal, Customer must deliver written notice of non-renewal by certified mail to Provider's legal department, and that notice must be received no later than ninety (90) days before the end of the then-current term.",
+      "answer": "Send written notice of non-renewal by certified mail to Provider's legal department so that it arrives at least 90 days before the current term ends."
+    },
+    {
+      "question": "How many people can use the platform?",
+      "answerable": true,
+      "sentence": "Subject to the terms of this Agreement, Provider grants Customer a non-exclusive, non-transferable right during the Subscription Term to permit up to twenty-five (25) Authorized Users to access and use the Services for Customer's internal business purposes.",
+      "answer": "Up to 25 Authorized Users."
+    },
+    {
+      "question": "Which state's law governs this agreement?",
+      "answerable": true,
+      "sentence": "This Agreement shall be governed by the laws of the State of Delaware, without regard to its conflict of laws principles.",
+      "answer": "Delaware law."
+    },
+    {
+      "question": "How long does Halvard keep my data after the contract ends?",
+      "answerable": false
+    },
+    {
+      "question": "What service credits do I get if the platform goes down?",
+      "answerable": false
+    },
+    {
+      "question": "Which country are my data stored in?",
+      "answerable": false
+    },
+    {
+      "question": "Is there a free trial period before the first payment?",
+      "answerable": false
+    }
+  ]
+}
