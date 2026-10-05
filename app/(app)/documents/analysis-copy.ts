@@ -27,7 +27,7 @@ export const TIER_LABEL: Record<Tier, string> = {
 
 /** One line under each tier's heading, saying what put a flag there. */
 export const TIER_NOTE: Record<Tier, string> = {
-  negotiate: "Each of these states a sum, a lock-in period, a notice period or a fee, or reads two ways.",
+  negotiate: "Each of these states a sum, a lock-in period, a notice period or a fee, reads two ways, or crosses one of your red lines.",
   know: "These are part of how the contract renews or ends, but none of them states a sum, period or fee.",
 };
 
@@ -72,6 +72,26 @@ export const ANALYSIS_COPY = {
     title: "Analysis isn’t set up on this server.",
     body: "This copy of Redline has no model connected, so it can’t analyse documents.",
   },
+} as const;
+
+/**
+ * What the buyer reads about red lines in the analysis view: the ones a run
+ * used, and on each flag that crosses one, which. The red lines themselves
+ * are put in words by describeRedLine (lib/engine/red-lines.ts).
+ */
+export const RED_LINE_COPY = {
+  usedLabel: "Red lines checked",
+  noneSet: "You had no red lines set when this ran.",
+  setThem: "Set your red lines",
+  edit: "Change your red lines",
+  rerunHint: "If you’ve changed them since, analyse again to use the new ones.",
+  /** Signed out, or no accounts: one line, no nag. */
+  needAccount: "Red lines need an account, so this ran without any.",
+  signIn: "Sign in",
+  crosses: "Crosses your red line",
+  tab: "Red line",
+  /** The cited words a figure-limit was checked against. */
+  citedFigure: "The sentence says",
 } as const;
 
 /** What the buyer reads about an outside-terms notice. A notice is not a flag: no tier, no counter-offer. */
@@ -121,6 +141,10 @@ export const FAILURE_COPY: Record<RunAnalysisFailure | "unreachable", { title: s
   "signed-out": { title: "You’re signed out.", body: "Sign in again to analyse this document." },
   "not-found": { title: "This document isn’t in your library.", body: "It was deleted, or it belongs to another account." },
   invalid: { title: "Redline couldn’t analyse this text.", body: "Add the document again, then try once more." },
+  "red-lines-failed": {
+    title: "Redline couldn’t load your red lines.",
+    body: "Nothing was analysed or saved. Try again in a minute.",
+  },
 };
 
 /**

@@ -7,7 +7,9 @@
 //  2. every citation must be found word for word in the stored text;
 //  3. every exposure part must be found word for word in its citation, and
 //     money and lock-in parts must state a figure (lib/engine/exposure.ts);
-//  4. the tier is worked out from what survived (lib/engine/tiers.ts);
+//  4. red-line breaches are worked out from the checked exposure
+//     (lib/engine/red-lines.ts), and the tier from what survived and those
+//     breaches (lib/engine/tiers.ts);
 //  5. statements and readings must pass the wording check (lib/engine/wording.ts).
 //     If they don't, the model is asked once more with the defects named; if
 //     any remain, the analysis fails and nothing is shown or saved.
@@ -22,6 +24,7 @@ import { checkQuote } from "./citations";
 import { decideOutcome } from "./clean";
 import { checkExposure, parseMoneyAmount } from "./exposure";
 import { ModelOutputError, type ChatMessage, type JsonSchema, type ModelClient } from "./model";
+import { describeRedLine, findBreaches } from "./red-lines";
 import { assignTier, rankFlags } from "./tiers";
 import {
   ANALYSIS_SCHEMA_VERSION,
@@ -151,11 +154,32 @@ function systemPrompt(): string {
   ].join("\n");
 }
 
+/** Where the figure a red line limits goes in exposure, so the code can check it against the limit. */
+const RED_LINE_FIGURE: Record<ClauseType, string> = {
+  auto_renewal: "the length of the renewal term, in lock_in",
+  notice_window: "the notice period, in exit_difficulty",
+  early_termination_fee: "the fee amount, in money",
+  rollover: "the length of the renewal or rollover term, in lock_in",
+  multi_year_term: "the length of the term the buyer is bound for, in lock_in",
+};
+
 function userPrompt(text: string, redLines: readonly RedLine[]): string {
-  const lines = redLines.length
-    ? redLines.map((r) => `- ${r.clauseType}: ${r.limit}`).join("\n")
-    : "- none";
-  return `The buyer's red lines (terms they will not accept):\n${lines}\n\n<document>\n${text}</document>`;
+  if (redLines.length === 0) {
+    return `The buyer's red lines (terms they will not accept):\n- none\n\n<document>\n${text}</document>`;
+  }
+  const lines = redLines.map((r) => `- ${r.clauseType}: ${describeRedLine(r)}`).join("\n");
+  const types = [...new Set(redLines.map((r) => r.clauseType))];
+  const figures = types.map((t) => `- ${t}: ${RED_LINE_FIGURE[t]}`).join("\n");
+  return [
+    "The buyer's red lines (terms they will not accept):",
+    lines,
+    "",
+    "Red lines are checked in code against the exposure you report, so for every clause of these types, copy into exposure the exact words that state the figure, with its number, whenever the sentence states one:",
+    figures,
+    "Do not say whether a red line is breached, and still report every clause in the family, not only these types.",
+    "",
+    `<document>\n${text}</document>`,
+  ].join("\n");
 }
 
 export function buildAnalysisMessages(text: string, redLines: readonly RedLine[]): ChatMessage[] {
@@ -168,7 +192,7 @@ export function buildAnalysisMessages(text: string, redLines: readonly RedLine[]
 export type AnalyseInput = {
   /** The stored document text, in canonical form (normalizeText). Citations are checked against it. */
   text: string;
-  /** The buyer's red lines, an input to every run (empty until #10). */
+  /** The buyer's red lines, an input to every run. Signed-out runs have none. */
   redLines: readonly RedLine[];
   client: ModelClient;
 };
@@ -221,7 +245,7 @@ function readReadings(value: unknown): Readings | null {
 }
 
 /** Applies the rules in code to one model answer. */
-function processAnswer(answer: unknown, text: string): Processed {
+function processAnswer(answer: unknown, text: string, redLines: readonly RedLine[]): Processed {
   if (typeof answer !== "object" || answer === null || !Array.isArray((answer as { clauses?: unknown }).clauses)) {
     throw new ModelOutputError("The model's answer has no list of clauses.");
   }
@@ -267,10 +291,9 @@ function processAnswer(answer: unknown, text: string): Processed {
     for (const d of lost) exposureDropped.push({ index, ...d });
 
     const moneyAmount = exposure.money ? parseMoneyAmount(exposure.money) : null;
-    // #10 works out red-line breaches from the buyer's red lines and passes them here.
-    // Until then no breach is computed, so none is passed; none is ever invented.
-    const tier = assignTier({ exposure, readings }, []);
-    kept.push({ index, clauseType, citation, tier, statement, exposure, moneyAmount, readings });
+    const redLineBreaches = findBreaches({ clauseType, exposure }, redLines);
+    const tier = assignTier({ exposure, readings }, redLineBreaches);
+    kept.push({ index, clauseType, citation, tier, statement, exposure, moneyAmount, readings, redLineBreaches });
   });
 
   // Ids follow document order; the list itself is ranked.
@@ -320,7 +343,7 @@ export async function analyse({ text, redLines, client }: AnalyseInput): Promise
 
   for (let attempt = 1; ; attempt++) {
     const answer = await client.complete({ task: ANALYSIS_TASK, messages, schema: ANALYSIS_SCHEMA });
-    const processed = processAnswer(answer, text);
+    const processed = processAnswer(answer, text, redLines);
     const defects = findWordingDefects(processed.pieces);
     wording.push({ attempt, defects });
 

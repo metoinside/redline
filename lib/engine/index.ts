@@ -1,6 +1,6 @@
 // The analysis engine's public API, for server code (server actions, route
 // handlers, scripts). Client components must not import this file, because it
-// re-exports the OpenRouter client; they import ./types, ./stored,
+// re-exports the OpenRouter client; they import ./types, ./stored, ./red-lines,
 // ./clean, ./citations, ./exposure, ./tiers or ./wording directly
 // (tests/engine/server-boundary.test.ts).
 
@@ -21,6 +21,7 @@ export {
 export { decideOutcome } from "./clean";
 export { checkExposure, hasFigure, parseMoneyAmount, type ExposureCheck } from "./exposure";
 export { assignTier, rankFlags, type TierInput } from "./tiers";
+export { describeRedLine, findBreaches, parseLimit, parseRedLine, parseRedLines } from "./red-lines";
 export {
   BANNED_TERMS,
   HEDGING_TERMS,

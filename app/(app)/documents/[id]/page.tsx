@@ -31,19 +31,26 @@ const loadDocument = cache(async (id: string): Promise<DocumentRow | null | "err
   return (data as DocumentRow | null) ?? null;
 });
 
-// The latest saved analysis of a document, or null when there is none or it
-// can't be read. Its citations are checked again before they are shown.
+// The latest saved analysis of a document, with the red lines it ran with, or
+// null when there is none or it can't be read. Its citations are checked
+// again, and its breaches worked out again from that snapshot, before they
+// are shown.
 async function loadLatestAnalysis(documentId: string): Promise<AnalysisRun | null> {
   const supabase = await createServerSupabase();
   const { data, error } = await supabase
     .from("analyses")
-    .select("result, created_at")
+    .select("result, created_at, red_lines")
     .eq("document_id", documentId)
     .order("created_at", { ascending: false })
     .limit(1)
     .maybeSingle();
   if (error || !data) return null;
-  return { analysis: data.result as AnalysisRun["analysis"], ranAt: new Date(data.created_at as string).toISOString() };
+  return {
+    analysis: data.result as AnalysisRun["analysis"],
+    ranAt: new Date(data.created_at as string).toISOString(),
+    // Checked on the way in by checkStoredAnalysis, like the result.
+    redLines: data.red_lines as AnalysisRun["redLines"],
+  };
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {

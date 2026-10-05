@@ -13,6 +13,7 @@ import {
   type ReactNode,
   type RefObject,
 } from "react";
+import { describeRedLine } from "@/lib/engine/red-lines";
 import { checkStoredAnalysis } from "@/lib/engine/stored";
 import {
   EXPOSURE_PARTS,
@@ -21,6 +22,7 @@ import {
   type Citation,
   type Flag,
   type OutsideTermsNotice,
+  type RedLine,
   type Tier,
 } from "@/lib/engine/types";
 import type { SourceKind } from "@/lib/extraction/limits";
@@ -32,6 +34,7 @@ import {
   EXPOSURE_LABEL,
   FAILURE_COPY,
   OUTSIDE_COPY,
+  RED_LINE_COPY,
   TIER_LABEL,
   TIER_NOTE,
   clauseNumberAt,
@@ -55,16 +58,24 @@ import { DocumentView } from "./document-view";
 // five clause types. When notices are what stops it being clean, the panel
 // says so, so the buyer never takes unread terms as checked.
 //
+// Each flag that crosses one of the buyer's red lines names it in its margin
+// comment and on its tab. The panel lists the red lines the run used (its
+// snapshot), or says the run had none; a run in the browser only says, in one
+// line, that red lines need an account.
+//
 // Every analysis shown here is read through checkStoredAnalysis against this
 // document's own text first, so a citation that doesn't match the text at its
 // offsets, an exposure fragment that isn't in its citation, or wording that
-// fails the check is never rendered, wherever the analysis came from.
+// fails the check is never rendered, wherever the analysis came from. Its
+// breaches and tiers are worked out again there from the run's red lines.
 
 export type AnalysisSource =
   /** A document in the buyer's library: runs are saved, and the latest is shown on load. */
   | { kind: "saved"; documentId: string; latest: AnalysisRun | null }
-  /** A document kept in this browser tab only: runs are not saved. */
-  | { kind: "browser" };
+  /** A document kept in this browser tab only: runs are not saved, and have no red lines. */
+  | { kind: "browser"; accountsConfigured: boolean };
+
+type ShownRun = { analysis: Analysis; ranAt: string; redLines: RedLine[] };
 
 type Failure = keyof typeof FAILURE_COPY;
 
@@ -104,7 +115,7 @@ export function AnalysedDocument({
 }) {
   const ids = useId();
   const [initial] = useState(() => checkRun(source.kind === "saved" ? source.latest : null, body));
-  const [run, setRun] = useState<{ analysis: Analysis; ranAt: string } | null>(initial.run);
+  const [run, setRun] = useState<ShownRun | null>(initial.run);
   const [storedNotice, setStoredNotice] = useState<StoredNotice | null>(initial.notice);
   const [failure, setFailure] = useState<Failure | null>(null);
   const [selected, setSelected] = useState<string | null>(firstItemId(initial.run?.analysis ?? null));
@@ -297,6 +308,30 @@ export function AnalysedDocument({
         </section>
       )}
 
+      {source.kind === "browser" ? (
+        <p className="analysis-redlines-none">{RED_LINE_COPY.needAccount}</p>
+      ) : (
+        run &&
+        !running &&
+        (run.redLines.length === 0 ? (
+          <p className="analysis-redlines-none">
+            {RED_LINE_COPY.noneSet} <a href="/red-lines">{RED_LINE_COPY.setThem}</a>
+          </p>
+        ) : (
+          <section className="analysis-redlines" aria-labelledby={`${ids}-redlines`}>
+            <h3 id={`${ids}-redlines`}>{RED_LINE_COPY.usedLabel}</h3>
+            <ul>
+              {run.redLines.map((redLine, i) => (
+                <li key={redLine.id ?? i}>{describeRedLine(redLine)}</li>
+              ))}
+            </ul>
+            <p className="analysis-redlines-note">
+              {RED_LINE_COPY.rerunHint} <a href="/red-lines">{RED_LINE_COPY.edit}</a>
+            </p>
+          </section>
+        ))
+      )}
+
       <p className="analysis-scope">{ANALYSIS_COPY.scope}</p>
       <p className="analysis-vendor">{ANALYSIS_COPY.vendorOnly}</p>
     </section>
@@ -327,6 +362,11 @@ export function AnalysedDocument({
                       >
                         <span className="flag-tab-type">{CLAUSE_LABEL[flag.clauseType]}</span>
                         <span className="flag-tab-line">{tabExposure(flag)}</span>
+                        {flag.redLineBreaches.length > 0 && (
+                          <span className="flag-tab-redline">
+                            {RED_LINE_COPY.tab}: {flag.redLineBreaches.map((b) => describeRedLine(b.redLine)).join("; ")}
+                          </span>
+                        )}
                         <span className="flag-tab-tier">{TIER_LABEL[flag.tier]}</span>
                       </button>
                     </li>
@@ -387,6 +427,17 @@ export function AnalysedDocument({
                 {number && <span className="comment-clause">{ANALYSIS_COPY.clause(number)}</span>}
               </h3>
               <p className="comment-tier">{TIER_LABEL[flag.tier]}</p>
+              {flag.redLineBreaches.map((breach, i) => (
+                <p key={i} className="comment-redline">
+                  <strong>{RED_LINE_COPY.crosses}:</strong> {describeRedLine(breach.redLine)}.
+                  {breach.cited !== null && (
+                    <>
+                      {" "}
+                      {RED_LINE_COPY.citedFigure} <q>{breach.cited}</q>.
+                    </>
+                  )}
+                </p>
+              ))}
               <p>{flag.statement}</p>
               {parts.length > 0 ? (
                 <dl className="comment-exposure">
@@ -478,15 +529,13 @@ function tabExposure(flag: Flag): string {
 
 /**
  * A run to show beside `body`, with every citation, exposure fragment and
- * piece of wording checked against it, or why a saved one can't be shown.
+ * piece of wording checked against it and every breach worked out again from
+ * the run's red lines, or why a saved one can't be shown.
  */
-function checkRun(
-  run: AnalysisRun | null,
-  body: string,
-): { run: { analysis: Analysis; ranAt: string } | null; notice: StoredNotice | null } {
+function checkRun(run: AnalysisRun | null, body: string): { run: ShownRun | null; notice: StoredNotice | null } {
   if (!run) return { run: null, notice: null };
-  const check = checkStoredAnalysis(run.analysis, body);
-  if (check.ok) return { run: { analysis: check.analysis, ranAt: run.ranAt }, notice: null };
+  const check = checkStoredAnalysis(run.analysis, body, run.redLines);
+  if (check.ok) return { run: { analysis: check.analysis, ranAt: run.ranAt, redLines: check.redLines }, notice: null };
   return { run: null, notice: check.reason === "outdated" ? "outdated" : "rejected" };
 }
 

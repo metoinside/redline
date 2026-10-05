@@ -5,8 +5,12 @@
 //  - every citation is checked again against the document text it will be
 //    shown beside, and a flag that fails is left out (ADR 0001);
 //  - every exposure fragment is checked again against its citation, the money
-//    amount is read again from the fragment, and the tier and order are worked
-//    out again from what survived (ADR 0003, 0005);
+//    amount is read again from the fragment, red-line breaches are worked out
+//    again from the red lines the run used (the analyses.red_lines snapshot,
+//    passed in), and the tier and order are worked out again from what
+//    survived (ADR 0003, 0005). A breach stored on a flag is never read;
+//  - the snapshot itself must be a list of valid red lines, or nothing is
+//    shown: a tier worked out from a partial snapshot could hide a breach;
 //  - every outside-terms notice's citation is checked again the same way, and
 //    a notice that fails is left out;
 //  - the wording check runs again over every statement, reading and notice
@@ -27,6 +31,7 @@
 import { citationMatches } from "./citations";
 import { decideOutcome } from "./clean";
 import { checkExposure, parseMoneyAmount } from "./exposure";
+import { findBreaches, parseRedLines } from "./red-lines";
 import { assignTier, rankFlags } from "./tiers";
 import {
   ANALYSIS_SCHEMA_VERSION,
@@ -36,15 +41,17 @@ import {
   type Flag,
   type OutsideTermsNotice,
   type Readings,
+  type RedLine,
 } from "./types";
 import { findWordingDefects } from "./wording";
 
 export type StoredAnalysisCheck =
-  | { ok: true; analysis: Analysis }
+  /** redLines: the run's snapshot, checked, for showing which red lines it ran with. */
+  | { ok: true; analysis: Analysis; redLines: RedLine[] }
   /**
    * outdated: saved by an earlier version, and needs a re-run.
    * wording: generated text failed the wording check.
-   * unreadable: not an analysis this version can read.
+   * unreadable: not an analysis this version can read, or its red-line snapshot is not valid.
    */
   | { ok: false; reason: "outdated" | "wording" | "unreadable" };
 
@@ -61,7 +68,7 @@ function readReadings(value: unknown): Readings | null {
   return value.length === 1 ? [value[0] as string] : [value[0] as string, value[1] as string];
 }
 
-function readFlag(value: unknown, storedText: string): Flag | null {
+function readFlag(value: unknown, storedText: string, redLines: readonly RedLine[]): Flag | null {
   if (typeof value !== "object" || value === null) return null;
   const raw = value as Record<string, unknown>;
   if (typeof raw.id !== "string" || !isClauseType(raw.clauseType)) return null;
@@ -74,9 +81,19 @@ function readFlag(value: unknown, storedText: string): Flag | null {
 
   const { exposure } = checkExposure(raw.exposure as Record<string, unknown>, citation.text);
   const moneyAmount = exposure.money ? parseMoneyAmount(exposure.money) : null;
-  // No red-line breaches are stored yet (#10 adds them), so none is passed.
-  const tier = assignTier({ exposure, readings }, []);
-  return { id: raw.id, clauseType: raw.clauseType, citation, tier, statement: raw.statement, exposure, moneyAmount, readings };
+  const redLineBreaches = findBreaches({ clauseType: raw.clauseType, exposure }, redLines);
+  const tier = assignTier({ exposure, readings }, redLineBreaches);
+  return {
+    id: raw.id,
+    clauseType: raw.clauseType,
+    citation,
+    tier,
+    statement: raw.statement,
+    exposure,
+    moneyAmount,
+    readings,
+    redLineBreaches,
+  };
 }
 
 function readNotice(value: unknown, storedText: string): OutsideTermsNotice | null {
@@ -89,8 +106,12 @@ function readNotice(value: unknown, storedText: string): OutsideTermsNotice | nu
   return { id: raw.id, citation, document: raw.document };
 }
 
-/** Checks a saved analysis against the text it will be shown beside, and says why when it can't be shown. */
-export function checkStoredAnalysis(value: unknown, storedText: string): StoredAnalysisCheck {
+/**
+ * Checks a saved analysis against the text it will be shown beside and the
+ * red lines it ran with (its analyses.red_lines snapshot, as stored), and
+ * says why when it can't be shown.
+ */
+export function checkStoredAnalysis(value: unknown, storedText: string, redLineSnapshot: unknown): StoredAnalysisCheck {
   if (typeof value !== "object" || value === null) return { ok: false, reason: "unreadable" };
   const raw = value as Record<string, unknown>;
   const version = raw.schemaVersion;
@@ -100,8 +121,10 @@ export function checkStoredAnalysis(value: unknown, storedText: string): StoredA
   if (version !== ANALYSIS_SCHEMA_VERSION || !Array.isArray(raw.flags) || !Array.isArray(raw.outsideTerms)) {
     return { ok: false, reason: "unreadable" };
   }
+  const redLines = parseRedLines(redLineSnapshot);
+  if (!redLines) return { ok: false, reason: "unreadable" };
 
-  const flags = raw.flags.map((f) => readFlag(f, storedText)).filter((f): f is Flag => f !== null);
+  const flags = raw.flags.map((f) => readFlag(f, storedText, redLines)).filter((f): f is Flag => f !== null);
   const notices = raw.outsideTerms
     .map((n) => readNotice(n, storedText))
     .filter((n): n is OutsideTermsNotice => n !== null)
@@ -119,11 +142,12 @@ export function checkStoredAnalysis(value: unknown, storedText: string): StoredA
   return {
     ok: true,
     analysis: { schemaVersion: ANALYSIS_SCHEMA_VERSION, flags: ranked, outsideTerms: notices, outcome: decideOutcome(ranked, notices) },
+    redLines,
   };
 }
 
 /** The analysis to show beside `storedText`, or null when it can't be shown (see checkStoredAnalysis for why). */
-export function readStoredAnalysis(value: unknown, storedText: string): Analysis | null {
-  const check = checkStoredAnalysis(value, storedText);
+export function readStoredAnalysis(value: unknown, storedText: string, redLineSnapshot: unknown): Analysis | null {
+  const check = checkStoredAnalysis(value, storedText, redLineSnapshot);
   return check.ok ? check.analysis : null;
 }

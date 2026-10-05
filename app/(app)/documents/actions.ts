@@ -5,15 +5,22 @@
 // model and the model's raw answer never leave the server.
 
 import { checkDocumentText } from "@/lib/documents/new-document";
+import { runSavedAnalysis } from "@/lib/documents/saved-run";
 import { analyse } from "@/lib/engine/analyse";
-import { ModelError } from "@/lib/engine/model";
+import { ModelError, type ModelClient } from "@/lib/engine/model";
 import { createOpenRouterClient, isModelConfigured } from "@/lib/engine/openrouter";
 import { WordingDefectsError } from "@/lib/engine/wording";
-import type { Analysis, AnalysisDiagnostics, RedLine } from "@/lib/engine/types";
+import type { Analysis, RedLine } from "@/lib/engine/types";
+import { RED_LINE_COLUMNS } from "@/lib/red-lines/rows";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createServerSupabase, getCurrentUser } from "@/lib/supabase/server";
 
-export type AnalysisRun = { analysis: Analysis; ranAt: string };
+/**
+ * One run as the browser gets it. redLines is the snapshot the run used:
+ * checkStoredAnalysis works breaches and tiers out again from it before
+ * anything is shown. A run in the browser only (signed out) has none.
+ */
+export type AnalysisRun = { analysis: Analysis; ranAt: string; redLines: RedLine[] };
 
 export type RunAnalysisFailure =
   | "model-off"
@@ -24,21 +31,19 @@ export type RunAnalysisFailure =
   | "signed-out"
   | "not-found"
   | "invalid"
-  | "save-failed";
+  | "save-failed"
+  /** The buyer's red lines couldn't be loaded, so nothing ran: a run without them could miss a breach. */
+  | "red-lines-failed";
 
 export type RunAnalysisResult = { ok: true; run: AnalysisRun } | { ok: false; reason: RunAnalysisFailure };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Runs the engine with the real model. Any model failure becomes a plain reason; nothing about it reaches the browser. */
-async function runEngine(
-  text: string,
-  redLines: RedLine[],
-): Promise<{ ok: true; analysis: Analysis; diagnostics: AnalysisDiagnostics } | { ok: false; reason: RunAnalysisFailure }> {
+async function runEngine<T>(run: (client: ModelClient) => Promise<T>): Promise<{ ok: true; value: T } | { ok: false; reason: RunAnalysisFailure }> {
   if (!isModelConfigured()) return { ok: false, reason: "model-off" };
   try {
-    const { analysis, diagnostics } = await analyse({ text, redLines, client: createOpenRouterClient() });
-    return { ok: true, analysis, diagnostics };
+    return { ok: true, value: await run(createOpenRouterClient()) };
   } catch (err) {
     if (err instanceof WordingDefectsError) {
       // The terms only, never the model's text.
@@ -59,8 +64,11 @@ async function runEngine(
 /**
  * Analyses a document in the signed-in buyer's library and saves the result
  * with its run date. The text is loaded under row-level security, so only the
- * owner's own document can be analysed. If the model or the save fails,
- * nothing is saved and nothing is shown.
+ * owner's own document can be analysed. The buyer's current red lines are
+ * loaded the same way and go into the run, and the saved row keeps a
+ * snapshot of them, so "Analyse again" after a change uses the new ones. If
+ * the red lines, the model or the save fails, nothing is saved and nothing
+ * is shown.
  */
 export async function analyseSavedDocument(documentId: unknown): Promise<RunAnalysisResult> {
   if (!isSupabaseConfigured()) return { ok: false, reason: "accounts-off" };
@@ -75,34 +83,49 @@ export async function analyseSavedDocument(documentId: unknown): Promise<RunAnal
   if (loadError) return { ok: false, reason: "model-failed" };
   if (!doc) return { ok: false, reason: "not-found" };
 
-  // Red lines arrive with #10; until then every run uses none, and the snapshot says so.
-  const redLines: RedLine[] = [];
-  const result = await runEngine(doc.body as string, redLines);
-  if (!result.ok) return result;
+  const { data: rows, error: redLinesError } = await supabase
+    .from("red_lines")
+    .select(RED_LINE_COLUMNS)
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: true });
+  if (redLinesError) {
+    console.error("[analysis] could not load red lines", redLinesError.code);
+    return { ok: false, reason: "red-lines-failed" };
+  }
 
-  const { data: saved, error: saveError } = await supabase
-    .from("analyses")
-    .insert({ document_id: documentId, result: result.analysis, red_lines: redLines })
-    .select("created_at")
-    .single();
+  const engine = await runEngine((client) =>
+    runSavedAnalysis({ documentId, body: doc.body as string, redLineRows: rows ?? [], client }),
+  );
+  if (!engine.ok) return engine;
+  if (!engine.value.ok) {
+    console.error("[analysis] a red line row could not be read");
+    return { ok: false, reason: "red-lines-failed" };
+  }
+  const result = engine.value.run;
+
+  const { data: saved, error: saveError } = await supabase.from("analyses").insert(result.insert).select("created_at").single();
   if (saveError || !saved) {
     console.error("[analysis] could not save the analysis", saveError?.code ?? "no row");
     return { ok: false, reason: "save-failed" };
   }
 
-  return { ok: true, run: { analysis: result.analysis, ranAt: new Date(saved.created_at as string).toISOString() } };
+  return {
+    ok: true,
+    run: { analysis: result.analysis, ranAt: new Date(saved.created_at as string).toISOString(), redLines: result.redLines },
+  };
 }
 
 /**
  * Analyses a document kept only in the browser (signed out, or no accounts on
  * this server). The text is checked and normalised again here, without
- * trusting the browser, and nothing is saved.
+ * trusting the browser, and nothing is saved. Red lines need an account, so
+ * this runs with none.
  */
 export async function analyseBrowserDocument(body: unknown): Promise<RunAnalysisResult> {
   const checked = checkDocumentText(body);
   if (!checked.ok) return { ok: false, reason: "invalid" };
 
-  const result = await runEngine(checked.text, []);
+  const result = await runEngine((client) => analyse({ text: checked.text, redLines: [], client }));
   if (!result.ok) return result;
-  return { ok: true, run: { analysis: result.analysis, ranAt: new Date().toISOString() } };
+  return { ok: true, run: { analysis: result.value.analysis, ranAt: new Date().toISOString(), redLines: [] } };
 }

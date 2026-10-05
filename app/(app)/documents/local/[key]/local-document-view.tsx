@@ -63,7 +63,7 @@ export function LocalDocumentView({
       sourceKind={doc.sourceKind}
       addedAt={doc.addedAt}
       notice={notice}
-      source={{ kind: "browser" }}
+      source={{ kind: "browser", accountsConfigured }}
       modelConfigured={modelConfigured}
     />
   );

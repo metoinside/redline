@@ -3,7 +3,7 @@ import { assignTier } from "@/lib/engine/tiers";
 import type { RedLineBreach } from "@/lib/engine/types";
 
 // The tier rule (ADR 0003, 0005) as later tickets call it: #10 works out
-// red-line breaches and passes them in. The engine passes none until then.
+// red-line breaches (lib/engine/red-lines.ts) and passes them in.
 
 const noExposure = { exposure: {}, readings: ["The add-on renews with the Services."] as [string] };
 
@@ -13,7 +13,7 @@ describe("assignTier", () => {
   });
 
   it("puts a clause that breaches a red line in Negotiate before signing, even with nothing else cited", () => {
-    const breach: RedLineBreach = { redLine: { clauseType: "auto_renewal", limit: "no auto-renewal of any kind" } };
+    const breach: RedLineBreach = { redLine: { clauseType: "auto_renewal", limit: { kind: "not_allowed" } }, cited: null };
     expect(assignTier(noExposure, [breach])).toBe("negotiate");
   });
 

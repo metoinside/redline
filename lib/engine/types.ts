@@ -5,9 +5,12 @@
 // versions of the app, so every field a later ticket adds is optional on the
 // stored shape or comes with a new schemaVersion. #5 added tier, statement,
 // exposure, moneyAmount and readings to Flag (schema version 2). #7 added
-// outsideTerms and outcome to Analysis (schema version 3). Tickets #6, #8-#10
-// add to Flag: redLineBreached, counterOffer; and to Analysis: summary,
-// noticeObligations.
+// outsideTerms and outcome to Analysis (schema version 3). #10 added
+// redLineBreaches to Flag without a new version: it is worked out again on
+// every read from the red lines the run used (the analyses.red_lines
+// snapshot), never read from the stored flag, and every version 3 analysis
+// saved before #10 ran with no red lines. Tickets #6, #8 add to Flag:
+// counterOffer; and to Analysis: summary, noticeObligations.
 
 /** The renewal-and-exit family (ADR 0004): the only clause types that can become flags. */
 export type ClauseType = "auto_renewal" | "notice_window" | "early_termination_fee" | "rollover" | "multi_year_term";
@@ -80,21 +83,77 @@ export interface Flag {
   /** The largest sum read in code from exposure.money, or null when it states none. Used to order flags. */
   moneyAmount: number | null;
   readings: Readings;
+  /**
+   * The buyer's red lines this clause breaches, in the order the red lines
+   * were given. Any breach puts the flag in Negotiate before signing.
+   */
+  redLineBreaches: RedLineBreach[];
 }
 
 /**
- * A flag's clause breaching one of the buyer's red lines. #10 works these out
- * from the buyer's red lines; the tier rule takes them as an input.
+ * How a red line limits its clause type, in a form code can check (#10):
+ *  - not_allowed: no clause of the type at all;
+ *  - max_days: the longest notice period the buyer accepts (notice_window);
+ *  - max_months: the longest renewal or rollover term, or lock-in, the buyer
+ *    accepts (auto_renewal, rollover, multi_year_term);
+ *  - max_dollars: the highest fee the buyer accepts (early_termination_fee).
+ * Values are whole numbers. The same rules are check constraints on the
+ * red_lines table (supabase/migrations/20261006150000_red_lines.sql).
+ */
+export type RedLineLimit =
+  | { kind: "not_allowed" }
+  | { kind: "max_days"; value: number }
+  | { kind: "max_months"; value: number }
+  | { kind: "max_dollars"; value: number };
+
+export type RedLineLimitKind = RedLineLimit["kind"];
+export type NumericLimitKind = Exclude<RedLineLimitKind, "not_allowed">;
+
+/** The limits each clause type can take: "not allowed", and the one figure its clauses state. */
+export const LIMIT_KINDS: Record<ClauseType, readonly RedLineLimitKind[]> = {
+  auto_renewal: ["not_allowed", "max_months"],
+  notice_window: ["not_allowed", "max_days"],
+  early_termination_fee: ["not_allowed", "max_dollars"],
+  rollover: ["not_allowed", "max_months"],
+  multi_year_term: ["not_allowed", "max_months"],
+};
+
+/** The figure-limit for a clause type (the one that isn't "not allowed"). */
+export const NUMERIC_LIMIT_KIND: Record<ClauseType, NumericLimitKind> = {
+  auto_renewal: "max_months",
+  notice_window: "max_days",
+  early_termination_fee: "max_dollars",
+  rollover: "max_months",
+  multi_year_term: "max_months",
+};
+
+/** Inclusive bounds on a figure-limit's value. Ten years, twenty years, $100 million. */
+export const LIMIT_VALUE_RANGE: Record<NumericLimitKind, { min: number; max: number }> = {
+  max_days: { min: 1, max: 3650 },
+  max_months: { min: 1, max: 240 },
+  max_dollars: { min: 1, max: 100_000_000 },
+};
+
+/** A term the buyer will not accept: a limit on one clause type in the family. An input to every analysis. */
+export interface RedLine {
+  /** The red_lines row it came from, when it came from one. Never used to decide a breach. */
+  id?: string;
+  clauseType: ClauseType;
+  limit: RedLineLimit;
+}
+
+/**
+ * A flag's clause breaching one of the buyer's red lines, worked out in code
+ * from the flag's checked exposure (lib/engine/red-lines.ts), never by the model.
  */
 export interface RedLineBreach {
   redLine: RedLine;
-}
-
-/** A term the buyer will not accept (#10 fills these in). An input to every analysis. */
-export interface RedLine {
-  clauseType: ClauseType;
-  /** The limit in the buyer's words, such as "no notice window longer than 60 days". */
-  limit: string;
+  /**
+   * The words in the flag's citation that breach a figure-limit, such as
+   * "ninety (90) days" or "$25,000". null for a "not allowed" red line,
+   * which any flag of its type breaches.
+   */
+  cited: string | null;
 }
 
 /**

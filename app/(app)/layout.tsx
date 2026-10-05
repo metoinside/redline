@@ -23,6 +23,7 @@ export const viewport: Viewport = {
 const NAV = [
   { href: "/new", label: "Add a document" },
   { href: "/library", label: "Library" },
+  { href: "/red-lines", label: "Red lines" },
 ];
 
 export default async function AppLayout({ children }: { children: ReactNode }) {

@@ -230,6 +230,35 @@ p { margin: 0; }
 }
 .field input:disabled, .field textarea:disabled { opacity: 0.6; cursor: progress; }
 
+/* ---------- Red lines ---------- */
+.redlines { display: grid; gap: 22px; }
+.redlines-note { color: var(--graphite); max-width: 46rem; }
+.redline-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+.redline-list > li { padding: 14px 0; border-bottom: 1px solid var(--rule); }
+.redline-row { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px 24px; }
+.redline-text { font-weight: 600; color: var(--ink); }
+.redline-actions { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 20px; }
+.redline-delete { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+.redline-error { color: var(--ink); font-size: 0.92rem; }
+.redline-add { display: grid; gap: 14px; padding-top: 4px; }
+.redline-add h2 { font-weight: 700; font-size: 1.2rem; }
+.redline-form .form-actions .status:empty { display: none; }
+.field select {
+  font: inherit; color: var(--ink);
+  padding: 10px 12px;
+  background: var(--sheet);
+  border: 1px solid var(--graphite);
+  border-radius: 2px;
+  width: 100%; max-width: 22rem;
+}
+.field select:focus-visible { outline: 3px solid var(--ink); outline-offset: 1px; }
+.field--short input { max-width: 12rem; font-variant-numeric: tabular-nums; }
+.choice { border: 0; margin: 0; padding: 0; min-width: 0; }
+.choice legend { font-weight: 600; font-size: 0.95rem; color: var(--ink); padding: 0; margin-bottom: 6px; }
+.choice label { display: flex; align-items: center; gap: 10px; font-weight: 400; font-size: 1rem; padding: 4px 0; cursor: pointer; }
+.choice input[type="radio"] { width: 18px; height: 18px; margin: 0; accent-color: var(--ink); }
+.choice:disabled { opacity: 0.6; }
+
 .status { color: var(--graphite); }
 .status--done { color: var(--ink); }
 .keep-note { color: var(--graphite); max-width: 46rem; }
@@ -291,6 +320,14 @@ p { margin: 0; }
 .checklist-status { display: flex; flex-wrap: wrap; gap: 4px 14px; color: var(--graphite); }
 .checklist-cite { color: var(--ink); font-weight: 600; text-decoration-color: var(--red); }
 .clean-result .clean-miss { color: var(--graphite); font-size: 0.95rem; }
+
+/* The red lines a run used. Ruled rows, like the checklist. */
+.analysis-redlines { display: grid; gap: 6px; justify-self: stretch; max-width: 46rem; }
+.analysis-redlines h3 { font-weight: 700; font-size: 1rem; color: var(--ink); }
+.analysis-redlines ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+.analysis-redlines li { padding: 8px 0; border-bottom: 1px solid var(--rule); color: var(--ink); }
+.analysis-redlines-note, .analysis-redlines-none { color: var(--graphite); font-size: 0.95rem; max-width: 46rem; }
+.analysis-redlines a, .analysis-redlines-none a { color: var(--ink); font-weight: 600; text-decoration-color: var(--red); }
 @media (max-width: 640px) {
   .checklist li { grid-template-columns: 1fr; }
 }
@@ -341,6 +378,7 @@ p { margin: 0; }
 .flag-tab-type { font-weight: 700; font-size: 1rem; line-height: 1.2; }
 .flag-tab-line { font-weight: 500; font-size: 0.86rem; overflow: hidden; text-overflow: ellipsis; }
 .flag-tab-tier { font-weight: 700; font-size: 0.76rem; }
+.flag-tab-redline { font-weight: 600; font-size: 0.76rem; overflow: hidden; text-overflow: ellipsis; }
 .flag-tab.is-selected { box-shadow: 0 0 0 3px var(--ink), 0 8px 14px -12px rgba(60, 40, 10, 0.6); }
 
 /* ---------- Margin comments ---------- */
@@ -362,6 +400,8 @@ p { margin: 0; }
 .comment-exposure dd.comment-document { font-family: var(--ui); font-weight: 600; font-size: 0.95rem; overflow-wrap: anywhere; }
 .comment-clause { font-weight: 600; font-size: 0.82rem; color: var(--graphite); }
 .comment-tier { font-weight: 700; font-size: 0.82rem; margin-bottom: 6px; }
+.comment-redline { margin-bottom: 6px; color: var(--ink); }
+.comment-redline q { font-family: var(--doc); }
 .comment-exposure { margin: 8px 0 0; display: grid; gap: 4px; }
 .comment-exposure div { display: grid; gap: 0; }
 .comment-exposure dt { font-weight: 600; font-size: 0.82rem; color: var(--graphite); }
