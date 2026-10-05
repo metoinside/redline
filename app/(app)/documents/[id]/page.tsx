@@ -1,14 +1,19 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
+import { isModelConfigured } from "@/lib/engine/openrouter";
 import type { SourceKind } from "@/lib/extraction/limits";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createServerSupabase, getCurrentUser } from "@/lib/supabase/server";
 import { AccountsOff } from "../../accounts-off";
-import { DocumentView } from "../document-view";
+import type { AnalysisRun } from "../actions";
+import { AnalysedDocument } from "../analysed-document";
 
 type Params = { params: Promise<{ id: string }> };
 type DocumentRow = { id: string; title: string; body: string; source_kind: SourceKind; created_at: string };
+
+// An analysis can take a minute or two; the run is a server action on this page.
+export const maxDuration = 120;
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -25,6 +30,21 @@ const loadDocument = cache(async (id: string): Promise<DocumentRow | null | "err
   if (error) return "error";
   return (data as DocumentRow | null) ?? null;
 });
+
+// The latest saved analysis of a document, or null when there is none or it
+// can't be read. Its citations are checked again before they are shown.
+async function loadLatestAnalysis(documentId: string): Promise<AnalysisRun | null> {
+  const supabase = await createServerSupabase();
+  const { data, error } = await supabase
+    .from("analyses")
+    .select("result, created_at")
+    .eq("document_id", documentId)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error || !data) return null;
+  return { analysis: data.result as AnalysisRun["analysis"], ranAt: new Date(data.created_at as string).toISOString() };
+}
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   if (!isSupabaseConfigured() || !(await getCurrentUser())) return { title: "Document" };
@@ -55,5 +75,16 @@ export default async function DocumentPage({ params }: Params) {
   }
   if (!doc) notFound();
 
-  return <DocumentView title={doc.title} body={doc.body} sourceKind={doc.source_kind} addedAt={doc.created_at} />;
+  const latest = await loadLatestAnalysis(doc.id);
+
+  return (
+    <AnalysedDocument
+      title={doc.title}
+      body={doc.body}
+      sourceKind={doc.source_kind}
+      addedAt={doc.created_at}
+      source={{ kind: "saved", documentId: doc.id, latest }}
+      modelConfigured={isModelConfigured()}
+    />
+  );
 }

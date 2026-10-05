@@ -258,6 +258,116 @@ p { margin: 0; }
 }
 .doc-text mark { background: none; color: inherit; }
 
+/* ---------- Analysis: the panel under the document heading ---------- */
+.analysis {
+  display: grid; gap: 12px; justify-items: start;
+  max-width: 46rem;
+  padding: 18px 0 22px; margin-bottom: 30px;
+  border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+}
+.analysis-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; }
+.analysis-head h2 { font-weight: 700; font-size: 1.2rem; color: var(--ink); }
+.analysis-ran { color: var(--graphite); font-size: 0.95rem; }
+.analysis-run { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; }
+.analysis-run .status:empty { display: none; }
+.analysis-result { font-weight: 600; color: var(--ink); }
+.analysis-scope, .analysis-vendor { color: var(--graphite); font-size: 0.95rem; }
+.analysis .message { justify-self: stretch; }
+
+/* ---------- Citation: the red pen underline, in place ---------- */
+.doc-text mark.cite {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 8' preserveAspectRatio='none'%3E%3Cpath d='M1 5.6C20 3.7 45 3.1 65 4.1c13 .6 24 1.5 34 .8' fill='none' stroke='%23c8102e' stroke-width='2.2' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 100% 8px;
+  padding-bottom: 3px;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  cursor: pointer;
+  scroll-margin: 96px 0;
+  animation: pen-draw 0.9s var(--ease-out) 0.2s both;
+}
+.doc-text mark.cite.is-selected { background-color: rgba(200, 16, 46, 0.08); }
+.doc-text mark.cite:focus { outline: none; }
+.doc-text mark.cite:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+@keyframes pen-draw { from { background-size: 0 8px; } to { background-size: 100% 8px; } }
+
+/* ---------- Flag tabs on the sheet's edge ---------- */
+.doc-sheet--tabs { position: relative; }
+/* Its own stacking context, so tabs tucked under the sheet (z-index -1) stay
+   above the work area and can still be clicked. */
+.work { position: relative; z-index: 0; }
+.flag-tabs { margin: 0 0 22px; }
+.flag-tabs ul { list-style: none; margin: 0; padding: 0 0 6px; display: flex; gap: 8px; overflow-x: auto; scrollbar-color: var(--manila-deep) transparent; }
+.flag-tab {
+  display: grid; gap: 1px; text-align: left; white-space: nowrap;
+  padding: 10px 14px 10px 16px;
+  font: inherit; color: var(--ink);
+  background: var(--sheet);
+  border: 0; border-radius: 6px; cursor: pointer;
+  box-shadow: inset 0 0 0 1px var(--graphite);
+  transition: transform 0.35s var(--ease-out), box-shadow 0.2s ease;
+}
+.flag-tab-type { font-weight: 700; font-size: 1rem; line-height: 1.2; }
+.flag-tab-line { font-weight: 500; font-size: 0.86rem; color: var(--graphite); }
+.flag-tab.is-selected { box-shadow: inset 0 0 0 2px var(--ink); }
+
+/* ---------- Margin comments ---------- */
+.margin { display: grid; gap: 12px; margin-bottom: 22px; }
+.comment {
+  display: none;
+  padding: 2px 0 4px 14px;
+  border-left: 1px solid rgba(200, 16, 46, 0.55);
+  color: var(--ink);
+  font-size: 0.98rem; line-height: 1.5;
+}
+.comment.is-selected { display: block; }
+.comment h3 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
+.comment-clause { font-weight: 600; font-size: 0.82rem; color: var(--graphite); }
+.doc-body--margin { display: flex; flex-direction: column; }
+.doc-body--margin .margin { order: -1; }
+
+/* Wide screens: tabs stand off the sheet's right edge, tucked under it, and
+   every comment sits in a margin column level with its sentence. */
+@media (min-width: 1300px) {
+  .doc-sheet--tabs { margin-right: 184px; }
+  .flag-tabs {
+    position: absolute; top: 0; bottom: 0; left: calc(100% - 12px);
+    width: 196px; margin: 0;
+    z-index: -1;
+  }
+  .flag-tabs ul {
+    position: sticky; top: 24px;
+    display: grid; justify-items: start; gap: 10px;
+    padding: 132px 0 0; overflow: visible;
+  }
+  .flag-tabs li { animation: tab-out 0.7s var(--ease-out) both; animation-delay: calc(0.3s + var(--i, 0) * 140ms); }
+  .flag-tab {
+    padding: 10px 14px 10px 26px;
+    border-radius: 0 6px 6px 0;
+    box-shadow: inset 0 0 0 1px var(--graphite), var(--desk-shadow);
+  }
+  .flag-tab:hover { transform: translateX(4px); }
+  .flag-tab.is-selected { box-shadow: inset 0 0 0 2px var(--ink), var(--desk-shadow); }
+
+  .doc-body--margin {
+    display: grid;
+    grid-template-columns: minmax(28rem, 72ch) minmax(12rem, 16rem);
+    gap: clamp(24px, 3vw, 40px);
+    align-items: start;
+  }
+  .doc-body--margin .margin { order: 0; position: relative; display: block; margin: 0; }
+  .comment { display: block; position: absolute; left: 0; right: 0; color: var(--graphite); }
+  .comment h3 { color: var(--ink); }
+  .comment.is-selected { color: var(--ink); }
+  .comment::before {
+    content: ""; position: absolute; top: 0.8em; right: 100%;
+    width: clamp(24px, 3vw, 40px);
+    border-top: 1px solid rgba(200, 16, 46, 0.55);
+  }
+}
+@keyframes tab-out { from { transform: translateX(-28px); opacity: 0; } to { transform: none; opacity: 1; } }
+
 /* ---------- Narrow screens: rail becomes a top bar ---------- */
 @media (max-width: 860px) {
   .frame { grid-template-columns: minmax(0, 1fr); }
@@ -288,6 +398,7 @@ p { margin: 0; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .action { transition: none; }
-  .action:hover { transform: none; }
+  .action, .flag-tab { transition: none; }
+  .action:hover, .flag-tab:hover { transform: none; }
+  .doc-text mark.cite, .flag-tabs li { animation: none; }
 }

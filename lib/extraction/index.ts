@@ -12,7 +12,7 @@ import { countTextChars, MAX_DOCUMENT_CHARS, MAX_FILE_BYTES, MIN_TEXT_CHARS, typ
 import { normalizeText } from "./normalize";
 import { extractPdf } from "./pdf";
 
-export { normalizeText } from "./normalize";
+export { normalizeFragment, normalizeText } from "./normalize";
 export * from "./limits";
 
 export type ExtractionInput = { name: string; type: string; bytes: ArrayBuffer };

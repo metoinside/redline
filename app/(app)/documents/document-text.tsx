@@ -9,7 +9,16 @@ import type { ReactNode } from "react";
 // text[start, end) in a <mark>; marks that overlap an earlier one or fall
 // outside the text are left out rather than bending the text to fit.
 
-export type TextMark = { start: number; end: number; id?: string; className?: string };
+export type TextMark = {
+  start: number;
+  end: number;
+  id?: string;
+  className?: string;
+  /** -1 lets a script focus the mark (a selected citation) without adding it to the tab order. */
+  tabIndex?: number;
+  /** Rendered as data-* attributes. */
+  data?: Record<string, string>;
+};
 
 export function DocumentText({ text, marks = [] }: { text: string; marks?: TextMark[] }) {
   const parts: ReactNode[] = [];
@@ -21,7 +30,15 @@ export function DocumentText({ text, marks = [] }: { text: string; marks?: TextM
     if (!valid) continue;
     if (mark.start > at) parts.push(text.slice(at, mark.start));
     parts.push(
-      <mark key={`${mark.start}-${mark.end}`} id={mark.id} className={mark.className} data-start={mark.start} data-end={mark.end}>
+      <mark
+        key={`${mark.start}-${mark.end}`}
+        id={mark.id}
+        className={mark.className}
+        tabIndex={mark.tabIndex}
+        data-start={mark.start}
+        data-end={mark.end}
+        {...Object.fromEntries(Object.entries(mark.data ?? {}).map(([k, v]) => [`data-${k}`, v]))}
+      >
         {text.slice(mark.start, mark.end)}
       </mark>,
     );
@@ -29,9 +46,5 @@ export function DocumentText({ text, marks = [] }: { text: string; marks?: TextM
   }
   if (at < text.length) parts.push(text.slice(at));
 
-  return (
-    <div className="doc-text">
-      {parts}
-    </div>
-  );
+  return <div className="doc-text">{parts}</div>;
 }

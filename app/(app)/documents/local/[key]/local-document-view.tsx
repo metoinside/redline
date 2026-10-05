@@ -2,9 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { loadLocalDocument, type LocalDocument } from "@/lib/documents/local";
-import { DocumentView } from "../../document-view";
+import { AnalysedDocument } from "../../analysed-document";
 
-export function LocalDocumentView({ id, accountsConfigured }: { id: string; accountsConfigured: boolean }) {
+export function LocalDocumentView({
+  id,
+  accountsConfigured,
+  modelConfigured,
+}: {
+  id: string;
+  accountsConfigured: boolean;
+  modelConfigured: boolean;
+}) {
   // undefined until the browser has looked in sessionStorage.
   const [doc, setDoc] = useState<LocalDocument | null | undefined>(undefined);
 
@@ -48,5 +56,15 @@ export function LocalDocumentView({ id, accountsConfigured }: { id: string; acco
     </p>
   );
 
-  return <DocumentView title={doc.title} body={doc.body} sourceKind={doc.sourceKind} addedAt={doc.addedAt} notice={notice} />;
+  return (
+    <AnalysedDocument
+      title={doc.title}
+      body={doc.body}
+      sourceKind={doc.sourceKind}
+      addedAt={doc.addedAt}
+      notice={notice}
+      source={{ kind: "browser" }}
+      modelConfigured={modelConfigured}
+    />
+  );
 }

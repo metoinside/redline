@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { MAX_DOCUMENT_CHARS, normalizePaste, normalizeText } from "@/lib/extraction";
+import { normalizeFragment } from "@/lib/extraction/normalize";
 import { FIXTURE_NAMES, loadFixture } from "../fixtures/index";
 
 // normalizeText is the one canonical normalisation (ADR 0001). The stored
@@ -144,5 +145,20 @@ describe("pasted text", () => {
 
   it("is refused when it is longer than Redline stores", () => {
     expect(normalizePaste("word ".repeat(MAX_DOCUMENT_CHARS / 4))).toEqual({ ok: false, reason: "too-long" });
+  });
+});
+
+describe("normalizeFragment, for a piece of text such as a quoted sentence", () => {
+  it("applies every rule but adds no trailing line break", () => {
+    expect(normalizeFragment("  Provider\u2019s  \u201Cstandard\u201D\tterms \n")).toBe("Provider's \"standard\" terms");
+    expect(normalizeFragment("")).toBe("");
+    expect(normalizeFragment(" \n ")).toBe("");
+  });
+
+  it("is normalizeText without the final line break", () => {
+    for (const input of ["a  b\n\n\nc", "\uFB01le-\nname", "x\r\ny\u00A0z  ", "\n\n  lead"]) {
+      const full = normalizeText(input);
+      expect(normalizeFragment(input)).toBe(full.replace(/\n$/, ""));
+    }
   });
 });

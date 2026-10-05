@@ -1,9 +1,9 @@
 // The one canonical normalisation (ADR 0001). It runs once, when a document's
 // text is extracted or pasted, and the result is the stored document text
-// that every citation is checked against. The citation verifier reuses this
-// function unchanged, so a quote and the document are always compared in the
-// same form. It must stay idempotent: normalizeText(normalizeText(x)) equals
-// normalizeText(x) for every x.
+// that every citation is checked against. The citation verifier puts each
+// quote through the same rules (normalizeFragment, below), so a quote and the
+// document are always compared in the same form. It must stay idempotent:
+// normalizeText(normalizeText(x)) equals normalizeText(x) for every x.
 //
 // The rules, in the order they run:
 //  1. Line endings become LF (CRLF, lone CR, U+2028, U+2029, form feed).
@@ -21,6 +21,11 @@
 // 12. Blank lines at the start are removed, and the text ends with exactly
 //     one line break (empty text stays empty).
 //
+// normalizeFragment applies rules 1-12 except the final line break, for a
+// piece of text that is compared against the stored text rather than stored
+// itself, such as the sentence a model quotes. normalizeText is that plus the
+// line break, so the two can never drift apart.
+//
 // Nothing else changes: dashes, digits, case, punctuation and single line
 // breaks are kept as they are.
 
@@ -34,8 +39,8 @@ const LIGATURES: Record<string, string> = {
   "\uFB06": "st",
 };
 
-export function normalizeText(raw: string): string {
-  const text = raw
+export function normalizeFragment(raw: string): string {
+  return raw
     // 1. Line endings.
     .replace(/\r\n?|[\u2028\u2029\f]/g, "\n")
     // 2. Invisible characters that only get in the way of matching.
@@ -62,6 +67,9 @@ export function normalizeText(raw: string): string {
     // 12. The edges of the document.
     .replace(/^[ \n]+/, "")
     .replace(/[ \n]+$/, "");
+}
 
+export function normalizeText(raw: string): string {
+  const text = normalizeFragment(raw);
   return text === "" ? "" : `${text}\n`;
 }

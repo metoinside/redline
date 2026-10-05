@@ -24,16 +24,31 @@ export function checkNewDocument(input: unknown): NewDocumentCheck {
   }
   if (!(SOURCE_KINDS as readonly string[]).includes(sourceKind)) return { ok: false, reason: "invalid" };
 
-  // Checked before normalising, so an oversized request costs nothing.
-  if (body.length > MAX_DOCUMENT_CHARS * 2) return { ok: false, reason: "too-long" };
-  const text = normalizeText(body);
-  if (countTextChars(text) < MIN_TEXT_CHARS) return { ok: false, reason: "no-text" };
-  if (text.length > MAX_DOCUMENT_CHARS) return { ok: false, reason: "too-long" };
+  const checked = checkDocumentText(body);
+  if (!checked.ok) return checked;
+  const text = checked.text;
 
   const cleanTitle = title.replace(/\s+/g, " ").trim();
   if (cleanTitle.length === 0 || cleanTitle.length > MAX_TITLE_CHARS) return { ok: false, reason: "invalid" };
 
   return { ok: true, document: { title: cleanTitle, body: text, sourceKind: sourceKind as SourceKind } };
+}
+
+export type DocumentTextCheck = { ok: true; text: string } | { ok: false; reason: "invalid" | "no-text" | "too-long" };
+
+/**
+ * Checks document text from the browser without trusting it: puts it through
+ * the canonical normalisation again (a no-op for text that came from
+ * extractText or normalizePaste) and applies the limits again.
+ */
+export function checkDocumentText(body: unknown): DocumentTextCheck {
+  if (typeof body !== "string") return { ok: false, reason: "invalid" };
+  // Checked before normalising, so an oversized request costs nothing.
+  if (body.length > MAX_DOCUMENT_CHARS * 2) return { ok: false, reason: "too-long" };
+  const text = normalizeText(body);
+  if (countTextChars(text) < MIN_TEXT_CHARS) return { ok: false, reason: "no-text" };
+  if (text.length > MAX_DOCUMENT_CHARS) return { ok: false, reason: "too-long" };
+  return { ok: true, text };
 }
 
 /** A starting title: the file name without its extension, or the text's first line. */
