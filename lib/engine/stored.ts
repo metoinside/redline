@@ -13,18 +13,23 @@
 //    shown: a tier worked out from a partial snapshot could hide a breach;
 //  - every outside-terms notice's citation is checked again the same way, and
 //    a notice that fails is left out;
-//  - the wording check runs again over every statement, reading and notice
-//    description. If any defect is found, nothing from the analysis is shown:
+//  - every summary point's and notice obligation's citation is checked again
+//    the same way, and each deadline again against its citation (a stated
+//    date must be in the sentence, a rule must name no date the sentence
+//    doesn't); one that fails is left out (lib/engine/summary.ts);
+//  - the wording check runs again over every statement, reading, notice
+//    description, summary point, obligation description and deadline rule. If any defect is found, nothing from the analysis is shown:
 //    a confident, checked result or none;
 //  - whether the result is clean, and its checklist, are worked out again from
 //    the flags and notices that survived (lib/engine/clean.ts). A stored
 //    "clean" is never read.
 //
-// An analysis saved before schema version 3 is not shown. It is reported as
+// An analysis saved before schema version 4 is not shown. It is reported as
 // outdated so the buyer can run it again. Version 1 (#4) has no tiers, so its
 // $48,000 renewal would rank no higher than a benign one. Version 2 (#5) was
 // never asked about outside terms, so a clean result worked out from it could
-// be a false all-clear.
+// be a false all-clear. Version 3 (#5, #7, #10) has no summary and no notice
+// obligations, so a deadline the buyer has to meet would go unshown.
 //
 // Safe to import in the browser.
 
@@ -32,6 +37,7 @@ import { citationMatches } from "./citations";
 import { decideOutcome } from "./clean";
 import { checkExposure, parseMoneyAmount } from "./exposure";
 import { findBreaches, parseRedLines } from "./red-lines";
+import { byDocumentOrder, checkDeadline, obligationPieces, summaryPieces } from "./summary";
 import { assignTier, rankFlags } from "./tiers";
 import {
   ANALYSIS_SCHEMA_VERSION,
@@ -39,9 +45,11 @@ import {
   type Analysis,
   type Citation,
   type Flag,
+  type NoticeObligation,
   type OutsideTermsNotice,
   type Readings,
   type RedLine,
+  type SummaryPoint,
 } from "./types";
 import { findWordingDefects } from "./wording";
 
@@ -106,6 +114,28 @@ function readNotice(value: unknown, storedText: string): OutsideTermsNotice | nu
   return { id: raw.id, citation, document: raw.document };
 }
 
+function readSummaryPoint(value: unknown, storedText: string): SummaryPoint | null {
+  if (typeof value !== "object" || value === null) return null;
+  const raw = value as Record<string, unknown>;
+  if (typeof raw.id !== "string") return null;
+  const citation = readCitation(raw.citation);
+  if (!citation || !citationMatches(storedText, citation)) return null;
+  if (typeof raw.text !== "string" || raw.text.trim() === "") return null;
+  return { id: raw.id, text: raw.text, citation };
+}
+
+function readObligation(value: unknown, storedText: string): NoticeObligation | null {
+  if (typeof value !== "object" || value === null) return null;
+  const raw = value as Record<string, unknown>;
+  if (typeof raw.id !== "string") return null;
+  const citation = readCitation(raw.citation);
+  if (!citation || !citationMatches(storedText, citation)) return null;
+  if (typeof raw.description !== "string" || raw.description.trim() === "") return null;
+  const deadline = checkDeadline(raw.deadline, citation.text);
+  if (!deadline.ok) return null;
+  return { id: raw.id, description: raw.description, deadline: deadline.deadline, citation };
+}
+
 /**
  * Checks a saved analysis against the text it will be shown beside and the
  * red lines it ran with (its analyses.red_lines snapshot, as stored), and
@@ -118,7 +148,13 @@ export function checkStoredAnalysis(value: unknown, storedText: string, redLineS
   if (typeof version === "number" && Number.isInteger(version) && version >= 1 && version < ANALYSIS_SCHEMA_VERSION) {
     return { ok: false, reason: "outdated" };
   }
-  if (version !== ANALYSIS_SCHEMA_VERSION || !Array.isArray(raw.flags) || !Array.isArray(raw.outsideTerms)) {
+  if (
+    version !== ANALYSIS_SCHEMA_VERSION ||
+    !Array.isArray(raw.flags) ||
+    !Array.isArray(raw.outsideTerms) ||
+    !Array.isArray(raw.summary) ||
+    !Array.isArray(raw.noticeObligations)
+  ) {
     return { ok: false, reason: "unreadable" };
   }
   const redLines = parseRedLines(redLineSnapshot);
@@ -129,7 +165,17 @@ export function checkStoredAnalysis(value: unknown, storedText: string, redLineS
     .map((n) => readNotice(n, storedText))
     .filter((n): n is OutsideTermsNotice => n !== null)
     .sort((a, b) => a.citation.start - b.citation.start || a.citation.end - b.citation.end);
+  const summary = raw.summary
+    .map((p) => readSummaryPoint(p, storedText))
+    .filter((p): p is SummaryPoint => p !== null)
+    .sort(byDocumentOrder);
+  const obligations = raw.noticeObligations
+    .map((o) => readObligation(o, storedText))
+    .filter((o): o is NoticeObligation => o !== null)
+    .sort(byDocumentOrder);
   const defects = findWordingDefects([
+    ...summary.flatMap((p) => summaryPieces(p, p.id)),
+    ...obligations.flatMap((o) => obligationPieces(o, o.id)),
     ...flags.flatMap((f) => [
       { field: `${f.id} statement`, text: f.statement },
       ...f.readings.map((r, i) => ({ field: `${f.id} reading ${i + 1}`, text: r })),
@@ -141,7 +187,14 @@ export function checkStoredAnalysis(value: unknown, storedText: string, redLineS
   const ranked = rankFlags(flags);
   return {
     ok: true,
-    analysis: { schemaVersion: ANALYSIS_SCHEMA_VERSION, flags: ranked, outsideTerms: notices, outcome: decideOutcome(ranked, notices) },
+    analysis: {
+      schemaVersion: ANALYSIS_SCHEMA_VERSION,
+      summary,
+      noticeObligations: obligations,
+      flags: ranked,
+      outsideTerms: notices,
+      outcome: decideOutcome(ranked, notices),
+    },
     redLines,
   };
 }

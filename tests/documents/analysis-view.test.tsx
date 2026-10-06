@@ -6,8 +6,10 @@ import {
   CLAUSE_LABEL,
   CLEAN_COPY,
   FAILURE_COPY,
+  OBLIGATION_COPY,
   OUTSIDE_COPY,
   RED_LINE_COPY,
+  SUMMARY_COPY,
   TIER_LABEL,
   clauseNumberAt,
 } from "@/app/(app)/documents/analysis-copy";
@@ -79,8 +81,8 @@ const commentOf = (html: string, sentence: string) => {
 
 describe("a saved document with an analysis", () => {
   it("shows every flag as a tab in its tier colour, grouped by tier in ranked order, and marks every citation in the unchanged text", async () => {
-    // Flags only here; outside-terms notices have their own tests below.
-    const analysis = await savedAnalysis(analysisPayload(sidecar, { outsideTerms: [] }));
+    // Flags only here; outside-terms notices and notice obligations have their own tests below.
+    const analysis = await savedAnalysis(analysisPayload(sidecar, { outsideTerms: [], noticeObligations: [] }));
     const html = render({ kind: "saved", documentId: "d", latest: { analysis, ranAt: "2026-10-06T10:00:00Z", redLines: [] } });
 
     expect(docTextOf(html)).toBe(contract);
@@ -176,7 +178,7 @@ describe("a saved document with an analysis", () => {
   });
 
   it("shows the clean result, with every clause type as \"we found none\", when nothing was found", async () => {
-    const analysis = await savedAnalysis({ clauses: [], outside_terms: [] }, cleanText);
+    const analysis = await savedAnalysis({ clauses: [], summary: [], notice_obligations: [], outside_terms: [] }, cleanText);
     const html = render({ kind: "saved", documentId: "d", latest: { analysis, ranAt: "2026-10-06T10:00:00Z", redLines: [] } }, true, cleanText);
     const panel = panelOf(html);
     expect(panel).toContain("No renewal or exit terms to negotiate");
@@ -192,7 +194,8 @@ describe("a saved document with an analysis", () => {
     const tampered = structuredClone(analysis);
     tampered.flags[0].citation.start += 2;
     const html = render({ kind: "saved", documentId: "d", latest: { analysis: tampered, ranAt: "2026-10-06T10:00:00Z", redLines: [] } });
-    expect(citesOf(html)).toHaveLength(analysis.flags.length - 1 + analysis.outsideTerms.length);
+    const underlined = new Set([...analysis.flags.slice(1), ...analysis.outsideTerms, ...analysis.noticeObligations].map((i) => i.citation.text));
+    expect(citesOf(html)).toHaveLength(underlined.size);
     expect(citesOf(html)).not.toContain(analysis.flags[0].citation.text);
     expect(docTextOf(html)).toBe(contract);
   });
@@ -234,7 +237,7 @@ describe("outside-terms notices on the document view", () => {
   });
 
   it("shows only the notice when there are no flags at all", async () => {
-    const payload = analysisPayload(sidecar, { omit: sidecar.clauses.map((c) => c.id) });
+    const payload = analysisPayload(sidecar, { omit: sidecar.clauses.map((c) => c.id), noticeObligations: [] });
     const html = render({ kind: "saved", documentId: "d", latest: { analysis: await savedAnalysis(payload), ranAt: "2026-10-06T10:00:00Z", redLines: [] } });
     expect(tabsOf(html).map((t) => t.colour)).toEqual(["outside"]);
     expect(citesOf(html)).toEqual([outside.sentence]);
@@ -265,7 +268,7 @@ describe("the clean result", () => {
   });
 
   it.each([
-    ["nothing found in the clean document", async () => ({ analysis: await savedAnalysis({ clauses: [], outside_terms: [] }, cleanText), body: cleanText })],
+    ["nothing found in the clean document", async () => ({ analysis: await savedAnalysis({ clauses: [], summary: [], notice_obligations: [], outside_terms: [] }, cleanText), body: cleanText })],
     ["only Know before signing flags", async () => ({ analysis: await knowOnly(), body: contract })],
   ])("never claims a clause type is absent from the contract (%s)", async (_label, make) => {
     const { analysis, body } = await make();
@@ -275,7 +278,13 @@ describe("the clean result", () => {
     expect(page).not.toMatch(ABSENCE_CLAIMS);
     expect(page.toLowerCase()).not.toContain("there is none");
     // And the copy itself, whatever is rendered.
-    for (const line of [...Object.values(CLEAN_COPY), OUTSIDE_COPY.notClean(1), OUTSIDE_COPY.notClean(2)]) {
+    for (const line of [
+      ...Object.values(CLEAN_COPY),
+      ...Object.values(SUMMARY_COPY),
+      ...Object.values(OBLIGATION_COPY),
+      OUTSIDE_COPY.notClean(1),
+      OUTSIDE_COPY.notClean(2),
+    ]) {
       expect(line).not.toMatch(ABSENCE_CLAIMS);
     }
   });

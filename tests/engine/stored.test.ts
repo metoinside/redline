@@ -17,7 +17,20 @@ const { text: cleanText } = loadFixture("clean-document");
 
 type StoredFlag = Record<string, unknown> & { citation: { text: string; start: number; end: number } };
 type StoredNotice = Record<string, unknown> & { citation: { text: string; start: number; end: number }; document: string };
-type Stored = { schemaVersion: number; flags: StoredFlag[]; outsideTerms: StoredNotice[]; outcome: Record<string, unknown> };
+type StoredPoint = Record<string, unknown> & { citation: { text: string; start: number; end: number }; text: string };
+type StoredObligation = Record<string, unknown> & {
+  citation: { text: string; start: number; end: number };
+  description: string;
+  deadline: Record<string, unknown>;
+};
+type Stored = {
+  schemaVersion: number;
+  summary: StoredPoint[];
+  noticeObligations: StoredObligation[];
+  flags: StoredFlag[];
+  outsideTerms: StoredNotice[];
+  outcome: Record<string, unknown>;
+};
 
 async function freshAnalysis(payload: unknown = analysisPayload(sidecar)): Promise<Stored> {
   const { analysis } = await analyse({ text: contract, redLines: [], client: scriptedClient(payload) });
@@ -163,6 +176,60 @@ describe("readStoredAnalysis", () => {
     expect(after.outcome.clean && after.outcome.checklist.every((e) => e.status === "none_found")).toBe(true);
   });
 
+  it("leaves out a summary point whose offsets no longer point at its sentence, and keeps the rest", async () => {
+    const stored = await freshAnalysis();
+    expect(stored.summary.length).toBe(sidecar.summary.length);
+    stored.summary[0].citation.start += 1;
+    const read = readStoredAnalysis(stored, contract, [])!;
+    expect(read.summary.map((p) => p.id)).toEqual(stored.summary.slice(1).map((p) => p.id));
+    expectCitationsVerbatim(read, contract);
+  });
+
+  it("leaves out a notice obligation whose offsets no longer point at its sentence", async () => {
+    const stored = await freshAnalysis();
+    stored.noticeObligations[1].citation.end -= 1;
+    const read = readStoredAnalysis(stored, contract, [])!;
+    expect(read.noticeObligations.map((o) => o.id)).toEqual(["o1"]);
+    expectCitationsVerbatim(read, contract);
+  });
+
+  it("leaves out every summary point and notice obligation when shown beside a different document", async () => {
+    const read = readStoredAnalysis(await freshAnalysis(), cleanText, [])!;
+    expect(read.summary).toEqual([]);
+    expect(read.noticeObligations).toEqual([]);
+  });
+
+  it("leaves out a stored deadline that names a date its sentence doesn't state, or is malformed", async () => {
+    const stored = await freshAnalysis();
+    const good = stored.noticeObligations[0];
+    stored.noticeObligations = [
+      { ...good, deadline: { kind: "date", date: "December 1, 2028" } },
+      { ...good, deadline: { kind: "rule", rule: "By December 1, 2028", relativeTo: "the end of the then-current term" } },
+      { ...good, deadline: { kind: "rule", rule: "90 days before the term ends" } },
+      { ...good, deadline: null as never },
+      { ...good, description: "" },
+      good,
+    ];
+    expect(readStoredAnalysis(stored, contract, [])!.noticeObligations).toEqual([good]);
+  });
+
+  it.each([
+    ["a summary point", (s: Stored) => (s.summary[0].text = "This might renew.")],
+    ["a notice obligation's description", (s: Stored) => (s.noticeObligations[0].description = "You could potentially owe notice.")],
+    ["a deadline rule", (s: Stored) => (s.noticeObligations[0].deadline = { ...s.noticeObligations[0].deadline, rule: "The typical 90 days" })],
+  ])("shows nothing when %s fails the wording check", async (_label, spoil) => {
+    const stored = await freshAnalysis();
+    spoil(stored);
+    expect(checkStoredAnalysis(stored, contract, [])).toEqual({ ok: false, reason: "wording" });
+  });
+
+  it("treats an analysis saved before the summary and notice obligations existed as needing a re-run", async () => {
+    const stored = await freshAnalysis();
+    const v3 = { schemaVersion: 3, flags: stored.flags, outsideTerms: stored.outsideTerms, outcome: stored.outcome };
+    expect(readStoredAnalysis(v3, contract, [])).toBeNull();
+    expect(checkStoredAnalysis(v3, contract, [])).toEqual({ ok: false, reason: "outdated" });
+  });
+
   it("treats an analysis saved before outside terms were checked as needing a re-run", async () => {
     const stored = await freshAnalysis();
     const v2 = { schemaVersion: 2, flags: stored.flags };
@@ -182,8 +249,10 @@ describe("readStoredAnalysis", () => {
     ["null", null],
     ["a string", "analysis"],
     ["an unknown schema version", { schemaVersion: 999, flags: [] }],
-    ["no flags list", { schemaVersion: ANALYSIS_SCHEMA_VERSION, outsideTerms: [] }],
-    ["no outside-terms list", { schemaVersion: ANALYSIS_SCHEMA_VERSION, flags: [] }],
+    ["no flags list", { schemaVersion: ANALYSIS_SCHEMA_VERSION, outsideTerms: [], summary: [], noticeObligations: [] }],
+    ["no outside-terms list", { schemaVersion: ANALYSIS_SCHEMA_VERSION, flags: [], summary: [], noticeObligations: [] }],
+    ["no summary", { schemaVersion: ANALYSIS_SCHEMA_VERSION, flags: [], outsideTerms: [], noticeObligations: [] }],
+    ["no notice-obligation list", { schemaVersion: ANALYSIS_SCHEMA_VERSION, flags: [], outsideTerms: [], summary: [] }],
   ])("returns null for %s", (_label, value) => {
     expect(readStoredAnalysis(value, contract, [])).toBeNull();
     expect(checkStoredAnalysis(value, contract, [])).toEqual({ ok: false, reason: "unreadable" });

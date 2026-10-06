@@ -88,7 +88,7 @@ describe("only verified notices count", () => {
 describe("a clean result", () => {
   it("for the clean document with nothing found lists all five clause types as \"we found none\"", async () => {
     const analysis = await analysisOf(analysisPayload(cleanSidecar), cleanText);
-    expect(analysisPayload(cleanSidecar)).toEqual({ clauses: [], outside_terms: [] });
+    expect(analysisPayload(cleanSidecar)).toMatchObject({ clauses: [], outside_terms: [], notice_obligations: [] });
     expect(analysis.flags).toEqual([]);
     expect(analysis.outsideTerms).toEqual([]);
     expect(analysis.outcome).toEqual({

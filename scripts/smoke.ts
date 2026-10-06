@@ -1,9 +1,10 @@
 // npm run smoke: runs the adhesion fixture through the real pipeline (the real
-// analyse with the OpenRouter client) and prints each kept flag in ranked
+// analyse with the OpenRouter client) and prints the summary points and the
+// notice obligations with their source sentences, then each kept flag in ranked
 // order with its tier, exposure, statement, readings and source sentence,
 // then each outside-terms notice, whether the result is clean (with its
 // checklist when it is), the diagnostics and how the result compares with the
-// fixture's labels. Proves the request shape works
+// fixture's labels, the notice obligations included. Proves the request shape works
 // against the real model. Never prints the key or the model id.
 
 import { loadEnvConfig } from "@next/env";
@@ -51,7 +52,28 @@ async function main(): Promise<number> {
   const seconds = ((Date.now() - started) / 1000).toFixed(1);
 
   const { analysis, diagnostics } = result;
-  console.log(`\nFlags kept (${analysis.flags.length}), in ${seconds}s:`);
+  const verbatim = (c: { text: string; start: number; end: number }) => (text.slice(c.start, c.end) === c.text ? "verbatim" : "MISMATCH");
+  console.log(`\nAnalysed in ${seconds}s.`);
+
+  console.log(`\nSummary (${analysis.summary.length} points):`);
+  for (const point of analysis.summary) {
+    console.log(`\n  ${point.id} [${point.citation.start}, ${point.citation.end}) ${verbatim(point.citation)}`);
+    console.log(`    point: ${point.text}`);
+    console.log(`    source: "${point.citation.text}"`);
+  }
+  if (analysis.summary.length === 0) console.log("  none");
+
+  console.log(`\nNotice obligations (${analysis.noticeObligations.length}):`);
+  for (const o of analysis.noticeObligations) {
+    console.log(`\n  ${o.id} [${o.citation.start}, ${o.citation.end}) ${verbatim(o.citation)}`);
+    console.log(`    do: ${o.description}`);
+    if (o.deadline.kind === "date") console.log(`    deadline (stated date): ${o.deadline.date}`);
+    else console.log(`    deadline (rule): ${o.deadline.rule}\n    counted from: ${o.deadline.relativeTo}`);
+    console.log(`    source: "${o.citation.text}"`);
+  }
+  if (analysis.noticeObligations.length === 0) console.log("  none");
+
+  console.log(`\nFlags kept (${analysis.flags.length}):`);
   const tierName = { negotiate: "Negotiate before signing", know: "Know before signing" } as const;
   for (const flag of analysis.flags) {
     const ok = text.slice(flag.citation.start, flag.citation.end) === flag.citation.text ? "verbatim" : "MISMATCH";
@@ -109,6 +131,16 @@ async function main(): Promise<number> {
     const quote = d.quote === null ? "(no quote)" : `"${d.quote.length > 110 ? `${d.quote.slice(0, 107)}...` : d.quote}"`;
     console.log(`    #${d.index} ${d.reason} ${quote}`);
   }
+  const printDropped = (label: string, returned: number, dropped: { index: number; reason: string; quote: string | null }[]) => {
+    console.log(`  ${label} returned by the model: ${returned}`);
+    console.log(`  ${label} dropped: ${dropped.length}`);
+    for (const d of dropped) {
+      const quote = d.quote === null ? "(no quote)" : `"${d.quote.length > 110 ? `${d.quote.slice(0, 107)}...` : d.quote}"`;
+      console.log(`    #${d.index} ${d.reason} ${quote}`);
+    }
+  };
+  printDropped("summary points", diagnostics.summaryReturned, diagnostics.summaryDropped);
+  printDropped("notice obligations", diagnostics.noticeObligationsReturned, diagnostics.noticeObligationsDropped);
   for (const a of diagnostics.wording) {
     console.log(`  wording, attempt ${a.attempt}: ${a.defects.map((d) => `${d.field} "${d.term}"`).join("; ") || "clean"}`);
   }
@@ -130,8 +162,23 @@ async function main(): Promise<number> {
     console.log(`  outside terms "${entry.document}": ${hit ? "shown as a notice" : "MISSED"}`);
   }
   console.log(`Labelled outside-terms sentences found: ${noticesFound} of ${sidecar.outsideTerms.length}`);
+  let obligationsFound = 0;
+  for (const entry of sidecar.noticeObligations) {
+    const hit = analysis.noticeObligations.find((o) => o.citation.text === entry.sentence);
+    if (hit) obligationsFound++;
+    const labelled = entry.relativeTo === undefined ? `date "${entry.deadline}"` : `rule "${entry.deadline}" from "${entry.relativeTo}"`;
+    const shown = !hit
+      ? "MISSED"
+      : hit.deadline.kind === "date"
+        ? `shown with date "${hit.deadline.date}"`
+        : `shown with rule "${hit.deadline.rule}" from "${hit.deadline.relativeTo}"`;
+    console.log(`  notice obligation "${entry.description}": ${shown}; labelled ${labelled}`);
+  }
+  const unlabelled = analysis.noticeObligations.filter((o) => !sidecar.noticeObligations.some((n) => n.sentence === o.citation.text));
+  for (const o of unlabelled) console.log(`  notice obligation not in the labels: ${o.id} "${o.description}"`);
+  console.log(`Labelled notice obligations found: ${obligationsFound} of ${sidecar.noticeObligations.length}`);
 
-  const cited = [...analysis.flags, ...analysis.outsideTerms];
+  const cited = [...analysis.summary, ...analysis.noticeObligations, ...analysis.flags, ...analysis.outsideTerms];
   return cited.every((item) => text.slice(item.citation.start, item.citation.end) === item.citation.text) ? 0 : 1;
 }
 

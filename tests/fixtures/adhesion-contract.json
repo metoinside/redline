@@ -81,16 +81,52 @@
       "why": "The add-on renews on its own, but the clause cites no sum, period or fee, and the buyer cancels it at any time without charge."
     }
   ],
+  "summary": [
+    {
+      "sentence": "This Master Subscription Agreement (the \"Agreement\") is entered into as of March 1, 2026 (the \"Effective Date\") by and between Halvard Cloud Systems, Inc., a Delaware corporation with offices at 400 Larkspur Avenue, Suite 1200, Wilmington, Delaware 19801 (\"Provider\"), and Brightwater Bakery Supply LLC, an Oregon limited liability company with offices at 77 Mill Street, Bend, Oregon 97701 (\"Customer\").",
+      "point": "This is a subscription agreement between Halvard Cloud Systems, Inc. (the Provider) and Brightwater Bakery Supply LLC (the Customer), dated March 1, 2026."
+    },
+    {
+      "sentence": "Subject to the terms of this Agreement, Provider grants Customer a non-exclusive, non-transferable right during the Subscription Term to permit up to twenty-five (25) Authorized Users to access and use the Services for Customer's internal business purposes.",
+      "point": "Up to 25 named users at your business can use the Services for your internal business purposes."
+    },
+    {
+      "sentence": "The Initial Subscription Term begins on the Effective Date and continues for thirty-six (36) months, and Customer may not terminate this Agreement for convenience at any time during the Initial Subscription Term.",
+      "point": "The first term runs for 36 months from the Effective Date, and you can’t end the agreement for convenience during it."
+    },
+    {
+      "sentence": "Upon expiration of the Initial Subscription Term or any renewal term, this Agreement shall automatically renew at the Subscription Fee then in effect, which for the first renewal term shall be no less than $48,000 per year.",
+      "point": "When a term ends, the agreement renews on its own, and the first renewal costs at least $48,000 a year."
+    },
+    {
+      "sentence": "To prevent renewal, Customer must deliver written notice of non-renewal by certified mail to Provider's legal department, and that notice must be received no later than ninety (90) days before the end of the then-current term.",
+      "point": "To stop a renewal, you have to send written notice by certified mail to Provider’s legal department, and it has to arrive at least 90 days before the current term ends."
+    },
+    {
+      "sentence": "The Subscription Fee for the Initial Subscription Term is $42,000 per year, payable annually in advance on the Effective Date and on each anniversary of the Effective Date.",
+      "point": "For the first term you pay $42,000 a year, in advance, on the Effective Date and on each anniversary of it."
+    },
+    {
+      "sentence": "Provider may increase the Subscription Fees for any renewal term by up to nine percent (9%) over the Subscription Fees for the prior term, by giving Customer notice of the increase at least thirty (30) days before the renewal term begins.",
+      "point": "Provider can raise the fees for a renewal term by up to 9% over the prior term, if it tells you at least 30 days before that term begins."
+    },
+    {
+      "sentence": "In no event shall Provider's total aggregate liability arising out of or relating to this Agreement exceed the Subscription Fees paid by Customer in the twelve (12) months preceding the event giving rise to the claim.",
+      "point": "Provider’s total liability under the agreement is capped at the Subscription Fees you paid in the 12 months before the event behind the claim."
+    }
+  ],
   "noticeObligations": [
     {
       "sentence": "To prevent renewal, Customer must deliver written notice of non-renewal by certified mail to Provider's legal department, and that notice must be received no later than ninety (90) days before the end of the then-current term.",
       "description": "Send written notice of non-renewal by certified mail to Provider's legal department to stop the agreement renewing.",
-      "deadline": "Received 90 days before the end of the then-current term"
+      "deadline": "Received 90 days before the end of the then-current term",
+      "relativeTo": "the end of the then-current term"
     },
     {
       "sentence": "Customer must notify Provider in writing of any dispute regarding an invoice within fifteen (15) days after the invoice date, failing which the invoice is deemed accepted.",
       "description": "Dispute an invoice in writing, or the invoice counts as accepted.",
-      "deadline": "15 days after the invoice date"
+      "deadline": "15 days after the invoice date",
+      "relativeTo": "the invoice date"
     }
   ],
   "outsideTerms": [

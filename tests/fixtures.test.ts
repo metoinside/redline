@@ -10,6 +10,7 @@ function countOccurrences(text: string, needle: string): number {
 function citedSentences(sidecar: FixtureSidecar): string[] {
   return [
     ...sidecar.clauses.map((c) => c.sentence),
+    ...sidecar.summary.map((p) => p.sentence),
     ...sidecar.noticeObligations.map((n) => n.sentence),
     ...sidecar.outsideTerms.map((o) => o.sentence),
     ...sidecar.decoys.map((d) => d.sentence),
@@ -20,7 +21,8 @@ function citedSentences(sidecar: FixtureSidecar): string[] {
 function sidecarProse(sidecar: FixtureSidecar): string[] {
   return [
     ...sidecar.clauses.flatMap((c) => [c.statement, c.why, ...(c.readings ?? [])]),
-    ...sidecar.noticeObligations.flatMap((n) => [n.description, n.deadline]),
+    ...sidecar.summary.map((p) => p.point),
+    ...sidecar.noticeObligations.flatMap((n) => [n.description, n.deadline, ...(n.relativeTo ? [n.relativeTo] : [])]),
     ...sidecar.decoys.map((d) => d.why),
     ...sidecar.questions.flatMap((q) => (q.answerable ? [q.answer] : [])),
   ];
@@ -91,6 +93,8 @@ describe("adhesion contract labels", () => {
 
   it("has notice obligations and an outside-terms sentence", () => {
     expect(sidecar.noticeObligations.length).toBeGreaterThan(0);
+    // Each deadline depends on another date, so each is a rule with what it counts from.
+    for (const n of sidecar.noticeObligations) expect(n.relativeTo, n.sentence).toBeTruthy();
     expect(sidecar.outsideTerms.length).toBeGreaterThan(0);
   });
 
@@ -103,6 +107,10 @@ describe("adhesion contract labels", () => {
 
 describe("clean document labels", () => {
   const { text, sidecar } = loadFixture("clean-document");
+
+  it("has summary points", () => {
+    expect(sidecar.summary.length).toBeGreaterThan(0);
+  });
 
   it("has no clauses, notice obligations or outside terms", () => {
     expect(sidecar.clauses).toEqual([]);

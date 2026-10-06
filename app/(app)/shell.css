@@ -307,6 +307,38 @@ p { margin: 0; }
 .analysis-outside { display: flex; gap: 10px; align-items: baseline; color: var(--ink); max-width: 46rem; }
 .analysis-outside .comment-swatch { flex: none; width: 12px; height: 12px; border-radius: 2px; align-self: center; background: var(--tab-blue); }
 
+/* ---------- Summary and notice obligations: ruled rows at the top of the panel ---------- */
+.analysis-summary, .analysis-obligations { display: grid; gap: 6px; justify-self: stretch; }
+.analysis-summary h3, .analysis-obligations h3 { font-weight: 700; font-size: 1.1rem; color: var(--ink); }
+.analysis-note { color: var(--graphite); font-size: 0.95rem; max-width: 46rem; }
+.summary-points, .obligation-list { list-style: none; margin: 4px 0 0; padding: 0; border-top: 1px solid var(--rule); }
+.summary-points li, .obligation-list li {
+  display: grid; grid-template-columns: 1fr auto; gap: 4px 16px; align-items: baseline;
+  padding: 9px 0 9px 10px; margin-left: -10px; border-bottom: 1px solid var(--rule);
+  border-left: 2px solid transparent;
+}
+.summary-points li.is-selected, .obligation-list li.is-selected { border-left-color: rgba(200, 16, 46, 0.55); }
+.summary-point, .obligation-what { color: var(--ink); }
+.obligation-list .notice-deadline { grid-column: 1; }
+.obligation-list .sentence-link { grid-column: 2; grid-row: 1; }
+.sentence-link { color: var(--ink); font-weight: 600; font-size: 0.95rem; white-space: nowrap; text-decoration-color: var(--red); }
+
+/* The notice-date box (DESIGN.md): a deadline as the text gives it, never a date Redline worked out. */
+.notice-deadline { display: grid; gap: 4px; justify-items: start; }
+.notice-date {
+  display: inline-block; padding: 3px 10px; border-radius: 3px;
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+  color: var(--ink); line-height: 1.4;
+}
+.notice-date-label { color: var(--graphite); font-size: 0.85rem; }
+.notice-date strong { font-weight: 700; }
+.notice-from { color: var(--graphite); font-size: 0.9rem; }
+.comment--obligation .notice-deadline { margin-top: 8px; }
+@media (max-width: 640px) {
+  .summary-points li, .obligation-list li { grid-template-columns: 1fr; }
+  .obligation-list .sentence-link { grid-column: 1; grid-row: auto; }
+}
+
 /* ---------- Clean result: plain words, no tab colour ---------- */
 .clean-result { display: grid; gap: 10px; justify-self: stretch; }
 .clean-result h3 { font-weight: 700; font-size: 1.1rem; color: var(--ink); }
@@ -333,7 +365,8 @@ p { margin: 0; }
 }
 
 /* ---------- Citation: the red pen underline, in place ---------- */
-.doc-text mark.cite {
+.doc-text mark.cite,
+.doc-text mark.summary-cite.is-selected {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 8' preserveAspectRatio='none'%3E%3Cpath d='M1 5.6C20 3.7 45 3.1 65 4.1c13 .6 24 1.5 34 .8' fill='none' stroke='%23c8102e' stroke-width='2.2' stroke-linecap='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: 0 100%;
@@ -345,9 +378,11 @@ p { margin: 0; }
   scroll-margin: 96px 0;
   animation: pen-draw 0.9s var(--ease-out) 0.2s both;
 }
-.doc-text mark.cite.is-selected { background-color: rgba(200, 16, 46, 0.08); }
-.doc-text mark.cite:focus { outline: none; }
-.doc-text mark.cite:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.doc-text mark.cite.is-selected, .doc-text mark.summary-cite.is-selected { background-color: rgba(200, 16, 46, 0.08); }
+/* A sentence only the summary cites carries no underline until a point selects it. */
+.doc-text mark.summary-cite { scroll-margin: 96px 0; }
+.doc-text mark.cite:focus, .doc-text mark.summary-cite:focus { outline: none; }
+.doc-text mark.cite:focus-visible, .doc-text mark.summary-cite:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 @keyframes pen-draw { from { background-size: 0 8px; } to { background-size: 100% 8px; } }
 
 /* ---------- Flag tabs on the sheet's edge ---------- */
@@ -490,5 +525,5 @@ p { margin: 0; }
 @media (prefers-reduced-motion: reduce) {
   .action, .flag-tab { transition: none; }
   .action:hover, .flag-tab:hover { transform: none; }
-  .doc-text mark.cite, .flag-tabs li { animation: none; }
+  .doc-text mark.cite, .doc-text mark.summary-cite, .flag-tabs li { animation: none; }
 }

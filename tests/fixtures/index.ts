@@ -41,7 +41,16 @@ export interface FixtureClause {
 export interface FixtureNoticeObligation {
   sentence: string;
   description: string;
+  /** The date as the sentence states it, or, when relativeTo is present, the rule for working the deadline out. */
   deadline: string;
+  /** What a rule-based deadline counts from. Absent when the sentence states the date itself. */
+  relativeTo?: string;
+}
+
+/** One point of a plain-English summary, and the sentence it rests on. */
+export interface FixtureSummaryPoint {
+  sentence: string;
+  point: string;
 }
 
 export interface FixtureOutsideTerms {
@@ -61,6 +70,7 @@ export type FixtureQuestion =
 export interface FixtureSidecar {
   document: string;
   clauses: FixtureClause[];
+  summary: FixtureSummaryPoint[];
   noticeObligations: FixtureNoticeObligation[];
   outsideTerms: FixtureOutsideTerms[];
   decoys: FixtureDecoy[];

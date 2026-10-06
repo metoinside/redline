@@ -9,8 +9,9 @@
 // redLineBreaches to Flag without a new version: it is worked out again on
 // every read from the red lines the run used (the analyses.red_lines
 // snapshot), never read from the stored flag, and every version 3 analysis
-// saved before #10 ran with no red lines. Tickets #6, #8 add to Flag:
-// counterOffer; and to Analysis: summary, noticeObligations.
+// saved before #10 ran with no red lines. #6 added summary and
+// noticeObligations to Analysis (schema version 4). Ticket #8 adds to Flag:
+// counterOffer.
 
 /** The renewal-and-exit family (ADR 0004): the only clause types that can become flags. */
 export type ClauseType = "auto_renewal" | "notice_window" | "early_termination_fee" | "rollover" | "multi_year_term";
@@ -188,11 +189,55 @@ export type AnalysisOutcome =
   | { clean: true; checklist: ChecklistEntry[] }
   | { clean: false; negotiateFlags: number; outsideTermsNotices: number };
 
-export const ANALYSIS_SCHEMA_VERSION = 3;
+/**
+ * One point of the plain-English summary: what one sentence of the document
+ * says. It may cover any clause, not only the renewal-and-exit family, and it
+ * never becomes a flag. A point whose citation fails the check is not shown.
+ */
+export interface SummaryPoint {
+  /** Unique within its analysis ("s1", "s2", ...), numbered in document order. */
+  id: string;
+  /** The point, in plain words. Passed the wording check. */
+  text: string;
+  citation: Citation;
+}
+
+/**
+ * When a notice obligation falls due, in the document's terms. Redline never
+ * works out a calendar date the text does not state (ADR 0002): a deadline
+ * that depends on another date is shown as its rule, so the buyer can check
+ * the arithmetic against the sentence.
+ *  - date: the text states the date. `date` is the document's own words, an
+ *    exact fragment of the citation, such as "June 15, 2026".
+ *  - rule: how the deadline is worked out, such as "Received 90 days before
+ *    the end of the then-current term", and the date or event it counts
+ *    from, such as "the end of the then-current term". Both passed the
+ *    wording check, and neither names a date or year the citation doesn't.
+ */
+export type NoticeDeadline = { kind: "date"; date: string } | { kind: "rule"; rule: string; relativeTo: string };
+
+/**
+ * Something the buyer must do by a date or deadline, with the sentence it
+ * comes from. Shown, never scheduled: no reminders (ADR 0002).
+ */
+export interface NoticeObligation {
+  /** Unique within its analysis ("o1", "o2", ...), numbered in document order. */
+  id: string;
+  /** What the buyer has to do, in plain words. Passed the wording check. */
+  description: string;
+  deadline: NoticeDeadline;
+  citation: Citation;
+}
+
+export const ANALYSIS_SCHEMA_VERSION = 4;
 
 /** What the buyer sees for one analysis run. */
 export interface Analysis {
   schemaVersion: typeof ANALYSIS_SCHEMA_VERSION;
+  /** Every summary point whose citation passed the check, in document order. */
+  summary: SummaryPoint[];
+  /** Every notice obligation whose citation and deadline passed the checks, in document order. */
+  noticeObligations: NoticeObligation[];
   /**
    * Every flag that passed the checks, in ranked order: Negotiate before
    * signing first, then Know before signing; within a tier by moneyAmount,
@@ -260,7 +305,6 @@ export interface WordingAttempt {
   defects: WordingDefect[];
 }
 
-/** How an analysis run went. Printed by the smoke script; never shown to the buyer. */
 /** Why the engine left out an outside-terms sentence the model returned. */
 export type NoticeDropReason = "malformed" | "quote_too_short" | "citation_not_found" | "duplicate";
 
@@ -272,6 +316,33 @@ export interface DroppedNotice {
   quote: string | null;
 }
 
+/** Why the engine left out a summary point the model returned. */
+export type SummaryDropReason = "malformed" | "quote_too_short" | "citation_not_found" | "duplicate";
+
+export interface DroppedSummaryPoint {
+  /** Position in the model's summary list, from 0. */
+  index: number;
+  reason: SummaryDropReason;
+  /** The quote as the model wrote it, when it wrote a string. */
+  quote: string | null;
+}
+
+/**
+ * Why the engine left out a notice obligation the model returned.
+ * date_not_in_citation: the deadline names a date (or a year, or a day of a
+ * month) that its sentence doesn't state, so it was worked out, not read.
+ */
+export type ObligationDropReason = "malformed" | "quote_too_short" | "citation_not_found" | "date_not_in_citation" | "duplicate";
+
+export interface DroppedObligation {
+  /** Position in the model's notice-obligation list, from 0. */
+  index: number;
+  reason: ObligationDropReason;
+  /** The quote as the model wrote it, when it wrote a string. */
+  quote: string | null;
+}
+
+/** How an analysis run went. Printed by the smoke script; never shown to the buyer. */
 export interface AnalysisDiagnostics {
   /** Items the model returned (in the answer that was used). */
   returned: number;
@@ -285,6 +356,14 @@ export interface AnalysisDiagnostics {
   outsideTermsReturned: number;
   /** Outside-terms sentences left out, and why. Only verified notices reach the analysis. */
   outsideTermsDropped: DroppedNotice[];
+  /** Summary points the model returned (in the answer that was used). */
+  summaryReturned: number;
+  /** Summary points left out, and why. */
+  summaryDropped: DroppedSummaryPoint[];
+  /** Notice obligations the model returned (in the answer that was used). */
+  noticeObligationsReturned: number;
+  /** Notice obligations left out, and why. */
+  noticeObligationsDropped: DroppedObligation[];
   /** The wording check on each answer the model gave. */
   wording: WordingAttempt[];
 }

@@ -99,7 +99,7 @@ describe("a sentence that brings in outside terms", () => {
     ].join("\n");
     const s = (n: number) => text.split("\n\n")[n - 1].replace(/^\d\. /, "").trim();
     const { analysis } = await run(
-      { clauses: [], outside_terms: [{ sentence: s(2), document: "the signed Statement of Work" }, { sentence: s(1), document: "the Master Terms at https://vendor.example/terms" }] },
+      { clauses: [], summary: [], notice_obligations: [], outside_terms: [{ sentence: s(2), document: "the signed Statement of Work" }, { sentence: s(1), document: "the Master Terms at https://vendor.example/terms" }] },
       text,
     );
     expect(analysis.outsideTerms.map((n) => [n.id, n.document])).toEqual([
@@ -128,7 +128,7 @@ describe("the wording check covers the document description", () => {
   it("never checks the cited sentence, which is the document's own words", async () => {
     const text = "1. Provider may update the Service Terms at https://vendor.example/terms from time to time, and they apply to this Order.\n";
     const sentence = text.slice(3).trim();
-    const { analysis } = await run({ clauses: [], outside_terms: [{ sentence, document: "the Service Terms at https://vendor.example/terms" }] }, text);
+    const { analysis } = await run({ clauses: [], summary: [], notice_obligations: [], outside_terms: [{ sentence, document: "the Service Terms at https://vendor.example/terms" }] }, text);
     expect(analysis.outsideTerms).toHaveLength(1);
   });
 });
@@ -138,7 +138,7 @@ describe("an answer with no outside-terms list", () => {
     const { clauses } = analysisPayload(sidecar);
     await expect(analyse({ text: contract, redLines: [], client: scriptedClient({ clauses }) })).rejects.toBeInstanceOf(ModelOutputError);
     await expect(
-      analyse({ text: contract, redLines: [], client: scriptedClient({ clauses, outside_terms: "none" }) }),
+      analyse({ text: contract, redLines: [], client: scriptedClient({ clauses, summary: [], notice_obligations: [], outside_terms: "none" }) }),
     ).rejects.toBeInstanceOf(ModelOutputError);
   });
 

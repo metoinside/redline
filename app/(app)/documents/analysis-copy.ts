@@ -4,8 +4,9 @@ import type { RunAnalysisFailure } from "./actions";
 // What the buyer reads in the analysis view. Every line here went through the
 // humanizer skill. Nothing in it says more than the flag does: its clause type,
 // its tier, the exposure its sentence cites, and the sentence itself. The
-// statement and readings on each flag, and the document named on each
-// outside-terms notice, come from the engine, which has already run them
+// statement and readings on each flag, the document named on each
+// outside-terms notice, the summary points and each notice obligation's
+// description and deadline come from the engine, which has already run them
 // through the wording check.
 //
 // The clean result says what Redline found, never that the contract lacks a
@@ -106,6 +107,35 @@ export const OUTSIDE_COPY = {
     n === 1
       ? "This contract brings in terms from another document that Redline hasn’t read, so this isn’t a clean result. Any renewal or exit terms in that document are unchecked. To check them, add it as its own document."
       : `This contract brings in terms from ${n} other documents that Redline hasn’t read, so this isn’t a clean result. Any renewal or exit terms in them are unchecked. To check them, add each one as its own document.`,
+} as const;
+
+/**
+ * The summary at the top of the analysis. Each point is the engine's, checked
+ * against its sentence and run through the wording check; this is only the
+ * frame around them.
+ */
+export const SUMMARY_COPY = {
+  heading: "Summary",
+  note: "What the contract says, in plain English. Each point links to the sentence it comes from.",
+  empty: "Redline shows a summary point only when its sentence matches the text word for word, so there’s nothing to show here.",
+  goTo: "Go to the sentence",
+} as const;
+
+/**
+ * Notice obligations: what the buyer has to do by a date or deadline. Shown,
+ * never scheduled (ADR 0002): there is no reminder, no calendar and no date
+ * Redline worked out itself. A deadline that depends on another date is shown
+ * as its rule.
+ */
+export const OBLIGATION_COPY = {
+  heading: "Notice obligations",
+  note: "What the contract says you have to do by a date or deadline. Redline doesn’t remind you about these.",
+  empty: "We found nothing you have to do by a date or deadline. Redline can miss one, so this means only that we didn’t find one.",
+  label: "Notice obligation",
+  deadline: "Deadline",
+  countsFrom: "Counted from",
+  ruleNote: "Redline doesn’t turn this into a date. Work it out from the dates in your contract.",
+  goTo: "Go to the sentence",
 } as const;
 
 /**

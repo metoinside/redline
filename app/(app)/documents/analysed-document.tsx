@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Fragment,
   useCallback,
   useEffect,
   useId,
@@ -21,6 +22,8 @@ import {
   type Analysis,
   type Citation,
   type Flag,
+  type NoticeDeadline,
+  type NoticeObligation,
   type OutsideTermsNotice,
   type RedLine,
   type Tier,
@@ -33,8 +36,10 @@ import {
   CLEAN_COPY,
   EXPOSURE_LABEL,
   FAILURE_COPY,
+  OBLIGATION_COPY,
   OUTSIDE_COPY,
   RED_LINE_COPY,
+  SUMMARY_COPY,
   TIER_LABEL,
   TIER_NOTE,
   clauseNumberAt,
@@ -63,6 +68,13 @@ import { DocumentView } from "./document-view";
 // snapshot), or says the run had none; a run in the browser only says, in one
 // line, that red lines need an account.
 //
+// The summary sits at the top of the panel, each point linking to its
+// sentence. Each notice obligation is a comment in the margin beside its
+// sentence, with its deadline as the text gives it (a stated date, or the
+// rule for working one out and what it counts from), and a short list of them
+// sits in the panel. Selecting a point or an obligation scrolls to its
+// sentence and highlights it. Nothing here schedules or reminds (ADR 0002).
+//
 // Every analysis shown here is read through checkStoredAnalysis against this
 // document's own text first, so a citation that doesn't match the text at its
 // offsets, an exposure fragment that isn't in its citation, or wording that
@@ -90,11 +102,42 @@ const ranFormat = new Intl.DateTimeFormat("en-GB", {
   minute: "2-digit",
 });
 
-/** Anything with a citation marked in the text: a flag ("f1") or an outside-terms notice ("n1"). */
+/**
+ * Anything with a citation marked in the text: a flag ("f1"), an
+ * outside-terms notice ("n1"), a notice obligation ("o1") or a summary point ("s1").
+ */
 type Marked = { id: string; citation: Citation };
 
-const rangeKey = (c: Citation) => `${c.start}:${c.end}`;
+/** What has a margin comment: everything marked except summary points. */
+type Commented = Flag | OutsideTermsNotice | NoticeObligation;
+
+/**
+ * One marked range in the text. Every item whose citation is this range, or
+ * overlaps it, shares it: the text can carry only one mark at a place.
+ * `commented` lists the items with a margin comment, so clicking the mark
+ * cycles through them; a range only summary points cite is marked quietly.
+ */
+type MarkGroup = { start: number; end: number; ids: string[]; commented: string[] };
+
 const byPosition = (a: Marked, b: Marked) => a.citation.start - b.citation.start || a.citation.end - b.citation.end;
+
+function groupMarks(commented: readonly Marked[], points: readonly Marked[]): MarkGroup[] {
+  const groups: MarkGroup[] = [];
+  const place = (item: Marked, hasComment: boolean) => {
+    const { start, end } = item.citation;
+    const group =
+      groups.find((g) => g.start === start && g.end === end) ?? groups.find((g) => start < g.end && g.start < end);
+    if (group) {
+      group.ids.push(item.id);
+      if (hasComment) group.commented.push(item.id);
+    } else {
+      groups.push({ start, end, ids: [item.id], commented: hasComment ? [item.id] : [] });
+    }
+  };
+  for (const item of [...commented].sort(byPosition)) place(item, true);
+  for (const point of [...points].sort(byPosition)) place(point, false);
+  return groups;
+}
 
 export function AnalysedDocument({
   title,
@@ -125,21 +168,20 @@ export function AnalysedDocument({
 
   const flags = run?.analysis.flags ?? [];
   const notices = run?.analysis.outsideTerms ?? [];
+  const obligations = run?.analysis.noticeObligations ?? [];
+  const summary = run?.analysis.summary ?? [];
   const outcome = run?.analysis.outcome ?? null;
-  const items: (Flag | OutsideTermsNotice)[] = useMemo(() => [...flags, ...notices], [flags, notices]);
+  const items: Commented[] = useMemo(() => [...flags, ...notices, ...obligations], [flags, notices, obligations]);
 
-  // One mark per cited range. Two items citing the same sentence (a sentence
-  // flagged as two clause types, or a flag on an outside-terms sentence) share it.
+  // One mark per cited range. Items citing the same sentence (a sentence
+  // flagged as two clause types, a flag on an outside-terms sentence, a
+  // notice obligation or a summary point on a flagged sentence) share it.
+  const groups = useMemo(() => groupMarks(items, summary), [items, summary]);
   const markIds = useMemo(() => {
     const ids = new Map<string, string>();
-    const byRange = new Map<string, string>();
-    for (const item of items) {
-      const key = rangeKey(item.citation);
-      if (!byRange.has(key)) byRange.set(key, `cite-${item.id}`);
-      ids.set(item.id, byRange.get(key)!);
-    }
+    for (const group of groups) for (const id of group.ids) ids.set(id, `cite-${group.ids[0]}`);
     return ids;
-  }, [items]);
+  }, [groups]);
 
   function start() {
     setFailure(null);
@@ -189,21 +231,36 @@ export function AnalysedDocument({
     select(ids[(at + 1) % ids.length], { scroll: false });
   }
 
-  const marks: TextMark[] = useMemo(() => {
-    const byRange = new Map<string, Marked[]>();
-    for (const item of [...items].sort(byPosition)) {
-      const key = rangeKey(item.citation);
-      byRange.set(key, [...(byRange.get(key) ?? []), item]);
-    }
-    return [...byRange.values()].map((group) => ({
-      start: group[0].citation.start,
-      end: group[0].citation.end,
-      id: markIds.get(group[0].id),
-      className: `cite${group.some((i) => i.id === selected) ? " is-selected" : ""}`,
-      tabIndex: -1,
-      data: { items: group.map((i) => i.id).join(" ") },
-    }));
-  }, [items, markIds, selected]);
+  const marks: TextMark[] = useMemo(
+    () =>
+      groups.map((group) => ({
+        start: group.start,
+        end: group.end,
+        id: markIds.get(group.ids[0]),
+        // A sentence only summary points cite is underlined only while selected.
+        className: `${group.commented.length > 0 ? "cite" : "summary-cite"}${selected && group.ids.includes(selected) ? " is-selected" : ""}`,
+        tabIndex: -1,
+        data: { items: group.commented.join(" ") },
+      })),
+    [groups, markIds, selected],
+  );
+
+  /** A link from the panel to a sentence in the text, named by its clause number when the line has one. */
+  const sentenceLink = (id: string, citation: Citation, fallback: string, className: string) => {
+    const number = clauseNumberAt(body, citation.start);
+    return (
+      <a
+        className={className}
+        href={`#${markIds.get(id) ?? ""}`}
+        onClick={(event) => {
+          event.preventDefault();
+          select(id, { scroll: true });
+        }}
+      >
+        {number ? ANALYSIS_COPY.clause(number) : fallback}
+      </a>
+    );
+  };
 
   useMarginLayout(bodyRef, marginRef, items);
 
@@ -259,6 +316,49 @@ export function AnalysedDocument({
         </p>
       )}
 
+      {run && !running && (
+        <section className="analysis-summary" aria-labelledby={`${ids}-summary`}>
+          <h3 id={`${ids}-summary`}>{SUMMARY_COPY.heading}</h3>
+          {summary.length > 0 ? (
+            <>
+              <p className="analysis-note">{SUMMARY_COPY.note}</p>
+              <ul className="summary-points">
+                {summary.map((point) => (
+                  <li key={point.id} className={point.id === selected ? "is-selected" : undefined}>
+                    <span className="summary-point">{point.text}</span>
+                    {sentenceLink(point.id, point.citation, SUMMARY_COPY.goTo, "sentence-link")}
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p className="analysis-note">{SUMMARY_COPY.empty}</p>
+          )}
+        </section>
+      )}
+
+      {run && !running && (
+        <section className="analysis-obligations" aria-labelledby={`${ids}-obligations`}>
+          <h3 id={`${ids}-obligations`}>{OBLIGATION_COPY.heading}</h3>
+          {obligations.length > 0 ? (
+            <>
+              <p className="analysis-note">{OBLIGATION_COPY.note}</p>
+              <ul className="obligation-list">
+                {obligations.map((obligation) => (
+                  <li key={obligation.id} className={obligation.id === selected ? "is-selected" : undefined}>
+                    <span className="obligation-what">{obligation.description}</span>
+                    <NoticeDate deadline={obligation.deadline} />
+                    {sentenceLink(obligation.id, obligation.citation, OBLIGATION_COPY.goTo, "sentence-link")}
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p className="analysis-note">{OBLIGATION_COPY.empty}</p>
+          )}
+        </section>
+      )}
+
       {run && !running && outcome && !outcome.clean && flags.length > 0 && (
         <p className="analysis-result">{ANALYSIS_COPY.found(count("negotiate"), count("know"))}</p>
       )}
@@ -281,22 +381,9 @@ export function AnalysedDocument({
                 {entry.status === "found_low_exposure" ? (
                   <span className="checklist-status">
                     {CLEAN_COPY.found}
-                    {entry.found.map(({ flagId, citation }) => {
-                      const number = clauseNumberAt(body, citation.start);
-                      return (
-                        <a
-                          key={flagId}
-                          className="checklist-cite"
-                          href={`#${markIds.get(flagId) ?? ""}`}
-                          onClick={(event) => {
-                            event.preventDefault();
-                            select(flagId, { scroll: true });
-                          }}
-                        >
-                          {number ? ANALYSIS_COPY.clause(number) : CLEAN_COPY.goTo}
-                        </a>
-                      );
-                    })}
+                    {entry.found.map(({ flagId, citation }) => (
+                      <Fragment key={flagId}>{sentenceLink(flagId, citation, CLEAN_COPY.goTo, "checklist-cite")}</Fragment>
+                    ))}
                   </span>
                 ) : (
                   <span className="checklist-status">{CLEAN_COPY.none}</span>
@@ -339,7 +426,7 @@ export function AnalysedDocument({
 
   let tabIndex = 0;
   const tabs =
-    items.length > 0 ? (
+    flags.length + notices.length > 0 ? (
       <nav className="flag-tabs" aria-label={ANALYSIS_COPY.flagsLabel}>
         <div className="flag-groups">
           {byTier
@@ -411,6 +498,9 @@ export function AnalysedDocument({
       <div className="margin" ref={marginRef}>
         {inDocumentOrder.map((item) => {
           if (isNotice(item)) return <NoticeComment key={item.id} notice={item} body={body} selected={item.id === selected} />;
+          if (isObligation(item)) {
+            return <ObligationComment key={item.id} obligation={item} body={body} selected={item.id === selected} />;
+          }
           const flag = item;
           const number = clauseNumberAt(body, flag.citation.start);
           const parts = EXPOSURE_PARTS.filter((part) => flag.exposure[part] !== undefined);
@@ -486,13 +576,61 @@ export function AnalysedDocument({
   );
 }
 
-function isNotice(item: Flag | OutsideTermsNotice): item is OutsideTermsNotice {
+function isNotice(item: Commented): item is OutsideTermsNotice {
   return "document" in item;
 }
 
-/** The first item to select: the top-ranked flag, or the first notice when there are no flags. */
+function isObligation(item: Commented): item is NoticeObligation {
+  return "deadline" in item;
+}
+
+/**
+ * The first item to select: the top-ranked flag, or the first notice when
+ * there are no flags, or the first notice obligation when there is neither.
+ */
 function firstItemId(analysis: Analysis | null): string | null {
-  return analysis?.flags[0]?.id ?? analysis?.outsideTerms[0]?.id ?? null;
+  return analysis?.flags[0]?.id ?? analysis?.outsideTerms[0]?.id ?? analysis?.noticeObligations[0]?.id ?? null;
+}
+
+/**
+ * A notice obligation's deadline in a notice-date box: the date as the text
+ * states it, or the rule for working it out with what it counts from. Never a
+ * date Redline worked out.
+ */
+function NoticeDate({ deadline }: { deadline: NoticeDeadline }) {
+  return (
+    <span className="notice-deadline">
+      <span className="notice-date">
+        <span className="notice-date-label">{OBLIGATION_COPY.deadline}</span>{" "}
+        <strong>{deadline.kind === "date" ? deadline.date : deadline.rule}</strong>
+      </span>
+      {deadline.kind === "rule" && (
+        <span className="notice-from">
+          {OBLIGATION_COPY.countsFrom}: {deadline.relativeTo}
+        </span>
+      )}
+    </span>
+  );
+}
+
+/** A notice obligation in the margin: what the buyer has to do, and by when. No tier, no reminder. */
+function ObligationComment({ obligation, body, selected }: { obligation: NoticeObligation; body: string; selected: boolean }) {
+  const number = clauseNumberAt(body, obligation.citation.start);
+  return (
+    <aside
+      className={`comment comment--obligation${selected ? " is-selected" : ""}`}
+      data-item={obligation.id}
+      aria-label={`${OBLIGATION_COPY.label}${number ? `, ${ANALYSIS_COPY.clause(number).toLowerCase()}` : ""}`}
+    >
+      <h3>
+        {OBLIGATION_COPY.label}
+        {number && <span className="comment-clause">{ANALYSIS_COPY.clause(number)}</span>}
+      </h3>
+      <p>{obligation.description}</p>
+      <NoticeDate deadline={obligation.deadline} />
+      {obligation.deadline.kind === "rule" && <p className="comment-none">{OBLIGATION_COPY.ruleNote}</p>}
+    </aside>
+  );
 }
 
 /** An outside-terms notice in the margin: what the sentence does and the document to add next. No tier, no counter-offer. */

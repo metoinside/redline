@@ -1,7 +1,13 @@
-import type { ModelAnalysisItem, ModelAnalysisPayload, ModelOutsideTermsItem } from "@/lib/engine/analyse";
+import type {
+  ModelAnalysisItem,
+  ModelAnalysisPayload,
+  ModelNoticeObligationItem,
+  ModelOutsideTermsItem,
+  ModelSummaryItem,
+} from "@/lib/engine/analyse";
 import { ScriptedModelClient, type ScriptStep } from "@/lib/engine/scripted";
 import type { ClauseType } from "@/lib/engine/types";
-import type { FixtureClause, FixtureOutsideTerms, FixtureSidecar } from "../fixtures/index";
+import type { FixtureClause, FixtureNoticeObligation, FixtureOutsideTerms, FixtureSidecar, FixtureSummaryPoint } from "../fixtures/index";
 
 // Builds what the model would return for a fixture, from its sidecar labels,
 // so the scripted client can stand in for the model. A test starts from the
@@ -10,8 +16,9 @@ import type { FixtureClause, FixtureOutsideTerms, FixtureSidecar } from "../fixt
 // sidecar's statement, exposure fragments and readings (one, or the two the
 // sidecar lists for a clause that reads two ways). The outside-terms list
 // carries each sidecar outside-terms sentence with the document it names.
-// Later tickets add the parts of the payload they introduce (summary, notice
-// obligations) here.
+// The summary carries each sidecar summary point with its sentence, and the
+// notice-obligation list each sidecar notice obligation with its description
+// and deadline (a rule with what it counts from, or a stated date).
 
 export type PayloadOptions = {
   /** Keep only clauses of these types. Default: every clause in the sidecar. */
@@ -27,6 +34,10 @@ export type PayloadOptions = {
    * outside-terms sentence in the sidecar. Anything goes, malformed items included.
    */
   outsideTerms?: readonly unknown[];
+  /** The summary, in place of the sidecar's. Anything goes, malformed items included. */
+  summary?: readonly unknown[];
+  /** The notice-obligation list, in place of the sidecar's. Anything goes, malformed items included. */
+  noticeObligations?: readonly unknown[];
 };
 
 /** The model's answer for a fixture, built from its labels. */
@@ -41,7 +52,28 @@ export function analysisPayload(sidecar: FixtureSidecar, options: PayloadOptions
   }
   items.push(...(options.extra ?? []));
   const outside = options.outsideTerms ?? sidecar.outsideTerms.map(outsideTermsItem);
-  return { clauses: items as ModelAnalysisItem[], outside_terms: [...outside] as ModelOutsideTermsItem[] };
+  const summary = options.summary ?? sidecar.summary.map(summaryItem);
+  const obligations = options.noticeObligations ?? sidecar.noticeObligations.map(noticeObligationItem);
+  return {
+    summary: [...summary] as ModelSummaryItem[],
+    notice_obligations: [...obligations] as ModelNoticeObligationItem[],
+    clauses: items as ModelAnalysisItem[],
+    outside_terms: [...outside] as ModelOutsideTermsItem[],
+  };
+}
+
+/** One summary point as the model would report it, from its sidecar label. */
+export function summaryItem(entry: FixtureSummaryPoint): ModelSummaryItem {
+  return { point: entry.point, sentence: entry.sentence };
+}
+
+/** One notice obligation as the model would report it, from its sidecar labels. */
+export function noticeObligationItem(entry: FixtureNoticeObligation): ModelNoticeObligationItem {
+  const deadline: ModelNoticeObligationItem["deadline"] =
+    entry.relativeTo === undefined
+      ? { kind: "date", date: entry.deadline, rule: null, relative_to: null }
+      : { kind: "rule", date: null, rule: entry.deadline, relative_to: entry.relativeTo };
+  return { sentence: entry.sentence, description: entry.description, deadline };
 }
 
 /** One outside-terms sentence as the model would report it, from its sidecar labels. */
@@ -49,9 +81,19 @@ export function outsideTermsItem(entry: FixtureOutsideTerms): ModelOutsideTermsI
   return { sentence: entry.sentence, document: entry.document };
 }
 
-/** A whole model answer from a list of clause items, with no outside terms unless given. */
-export function answerOf(clauses: readonly unknown[], outsideTerms: readonly unknown[] = []): ModelAnalysisPayload {
-  return { clauses: [...clauses] as ModelAnalysisItem[], outside_terms: [...outsideTerms] as ModelOutsideTermsItem[] };
+/** A whole model answer from a list of clause items, with no outside terms, summary or notice obligations unless given. */
+export function answerOf(
+  clauses: readonly unknown[],
+  outsideTerms: readonly unknown[] = [],
+  summary: readonly unknown[] = [],
+  noticeObligations: readonly unknown[] = [],
+): ModelAnalysisPayload {
+  return {
+    summary: [...summary] as ModelSummaryItem[],
+    notice_obligations: [...noticeObligations] as ModelNoticeObligationItem[],
+    clauses: [...clauses] as ModelAnalysisItem[],
+    outside_terms: [...outsideTerms] as ModelOutsideTermsItem[],
+  };
 }
 
 /** One clause as the model would report it, from its sidecar labels. */

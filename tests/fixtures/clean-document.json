@@ -1,6 +1,28 @@
 {
   "document": "clean-document.txt",
   "clauses": [],
+  "summary": [
+    {
+      "sentence": "Seller shall design, fabricate and install one exterior storefront sign for Buyer's retail location at 77 Mill Street, Bend, Oregon.",
+      "point": "The Seller has to design, make and install one exterior storefront sign for your shop at 77 Mill Street, Bend, Oregon."
+    },
+    {
+      "sentence": "The total price for all work under this Purchase Order is $6,850, which includes design, materials, fabrication, delivery, installation and removal of the old sign.",
+      "point": "The total price is $6,850, covering design, materials, fabrication, delivery, installation and removal of the old sign."
+    },
+    {
+      "sentence": "Buyer shall pay a deposit of $2,000 within seven (7) days after Buyer approves the design proof.",
+      "point": "You pay a $2,000 deposit within 7 days after you approve the design proof."
+    },
+    {
+      "sentence": "Seller shall complete installation no later than June 15, 2026.",
+      "point": "The Seller has to finish installing the sign by June 15, 2026."
+    },
+    {
+      "sentence": "Seller warrants that the sign will be free from defects in materials and workmanship for two (2) years after installation.",
+      "point": "The Seller guarantees the sign against defects in materials and workmanship for two years after installation."
+    }
+  ],
   "noticeObligations": [],
   "outsideTerms": [],
   "decoys": [
