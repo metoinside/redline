@@ -413,3 +413,54 @@ export interface AnalyseResult {
   analysis: Analysis;
   diagnostics: AnalysisDiagnostics;
 }
+
+// ---------- The question box (#9) ----------
+
+export const ANSWER_SCHEMA_VERSION = 1;
+
+/**
+ * What the question box shows for one question (PRD §3 item 7). Stored as
+ * JSON (questions.result) and checked again on every read
+ * (lib/engine/answers.ts, readStoredAnswer).
+ *  - answered: the model's answer, shown only because its citation was found
+ *    word for word in the stored text and its wording passed the check.
+ *  - not-said: "the document doesn't say". The model said the document doesn't
+ *    answer the question, or gave no sentence, or a sentence that isn't in the
+ *    text. Never an answer from general knowledge.
+ */
+export type Answer =
+  | { schemaVersion: typeof ANSWER_SCHEMA_VERSION; kind: "answered"; text: string; citation: Citation }
+  | { schemaVersion: typeof ANSWER_SCHEMA_VERSION; kind: "not-said" };
+
+/** Why ask() returned "the document doesn't say". Diagnostics only; never shown. */
+export type NotSaidReason =
+  /** The model said the document doesn't answer the question. */
+  | "model_said_no"
+  /** The model said it does, but gave no answer. */
+  | "no_answer"
+  /** The model gave no sentence. */
+  | "no_citation"
+  | "quote_too_short"
+  /** The sentence is not in the stored text word for word. */
+  | "citation_not_found";
+
+export interface AskDiagnostics {
+  /** The wording check on each answer the model gave that would otherwise have been shown. */
+  wording: WordingAttempt[];
+  /** Why the result is "the document doesn't say", or null when it is an answer. */
+  notSaid: NotSaidReason | null;
+}
+
+/** A question the buyer typed that can't be asked. Nothing was sent to the model. */
+export type QuestionProblem = "empty" | "too-long";
+
+/**
+ * What ask() returns. A model call that fails throws a ModelError, as in analyse.
+ *  - wording-failed: the answer hedged or compared with the market, and so did
+ *    the retry. Nothing is shown. It is not "the document doesn't say": the
+ *    document may well say, and claiming otherwise would be false.
+ */
+export type AskResult =
+  | { ok: true; question: string; answer: Answer; diagnostics: AskDiagnostics }
+  | { ok: false; reason: "invalid-question"; problem: QuestionProblem }
+  | { ok: false; reason: "wording-failed"; attempts: WordingAttempt[] };

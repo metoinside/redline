@@ -1,16 +1,20 @@
 "use server";
 
-// Runs an analysis on the server, where the OpenRouter key lives. The browser
-// calls these by reference and gets back only the analysis: the key, the
-// model and the model's raw answer never leave the server.
+// Runs an analysis, or answers a question, on the server, where the
+// OpenRouter key lives. The browser calls these by reference and gets back
+// only the analysis or the answer: the key, the model and the model's raw
+// answer never leave the server.
 
 import { checkDocumentText } from "@/lib/documents/new-document";
 import { runSavedAnalysis } from "@/lib/documents/saved-run";
+import { runSavedQuestion } from "@/lib/documents/saved-question";
+import { ask } from "@/lib/engine/ask";
 import { CounterOfferDefectsError, analyse } from "@/lib/engine/analyse";
+import { checkQuestion } from "@/lib/engine/answers";
 import { ModelError, type ModelClient } from "@/lib/engine/model";
 import { createOpenRouterClient, isModelConfigured } from "@/lib/engine/openrouter";
 import { WordingDefectsError } from "@/lib/engine/wording";
-import type { Analysis, RedLine } from "@/lib/engine/types";
+import type { Analysis, Answer, AskResult, QuestionProblem, RedLine } from "@/lib/engine/types";
 import { RED_LINE_COLUMNS } from "@/lib/red-lines/rows";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createServerSupabase, getCurrentUser } from "@/lib/supabase/server";
@@ -41,8 +45,13 @@ export type RunAnalysisResult = { ok: true; run: AnalysisRun } | { ok: false; re
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+type EngineFailure = "model-off" | "model-failed" | "wording-failed" | "counter-offer-failed";
+
 /** Runs the engine with the real model. Any model failure becomes a plain reason; nothing about it reaches the browser. */
-async function runEngine<T>(run: (client: ModelClient) => Promise<T>): Promise<{ ok: true; value: T } | { ok: false; reason: RunAnalysisFailure }> {
+async function runEngine<T>(
+  run: (client: ModelClient) => Promise<T>,
+  label = "analysis",
+): Promise<{ ok: true; value: T } | { ok: false; reason: EngineFailure }> {
   if (!isModelConfigured()) return { ok: false, reason: "model-off" };
   try {
     return { ok: true, value: await run(createOpenRouterClient()) };
@@ -50,21 +59,21 @@ async function runEngine<T>(run: (client: ModelClient) => Promise<T>): Promise<{
     if (err instanceof WordingDefectsError) {
       // The terms only, never the model's text.
       const terms = [...new Set(err.attempts.flatMap((a) => a.defects.map((d) => d.term)))];
-      console.error(`[analysis] wording check failed after ${err.attempts.length} attempts: ${terms.join(", ")}`);
+      console.error(`[${label}] wording check failed after ${err.attempts.length} attempts: ${terms.join(", ")}`);
       return { ok: false, reason: "wording-failed" };
     }
     if (err instanceof CounterOfferDefectsError) {
       // The clause types only, never the model's text.
       const types = [...new Set(err.attempts.flatMap((a) => a.defects.map((d) => d.clauseType)))];
-      console.error(`[analysis] counter-offer check failed after ${err.attempts.length} attempts: ${types.join(", ")}`);
+      console.error(`[${label}] counter-offer check failed after ${err.attempts.length} attempts: ${types.join(", ")}`);
       return { ok: false, reason: "counter-offer-failed" };
     }
     if (err instanceof ModelError) {
       // The kind and status only: messages are already free of the key and model id.
-      console.error(`[analysis] model call failed: ${err.kind}${"status" in err ? ` ${String(err.status)}` : ""}`);
+      console.error(`[${label}] model call failed: ${err.kind}${"status" in err ? ` ${String(err.status)}` : ""}`);
       return { ok: false, reason: err.kind === "not-configured" ? "model-off" : "model-failed" };
     }
-    console.error("[analysis] failed", err instanceof Error ? err.name : typeof err);
+    console.error(`[${label}] failed`, err instanceof Error ? err.name : typeof err);
     return { ok: false, reason: "model-failed" };
   }
 }
@@ -136,4 +145,100 @@ export async function analyseBrowserDocument(body: unknown): Promise<RunAnalysis
   const result = await runEngine((client) => analyse({ text: checked.text, redLines: [], client }));
   if (!result.ok) return result;
   return { ok: true, run: { analysis: result.value.analysis, ranAt: new Date().toISOString(), redLines: [] } };
+}
+
+// ---------- The question box ----------
+
+/**
+ * One question as the browser gets it. `result` is the answer exactly as
+ * saved or returned: the browser reads it through readStoredAnswer against
+ * the document's own text before showing it, so a citation that no longer
+ * matches is shown as "the document doesn't say". `id` is null for a question
+ * about a document kept in the browser only, which is never saved.
+ */
+export type AskedQuestion = { id: string | null; question: string; result: Answer; askedAt: string };
+
+export type AskQuestionFailure =
+  | "model-off"
+  | "model-failed"
+  /** The answer still hedged or compared with the market after a retry. Nothing is shown or saved. */
+  | "wording-failed"
+  | `question-${QuestionProblem}`
+  | "accounts-off"
+  | "signed-out"
+  | "not-found"
+  | "invalid"
+  | "save-failed";
+
+export type AskQuestionResult = { ok: true; asked: AskedQuestion } | { ok: false; reason: AskQuestionFailure };
+
+type AskRefusal = Exclude<AskResult, { ok: true }>;
+
+/** Runs ask() with the real model and turns every way it can fail into a plain reason. */
+async function runAsk<S extends { ok: true }>(
+  run: (client: ModelClient) => Promise<S | AskRefusal>,
+): Promise<{ ok: true; value: S } | { ok: false; reason: AskQuestionFailure }> {
+  const engine = await runEngine(run, "question");
+  if (!engine.ok) return { ok: false, reason: engine.reason === "counter-offer-failed" ? "model-failed" : engine.reason };
+  const result = engine.value;
+  if (result.ok) return { ok: true, value: result };
+  if (result.reason === "invalid-question") return { ok: false, reason: `question-${result.problem}` };
+  // The terms only, never the model's text.
+  const terms = [...new Set(result.attempts.flatMap((a) => a.defects.map((d) => d.term)))];
+  console.error(`[question] wording check failed after ${result.attempts.length} attempts: ${terms.join(", ")}`);
+  return { ok: false, reason: "wording-failed" };
+}
+
+/**
+ * Answers a question about a document in the signed-in buyer's library, and
+ * saves the question with the answer shown. The text is loaded under
+ * row-level security, so only the owner's own document can be asked about.
+ * If the model or the save fails, nothing is saved and nothing is shown.
+ */
+export async function askSavedDocument(documentId: unknown, question: unknown): Promise<AskQuestionResult> {
+  if (!isSupabaseConfigured()) return { ok: false, reason: "accounts-off" };
+  if (typeof documentId !== "string" || !UUID.test(documentId)) return { ok: false, reason: "invalid" };
+  const checked = checkQuestion(question);
+  if (!checked.ok) return { ok: false, reason: `question-${checked.problem}` };
+  if (!isModelConfigured()) return { ok: false, reason: "model-off" };
+
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, reason: "signed-out" };
+
+  const supabase = await createServerSupabase();
+  const { data: doc, error: loadError } = await supabase.from("documents").select("id, body").eq("id", documentId).maybeSingle();
+  if (loadError) return { ok: false, reason: "model-failed" };
+  if (!doc) return { ok: false, reason: "not-found" };
+
+  const engine = await runAsk((client) => runSavedQuestion({ documentId, body: doc.body as string, question: checked.question, client }));
+  if (!engine.ok) return engine;
+  const { run } = engine.value;
+
+  const { data: saved, error: saveError } = await supabase.from("questions").insert(run.insert).select("id, created_at").single();
+  if (saveError || !saved) {
+    console.error("[question] could not save the question", saveError?.code ?? "no row");
+    return { ok: false, reason: "save-failed" };
+  }
+
+  return {
+    ok: true,
+    asked: { id: saved.id as string, question: run.question, result: run.answer, askedAt: new Date(saved.created_at as string).toISOString() },
+  };
+}
+
+/**
+ * Answers a question about a document kept only in the browser (signed out,
+ * or no accounts on this server). The text is checked and normalised again
+ * here, without trusting the browser, and nothing is saved.
+ */
+export async function askBrowserDocument(body: unknown, question: unknown): Promise<AskQuestionResult> {
+  const text = checkDocumentText(body);
+  if (!text.ok) return { ok: false, reason: "invalid" };
+  const checked = checkQuestion(question);
+  if (!checked.ok) return { ok: false, reason: `question-${checked.problem}` };
+
+  const engine = await runAsk((client) => ask({ text: text.text, question: checked.question, client }));
+  if (!engine.ok) return engine;
+  const { value } = engine;
+  return { ok: true, asked: { id: null, question: value.question, result: value.answer, askedAt: new Date().toISOString() } };
 }

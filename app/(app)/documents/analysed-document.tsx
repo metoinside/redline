@@ -30,7 +30,7 @@ import {
   type Tier,
 } from "@/lib/engine/types";
 import type { SourceKind } from "@/lib/extraction/limits";
-import { analyseBrowserDocument, analyseSavedDocument, type AnalysisRun, type RunAnalysisResult } from "./actions";
+import { analyseBrowserDocument, analyseSavedDocument, type AnalysisRun, type AskedQuestion, type RunAnalysisResult } from "./actions";
 import {
   ANALYSIS_COPY,
   CLAUSE_LABEL,
@@ -48,6 +48,7 @@ import {
 } from "./analysis-copy";
 import type { TextMark } from "./document-text";
 import { DocumentView } from "./document-view";
+import { QuestionBox, answerMarks, showQuestion, type ShownQuestion } from "./question-box";
 
 // The document view with its analysis: a control to run it, the running
 // state, and the result. Each flag is a tab on the sheet's edge, in its tier's
@@ -82,6 +83,11 @@ import { DocumentView } from "./document-view";
 // sits in the panel. Selecting a point or an obligation scrolls to its
 // sentence and highlights it. Nothing here schedules or reminds (ADR 0002).
 //
+// Below the panel sits the question box. Each answer's sentence is marked in
+// the text the way a summary point's is: quietly, and underlined while its
+// answer is selected. A new answer is selected as it arrives; its link
+// scrolls to the sentence.
+//
 // Every analysis shown here is read through checkStoredAnalysis against this
 // document's own text first, so a citation that doesn't match the text at its
 // offsets, an exposure fragment that isn't in its citation, or wording that
@@ -89,9 +95,13 @@ import { DocumentView } from "./document-view";
 // breaches and tiers are worked out again there from the run's red lines.
 
 export type AnalysisSource =
-  /** A document in the buyer's library: runs are saved, and the latest is shown on load. */
-  | { kind: "saved"; documentId: string; latest: AnalysisRun | null }
-  /** A document kept in this browser tab only: runs are not saved, and have no red lines. */
+  /**
+   * A document in the buyer's library: runs and questions are saved, and the
+   * latest run and the earlier questions (newest first) are shown on load.
+   * questions is null when they couldn't be loaded.
+   */
+  | { kind: "saved"; documentId: string; latest: AnalysisRun | null; questions?: AskedQuestion[] | null }
+  /** A document kept in this browser tab only: runs and questions are not saved, and runs have no red lines. */
   | { kind: "browser"; accountsConfigured: boolean };
 
 type ShownRun = { analysis: Analysis; ranAt: string; redLines: RedLine[] };
@@ -170,6 +180,9 @@ export function AnalysedDocument({
   const [failure, setFailure] = useState<Failure | null>(null);
   const [selected, setSelected] = useState<string | null>(firstItemId(initial.run?.analysis ?? null));
   const [running, startRunning] = useTransition();
+  const [questions, setQuestions] = useState<ShownQuestion[]>(() =>
+    source.kind === "saved" ? (source.questions ?? []).map((q, i) => showQuestion(q, body, `saved-${i}`)) : [],
+  );
   const bodyRef = useRef<HTMLDivElement>(null);
   const marginRef = useRef<HTMLDivElement>(null);
 
@@ -183,7 +196,9 @@ export function AnalysedDocument({
   // One mark per cited range. Items citing the same sentence (a sentence
   // flagged as two clause types, a flag on an outside-terms sentence, a
   // notice obligation or a summary point on a flagged sentence) share it.
-  const groups = useMemo(() => groupMarks(items, summary), [items, summary]);
+  // Answers' sentences are marked quietly, as summary points' are.
+  const answered = useMemo(() => answerMarks(questions), [questions]);
+  const groups = useMemo(() => groupMarks(items, [...summary, ...answered]), [items, summary, answered]);
   const markIds = useMemo(() => {
     const ids = new Map<string, string>();
     for (const group of groups) for (const id of group.ids) ids.set(id, `cite-${group.ids[0]}`);
@@ -431,6 +446,22 @@ export function AnalysedDocument({
     </section>
   );
 
+  const questionBox = (
+    <QuestionBox
+      source={source.kind === "saved" ? { kind: "saved", documentId: source.documentId } : { kind: "browser" }}
+      body={body}
+      modelConfigured={modelConfigured}
+      questions={questions}
+      loadFailed={source.kind === "saved" && source.questions === null}
+      selected={selected}
+      onAsked={(question) => {
+        setQuestions((earlier) => [question, ...earlier]);
+        if (question.answer?.kind === "answered") setSelected(question.key);
+      }}
+      sentenceLink={sentenceLink}
+    />
+  );
+
   let tabIndex = 0;
   const tabs =
     flags.length + notices.length > 0 ? (
@@ -574,7 +605,12 @@ export function AnalysedDocument({
       sourceKind={sourceKind}
       addedAt={addedAt}
       notice={notice}
-      analysis={panel}
+      analysis={
+        <>
+          {panel}
+          {questionBox}
+        </>
+      }
       marks={marks}
       margin={margin}
       tabs={tabs}

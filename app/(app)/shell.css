@@ -364,6 +364,41 @@ p { margin: 0; }
   .checklist li { grid-template-columns: 1fr; }
 }
 
+/* ---------- The question box: under the analysis panel, on the sheet ---------- */
+.ask {
+  display: grid; gap: 12px; justify-items: start;
+  max-width: 46rem;
+  padding: 0 0 22px; margin-bottom: 30px;
+  border-bottom: 1px solid var(--rule);
+}
+.ask h2 { font-weight: 700; font-size: 1.2rem; color: var(--ink); }
+.ask-note { color: var(--graphite); font-size: 0.95rem; max-width: 46rem; }
+.ask-form { display: grid; gap: 12px; justify-self: stretch; }
+.ask-run { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; }
+.ask-run .status:empty { display: none; }
+.ask .message { justify-self: stretch; }
+.asked { display: grid; gap: 6px; justify-self: stretch; }
+.asked h3 { font-weight: 700; font-size: 1.1rem; color: var(--ink); }
+.asked-list { list-style: none; margin: 4px 0 0; padding: 0; border-top: 1px solid var(--rule); }
+.asked-list li {
+  display: grid; gap: 6px; justify-items: start;
+  padding: 12px 0 12px 10px; margin-left: -10px; border-bottom: 1px solid var(--rule);
+  border-left: 2px solid transparent;
+}
+.asked-list li.is-selected { border-left-color: rgba(200, 16, 46, 0.55); }
+.asked-question { font-weight: 600; color: var(--ink); overflow-wrap: anywhere; }
+.asked-answer { color: var(--ink); }
+.asked-answer strong { color: var(--graphite); }
+.asked-note, .asked-at { color: var(--graphite); font-size: 0.88rem; }
+.asked-answer--rejected { color: var(--graphite); }
+/* The cited sentence is the document's words, so it is set in the document's voice. */
+.asked-cite { margin: 2px 0 0; display: grid; gap: 2px; }
+.asked-cite figcaption { font-weight: 600; font-size: 0.82rem; color: var(--graphite); }
+.asked-cite blockquote {
+  margin: 0; padding-left: 12px; border-left: 1px solid var(--rule);
+  font-family: var(--doc); font-size: 1rem; line-height: 1.55; color: var(--ink);
+}
+
 /* ---------- Citation: the red pen underline, in place ---------- */
 .doc-text mark.cite,
 .doc-text mark.summary-cite.is-selected {

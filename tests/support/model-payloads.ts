@@ -6,9 +6,17 @@ import type {
   ModelOutsideTermsItem,
   ModelSummaryItem,
 } from "@/lib/engine/analyse";
+import type { ModelAnswerPayload } from "@/lib/engine/ask";
 import { ScriptedModelClient, type ScriptStep } from "@/lib/engine/scripted";
 import type { ClauseType } from "@/lib/engine/types";
-import type { FixtureClause, FixtureNoticeObligation, FixtureOutsideTerms, FixtureSidecar, FixtureSummaryPoint } from "../fixtures/index";
+import type {
+  FixtureClause,
+  FixtureNoticeObligation,
+  FixtureOutsideTerms,
+  FixtureQuestion,
+  FixtureSidecar,
+  FixtureSummaryPoint,
+} from "../fixtures/index";
 
 // Builds what the model would return for a fixture, from its sidecar labels,
 // so the scripted client can stand in for the model. A test starts from the
@@ -244,3 +252,15 @@ export const FABRICATED_SENTENCES: Record<ClauseType, string> = {
   rollover: "Any unused subscription credits roll over into the next term and extend it by the same number of months.",
   multi_year_term: "The initial term of this Agreement is five (5) years from the Effective Date.",
 };
+
+// ---------- The question box ----------
+
+/** What the model would return for a sidecar question: its answer and sentence, or "the document doesn't answer". */
+export function answerPayload(question: FixtureQuestion): ModelAnswerPayload {
+  return question.answerable
+    ? { document_answers: true, answer: question.answer, sentence: question.sentence }
+    : { document_answers: false, answer: null, sentence: null };
+}
+
+/** The model saying the document doesn't answer the question. */
+export const UNANSWERED: ModelAnswerPayload = { document_answers: false, answer: null, sentence: null };

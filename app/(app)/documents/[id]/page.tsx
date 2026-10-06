@@ -6,13 +6,13 @@ import type { SourceKind } from "@/lib/extraction/limits";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createServerSupabase, getCurrentUser } from "@/lib/supabase/server";
 import { AccountsOff } from "../../accounts-off";
-import type { AnalysisRun } from "../actions";
+import type { AnalysisRun, AskedQuestion } from "../actions";
 import { AnalysedDocument } from "../analysed-document";
 
 type Params = { params: Promise<{ id: string }> };
 type DocumentRow = { id: string; title: string; body: string; source_kind: SourceKind; created_at: string };
 
-// An analysis can take a minute or two; the run is a server action on this page.
+// An analysis can take a minute or two; the run, and each question, is a server action on this page.
 export const maxDuration = 120;
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -53,6 +53,30 @@ async function loadLatestAnalysis(documentId: string): Promise<AnalysisRun | nul
   };
 }
 
+/** How many earlier questions a document shows, newest first. */
+const QUESTION_LIMIT = 50;
+
+// The questions asked about a document, newest first, or null when they
+// couldn't be loaded. Each answer's citation is checked again against the
+// document text before it is shown (readStoredAnswer).
+async function loadQuestions(documentId: string): Promise<AskedQuestion[] | null> {
+  const supabase = await createServerSupabase();
+  const { data, error } = await supabase
+    .from("questions")
+    .select("id, question, result, created_at")
+    .eq("document_id", documentId)
+    .order("created_at", { ascending: false })
+    .limit(QUESTION_LIMIT);
+  if (error || !data) return null;
+  return data.map((row) => ({
+    id: row.id as string,
+    question: row.question as string,
+    // Checked on the way in by readStoredAnswer, like an analysis.
+    result: row.result as AskedQuestion["result"],
+    askedAt: new Date(row.created_at as string).toISOString(),
+  }));
+}
+
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   if (!isSupabaseConfigured() || !(await getCurrentUser())) return { title: "Document" };
   const doc = await loadDocument((await params).id);
@@ -82,7 +106,7 @@ export default async function DocumentPage({ params }: Params) {
   }
   if (!doc) notFound();
 
-  const latest = await loadLatestAnalysis(doc.id);
+  const [latest, questions] = await Promise.all([loadLatestAnalysis(doc.id), loadQuestions(doc.id)]);
 
   return (
     <AnalysedDocument
@@ -90,7 +114,7 @@ export default async function DocumentPage({ params }: Params) {
       body={doc.body}
       sourceKind={doc.source_kind}
       addedAt={doc.created_at}
-      source={{ kind: "saved", documentId: doc.id, latest }}
+      source={{ kind: "saved", documentId: doc.id, latest, questions }}
       modelConfigured={isModelConfigured()}
     />
   );

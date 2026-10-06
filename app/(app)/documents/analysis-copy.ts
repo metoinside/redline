@@ -1,5 +1,6 @@
 import type { ClauseType, ExposurePart, Tier } from "@/lib/engine/types";
-import type { RunAnalysisFailure } from "./actions";
+import { MAX_QUESTION_CHARS } from "@/lib/engine/answers";
+import type { AskQuestionFailure, RunAnalysisFailure } from "./actions";
 
 // What the buyer reads in the analysis view. Every line here went through the
 // humanizer skill. Nothing in it says more than the flag does: its clause type,
@@ -202,6 +203,63 @@ export const FAILURE_COPY: Record<RunAnalysisFailure | "unreachable", { title: s
     title: "Redline couldn’t load your red lines.",
     body: "Nothing was analysed or saved. Try again in a minute.",
   },
+};
+
+/**
+ * The question box (PRD §3 item 7). Answers come from the engine, checked
+ * against their sentence and run through the wording check; this is the
+ * frame around them. "the document doesn't say" is the PRD's own phrase and
+ * stays exactly as it is.
+ */
+export const ASK_COPY = {
+  heading: "Ask about this document",
+  note: "Redline answers only from this document’s text, not from general knowledge, and shows the sentence each answer comes from. If the text doesn’t answer your question, Redline says so.",
+  label: "Your question",
+  placeholder: "For example: how do I cancel?",
+  hint: `Up to ${MAX_QUESTION_CHARS} characters.`,
+  ask: "Ask",
+  running: "Looking for the answer in this document.",
+  notSaved: "Questions about this document aren’t saved. They’re gone when you leave this page.",
+  answerLead: "Answer:",
+  notSaid: "the document doesn't say",
+  notSaidNote: "Redline found no sentence in this document that answers this question. It doesn’t answer from general knowledge.",
+  citedLabel: "From the document",
+  goTo: "Go to the sentence",
+  earlier: "Earlier questions",
+  thisVisit: "Your questions",
+  askedAt: "Asked",
+  rejected: "This saved answer didn’t pass Redline’s checks, so it isn’t shown. Ask the question again.",
+  loadFailed: "Redline couldn’t load your earlier questions. Reload the page to try again.",
+  modelOff: {
+    title: "Questions aren’t set up on this server.",
+    body: "This copy of Redline has no model connected, so it can’t answer questions.",
+  },
+} as const;
+
+export const ASK_FAILURE_COPY: Record<AskQuestionFailure | "unreachable", { title: string; body: string }> = {
+  "model-off": ASK_COPY.modelOff,
+  "model-failed": { title: "Redline didn’t get an answer.", body: "Nothing was saved. Try again in a minute." },
+  "wording-failed": {
+    title: "The answer didn’t pass Redline’s wording check.",
+    body: "Both tries hedged or compared this contract with others, so Redline didn’t show the answer or save it. Ask again.",
+  },
+  "question-empty": { title: "Type a question first.", body: "" },
+  "question-too-long": {
+    title: "That question is too long.",
+    body: `Questions can be up to ${MAX_QUESTION_CHARS} characters. Shorten it and ask again.`,
+  },
+  unreachable: { title: "Redline didn’t get an answer.", body: "It couldn’t reach the server. Check your connection and try again." },
+  "save-failed": {
+    title: "The answer couldn’t be saved.",
+    body: "Redline shows an answer about a saved document only once it’s saved. Try again in a minute.",
+  },
+  "accounts-off": {
+    title: "Accounts aren’t set up on this server.",
+    body: "Without accounts, Redline can’t answer questions about a document in a library.",
+  },
+  "signed-out": { title: "You’re signed out.", body: "Sign in again to ask about this document." },
+  "not-found": { title: "This document isn’t in your library.", body: "It was deleted, or it belongs to another account." },
+  invalid: { title: "Redline couldn’t read this document’s text.", body: "Add the document again, then ask once more." },
 };
 
 /**
