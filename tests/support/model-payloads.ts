@@ -1,5 +1,6 @@
 import type {
   ModelAnalysisItem,
+  ModelCounterOffer,
   ModelAnalysisPayload,
   ModelNoticeObligationItem,
   ModelOutsideTermsItem,
@@ -19,6 +20,10 @@ import type { FixtureClause, FixtureNoticeObligation, FixtureOutsideTerms, Fixtu
 // The summary carries each sidecar summary point with its sentence, and the
 // notice-obligation list each sidecar notice obligation with its description
 // and deadline (a rule with what it counts from, or a stated date).
+// Each clause also carries a counter-offer (SIDECAR_COUNTER_OFFERS): the
+// wording the buyer proposes in place of its sentence, and a message to the
+// vendor. The fixture sidecars have no counter-offer labels of their own, so
+// they are written here, one per sidecar clause, in the engine's wording rules.
 
 export type PayloadOptions = {
   /** Keep only clauses of these types. Default: every clause in the sidecar. */
@@ -96,6 +101,67 @@ export function answerOf(
   };
 }
 
+/**
+ * The counter-offer the model would give for each sidecar clause, by clause
+ * id. Only adhesion-contract.json has clauses. Each replacement differs from
+ * its sentence, and none of them hedges or compares with the market.
+ */
+export const SIDECAR_COUNTER_OFFERS: Readonly<Record<string, ModelCounterOffer>> = {
+  c1: {
+    replacement:
+      "The Initial Subscription Term begins on the Effective Date and continues for twelve (12) months, and Customer can terminate this Agreement for convenience at any time on thirty (30) days' written notice to Provider.",
+    message:
+      "Before we sign, we'd like to change the length of the first term. As written, it holds us for 36 months with no way to end it early. We're asking for a 12-month first term and the right to end the agreement on 30 days' written notice.",
+  },
+  c2: {
+    replacement:
+      "Upon expiration of the Initial Subscription Term or any renewal term, this Agreement shall renew only if both parties agree in writing, at a Subscription Fee no higher than the fee for the term that is ending.",
+    message:
+      "We'd like to change how the agreement renews. Right now it renews on its own at no less than $48,000 a year. We're asking that it renew only when we both agree in writing, at a fee no higher than what we pay now.",
+  },
+  c3: {
+    replacement: "Each renewal term shall be twelve (12) months.",
+    message: "We're asking for renewal terms of 12 months. As written, each renewal runs another 36 months, the same as the first term.",
+  },
+  c4: {
+    replacement:
+      "To prevent renewal, Customer must give written notice of non-renewal to Provider by email or by mail, and that notice must be sent no later than thirty (30) days before the end of the then-current term.",
+    message:
+      "We'd like to make notice of non-renewal simpler. The current wording asks for certified mail to your legal department, received 90 days before the term ends. We're asking to give written notice by email or mail, sent at least 30 days before the term ends.",
+  },
+  c5: {
+    replacement:
+      "If Customer terminates this Agreement for convenience during any renewal term, Customer shall pay only the Subscription Fees for the period up to the effective date of termination.",
+    message:
+      "We'd like to change the early termination fee. As written, ending the agreement during a renewal term costs us every fee left in that term. We're asking to pay only for the service up to the date the termination takes effect.",
+  },
+  c6: {
+    replacement:
+      "If Customer purchases additional Authorized User seats during any term, the subscription for those seats shall end on the last day of the then-current term, and adding seats shall not extend or restart the term of the existing Services.",
+    message:
+      "We'd like to settle what happens when we add seats. The current sentence reads two ways, and one reading restarts the whole subscription for a full new term. We're asking that added seats end with the current term and never extend or restart it.",
+  },
+  c7: {
+    replacement:
+      "The Priority Support add-on renews together with the Services only if Customer confirms the renewal in writing, and Customer can cancel the Priority Support add-on at any time without charge from the billing page of its account.",
+    message:
+      "We'd like the Priority Support add-on to renew only when we confirm it in writing. We're glad to keep the right to cancel it at any time from the billing page.",
+  },
+};
+
+/** The sidecar clause's counter-offer. Fails loudly for a clause nobody wrote one for. */
+export function counterOfferFor(clause: FixtureClause): ModelCounterOffer {
+  const offer = SIDECAR_COUNTER_OFFERS[clause.id];
+  if (!offer) throw new Error(`no counter-offer written for sidecar clause ${clause.id}`);
+  return { ...offer };
+}
+
+/** A counter-offer for any sentence: a plain replacement and message that pass the wording check. */
+export const PLAIN_COUNTER_OFFER: ModelCounterOffer = {
+  replacement: "Either party can end this Agreement at the end of the current term by giving thirty (30) days' written notice.",
+  message: "We'd like to be able to end the agreement at the end of any term on 30 days' written notice.",
+};
+
 /** One clause as the model would report it, from its sidecar labels. */
 export function modelItem(clause: FixtureClause): ModelAnalysisItem {
   return {
@@ -108,10 +174,11 @@ export function modelItem(clause: FixtureClause): ModelAnalysisItem {
       exit_difficulty: clause.exposure.exitDifficulty ?? null,
     },
     readings: clause.readings ? [...clause.readings] : [clause.statement],
+    counter_offer: counterOfferFor(clause),
   };
 }
 
-/** An item for any sentence, with a plain statement, one reading and no exposure unless given. */
+/** An item for any sentence, with a plain statement, one reading, a plain counter-offer and no exposure unless given. */
 export function itemFor(
   clauseType: string,
   sentence: string,
@@ -124,6 +191,7 @@ export function itemFor(
     statement,
     exposure: { money: null, lock_in: null, exit_difficulty: null },
     readings: [statement],
+    counter_offer: { ...PLAIN_COUNTER_OFFER },
     ...overrides,
   };
 }

@@ -21,6 +21,7 @@ import {
   TIERS,
   type Analysis,
   type Citation,
+  type CounterOffer,
   type Flag,
   type NoticeDeadline,
   type NoticeObligation,
@@ -34,6 +35,7 @@ import {
   ANALYSIS_COPY,
   CLAUSE_LABEL,
   CLEAN_COPY,
+  COUNTER_OFFER_COPY,
   EXPOSURE_LABEL,
   FAILURE_COPY,
   OBLIGATION_COPY,
@@ -53,7 +55,12 @@ import { DocumentView } from "./document-view";
 // grouped by tier in ranked order. Selecting one scrolls to its citation,
 // which carries the red pen underline in place, and its margin comment sits
 // beside the sentence with the plain statement, the cited exposure and, for a
-// clause that reads two ways, both readings.
+// clause that reads two ways, both readings. Below them sits the flag's
+// counter-offer: its cited sentence struck through and the proposed wording
+// set as a tracked insertion with the red double underline, then the message
+// to the vendor, with a control that copies the message together with the
+// sentence and the proposed wording. On a wide screen the counter-offer shows
+// in the selected comment only, so the margin stays readable.
 //
 // Each outside-terms notice is a blue tab after the flags. Its sentence is
 // underlined in place the same way, and its margin comment names the document
@@ -262,7 +269,7 @@ export function AnalysedDocument({
     );
   };
 
-  useMarginLayout(bodyRef, marginRef, items);
+  useMarginLayout(bodyRef, marginRef, items, selected);
 
   const ranOn = run ? (
     <p className="analysis-ran">
@@ -553,6 +560,7 @@ export function AnalysedDocument({
                   </ol>
                 </div>
               )}
+              <CounterOfferEdit offer={flag.counterOffer} />
             </aside>
           );
         })}
@@ -633,6 +641,55 @@ function ObligationComment({ obligation, body, selected }: { obligation: NoticeO
   );
 }
 
+/**
+ * A flag's counter-offer as a marked-up edit of its cited sentence: the
+ * sentence struck through, the replacement inserted, then the message to the
+ * vendor. The sentence comes from the flag's checked citation, never from the
+ * model. Copying puts the message, the sentence and the replacement on the
+ * clipboard, so the vendor sees exactly what the buyer wants changed.
+ */
+function CounterOfferEdit({ offer }: { offer: CounterOffer }) {
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle");
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(COUNTER_OFFER_COPY.toSend(offer.message, offer.replaces.text, offer.replacement));
+      setCopyState("copied");
+    } catch {
+      setCopyState("failed");
+    }
+  }
+
+  return (
+    <div className="counter-offer">
+      <p className="counter-offer-lead">
+        <strong>{COUNTER_OFFER_COPY.lead}</strong> {COUNTER_OFFER_COPY.leadRest}
+      </p>
+      <p className="counter-offer-edit">
+        <del>
+          <span className="visually-hidden">{COUNTER_OFFER_COPY.now} </span>
+          {offer.replaces.text}
+        </del>{" "}
+        <ins>
+          <span className="visually-hidden">{COUNTER_OFFER_COPY.proposed} </span>
+          {offer.replacement}
+        </ins>
+      </p>
+      <p className="counter-offer-label">{COUNTER_OFFER_COPY.messageLabel}</p>
+      <p className="counter-offer-message">{offer.message}</p>
+      <p className="counter-offer-copy">
+        <button type="button" className="text-action" onClick={copy}>
+          {COUNTER_OFFER_COPY.copy}
+        </button>
+        <span className="copy-status" role="status" aria-live="polite">
+          {copyState === "copied" ? COUNTER_OFFER_COPY.copied : copyState === "failed" ? COUNTER_OFFER_COPY.copyFailed : ""}
+        </span>
+      </p>
+      <p className="counter-offer-note">{COUNTER_OFFER_COPY.copyNote}</p>
+    </div>
+  );
+}
+
 /** An outside-terms notice in the margin: what the sentence does and the document to add next. No tier, no counter-offer. */
 function NoticeComment({ notice, body, selected }: { notice: OutsideTermsNotice; body: string; selected: boolean }) {
   const number = clauseNumberAt(body, notice.citation.start);
@@ -689,6 +746,8 @@ function useMarginLayout(
   bodyRef: RefObject<HTMLDivElement | null>,
   marginRef: RefObject<HTMLDivElement | null>,
   items: Marked[],
+  /** The selected item: its comment grows when it shows its counter-offer, so the comments below move down. */
+  selected: string | null,
 ) {
   useIsoLayoutEffect(() => {
     const bodyEl = bodyRef.current;
@@ -717,5 +776,5 @@ function useMarginLayout(
     const observer = new ResizeObserver(place);
     observer.observe(bodyEl);
     return () => observer.disconnect();
-  }, [bodyRef, marginRef, items]);
+  }, [bodyRef, marginRef, items, selected]);
 }

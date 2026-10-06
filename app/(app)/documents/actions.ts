@@ -6,7 +6,7 @@
 
 import { checkDocumentText } from "@/lib/documents/new-document";
 import { runSavedAnalysis } from "@/lib/documents/saved-run";
-import { analyse } from "@/lib/engine/analyse";
+import { CounterOfferDefectsError, analyse } from "@/lib/engine/analyse";
 import { ModelError, type ModelClient } from "@/lib/engine/model";
 import { createOpenRouterClient, isModelConfigured } from "@/lib/engine/openrouter";
 import { WordingDefectsError } from "@/lib/engine/wording";
@@ -27,6 +27,8 @@ export type RunAnalysisFailure =
   | "model-failed"
   /** The model's wording still hedged or compared with the market after a retry. Nothing is shown or saved. */
   | "wording-failed"
+  /** A flag still had no usable counter-offer after a retry. Nothing is shown or saved: a flag is never shown without one. */
+  | "counter-offer-failed"
   | "accounts-off"
   | "signed-out"
   | "not-found"
@@ -50,6 +52,12 @@ async function runEngine<T>(run: (client: ModelClient) => Promise<T>): Promise<{
       const terms = [...new Set(err.attempts.flatMap((a) => a.defects.map((d) => d.term)))];
       console.error(`[analysis] wording check failed after ${err.attempts.length} attempts: ${terms.join(", ")}`);
       return { ok: false, reason: "wording-failed" };
+    }
+    if (err instanceof CounterOfferDefectsError) {
+      // The clause types only, never the model's text.
+      const types = [...new Set(err.attempts.flatMap((a) => a.defects.map((d) => d.clauseType)))];
+      console.error(`[analysis] counter-offer check failed after ${err.attempts.length} attempts: ${types.join(", ")}`);
+      return { ok: false, reason: "counter-offer-failed" };
     }
     if (err instanceof ModelError) {
       // The kind and status only: messages are already free of the key and model id.

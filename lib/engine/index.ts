@@ -1,7 +1,7 @@
 // The analysis engine's public API, for server code (server actions, route
 // handlers, scripts). Client components must not import this file, because it
 // re-exports the OpenRouter client; they import ./types, ./stored, ./red-lines,
-// ./clean, ./summary, ./citations, ./exposure, ./tiers or ./wording directly
+// ./clean, ./summary, ./counter-offers, ./citations, ./exposure, ./tiers or ./wording directly
 // (tests/engine/server-boundary.test.ts).
 
 export * from "./types";
@@ -9,6 +9,7 @@ export * from "./model";
 export { findCitation, checkQuote, citationMatches, MIN_CITATION_CHARS, type QuoteCheck } from "./citations";
 export {
   analyse,
+  CounterOfferDefectsError,
   ALLOWED_CLAUSE_TYPES,
   ANALYSIS_SCHEMA,
   ANALYSIS_TASK,
@@ -16,10 +17,12 @@ export {
   type AnalyseInput,
   type ModelAnalysisItem,
   type ModelAnalysisPayload,
+  type ModelCounterOffer,
   type ModelNoticeObligationItem,
   type ModelOutsideTermsItem,
   type ModelSummaryItem,
 } from "./analyse";
+export { counterOfferPieces, readCounterOffer, type CounterOfferCheck } from "./counter-offers";
 export { checkDeadline, datesNotInCitation, type DeadlineCheck } from "./summary";
 export { decideOutcome } from "./clean";
 export { checkExposure, hasFigure, parseMoneyAmount, type ExposureCheck } from "./exposure";

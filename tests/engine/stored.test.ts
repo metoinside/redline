@@ -223,6 +223,74 @@ describe("readStoredAnalysis", () => {
     expect(checkStoredAnalysis(stored, contract, [])).toEqual({ ok: false, reason: "wording" });
   });
 
+  it("re-checks the wording of every stored counter-offer, the replacement and the message", async () => {
+    const replacement = await freshAnalysis();
+    replacement.flags[0].counterOffer = { ...(replacement.flags[0].counterOffer as object), replacement: "Customer may end this Agreement at any time." };
+    expect(checkStoredAnalysis(replacement, contract, [])).toEqual({ ok: false, reason: "wording" });
+
+    const message = await freshAnalysis();
+    message.flags[2].counterOffer = { ...(message.flags[2].counterOffer as object), message: "This fee is unusual, so we'd like it gone." };
+    expect(checkStoredAnalysis(message, contract, [])).toEqual({ ok: false, reason: "wording" });
+  });
+
+  it.each([
+    ["no counter-offer", undefined],
+    ["a null counter-offer", null],
+    ["an empty replacement", { replacement: "", message: "We'd like this changed." }],
+    ["no message", { replacement: "Each renewal term shall be twelve (12) months." }],
+  ])("shows nothing when a stored flag has %s, rather than show the flag without one", async (_label, offer) => {
+    const stored = await freshAnalysis();
+    stored.flags[1] = { ...stored.flags[1], counterOffer: offer };
+    expect(readStoredAnalysis(stored, contract, [])).toBeNull();
+    expect(checkStoredAnalysis(stored, contract, [])).toEqual({ ok: false, reason: "unreadable" });
+  });
+
+  it("shows nothing when a stored replacement repeats its sentence unchanged", async () => {
+    const stored = await freshAnalysis();
+    stored.flags[0].counterOffer = { ...(stored.flags[0].counterOffer as object), replacement: stored.flags[0].citation.text };
+    expect(checkStoredAnalysis(stored, contract, [])).toEqual({ ok: false, reason: "unreadable" });
+  });
+
+  it("ties every counter-offer to its flag's citation again, whatever sentence was stored with it", async () => {
+    const stored = await freshAnalysis();
+    const other = stored.flags[3].citation;
+    stored.flags[0].counterOffer = { ...(stored.flags[0].counterOffer as object), replaces: { ...other } };
+    const read = readStoredAnalysis(stored, contract, [])!;
+    for (const flag of read.flags) expect(flag.counterOffer.replaces).toEqual(flag.citation);
+    expectCitationsVerbatim(read, contract);
+  });
+
+  it("drops a flag whose citation no longer checks out together with its counter-offer", async () => {
+    const stored = await freshAnalysis();
+    const gone = stored.flags[0];
+    const offer = gone.counterOffer as { replacement: string; message: string };
+    gone.citation.start += 1;
+    const read = readStoredAnalysis(stored, contract, [])!;
+    expect(read.flags).toHaveLength(stored.flags.length - 1);
+    const shown = JSON.stringify(read);
+    expect(shown).not.toContain(offer.replacement);
+    expect(shown).not.toContain(offer.message);
+  });
+
+  it("never reads a counter-offer stored on an outside-terms notice", async () => {
+    const stored = await freshAnalysis();
+    stored.outsideTerms[0] = { ...stored.outsideTerms[0], counterOffer: { replacement: "The zebra policy does not apply.", message: "Please drop it." } };
+    const read = readStoredAnalysis(stored, contract, [])!;
+    expect(read.outsideTerms[0]).not.toHaveProperty("counterOffer");
+    expect(JSON.stringify(read)).not.toContain("zebra");
+  });
+
+  it("treats an analysis saved before counter-offers existed as needing a re-run", async () => {
+    const stored = await freshAnalysis();
+    const v4 = {
+      ...stored,
+      schemaVersion: 4,
+      flags: stored.flags.map(({ counterOffer: _gone, ...flag }) => flag),
+    };
+    expect(readStoredAnalysis(v4, contract, [])).toBeNull();
+    expect(checkStoredAnalysis(v4, contract, [])).toEqual({ ok: false, reason: "outdated" });
+  });
+
   it("treats an analysis saved before the summary and notice obligations existed as needing a re-run", async () => {
     const stored = await freshAnalysis();
     const v3 = { schemaVersion: 3, flags: stored.flags, outsideTerms: stored.outsideTerms, outcome: stored.outcome };

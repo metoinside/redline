@@ -1,14 +1,16 @@
 // npm run smoke: runs the adhesion fixture through the real pipeline (the real
 // analyse with the OpenRouter client) and prints the summary points and the
 // notice obligations with their source sentences, then each kept flag in ranked
-// order with its tier, exposure, statement, readings and source sentence,
-// then each outside-terms notice, whether the result is clean (with its
+// order with its tier, exposure, statement, readings, source sentence and
+// counter-offer (the sentence it replaces, the proposed wording and the
+// message to the vendor), then each outside-terms notice, whether the result is clean (with its
 // checklist when it is), the diagnostics and how the result compares with the
 // fixture's labels, the notice obligations included. Proves the request shape works
-// against the real model. Never prints the key or the model id.
+// against the real model. Never prints the key or the model id. Prints only:
+// it writes no file and saves nothing.
 
 import { loadEnvConfig } from "@next/env";
-import { analyse } from "@/lib/engine/analyse";
+import { CounterOfferDefectsError, analyse } from "@/lib/engine/analyse";
 import { ModelError, ModelHttpError } from "@/lib/engine/model";
 import { createOpenRouterClient } from "@/lib/engine/openrouter";
 import { EXPOSURE_PARTS } from "@/lib/engine/types";
@@ -39,6 +41,13 @@ async function main(): Promise<number> {
       console.error(`The analysis failed the wording check after ${err.attempts.length} attempts. Nothing would be shown or saved.`);
       for (const a of err.attempts) {
         console.error(`  attempt ${a.attempt}: ${a.defects.map((d) => `${d.field} "${d.term}"`).join("; ") || "clean"}`);
+      }
+      return 1;
+    }
+    if (err instanceof CounterOfferDefectsError) {
+      console.error(`The analysis left flags without a counter-offer after ${err.attempts.length} attempts. Nothing would be shown or saved.`);
+      for (const a of err.attempts) {
+        console.error(`  attempt ${a.attempt}: ${a.defects.map((d) => `${d.field} ${d.problem}`).join("; ") || "every flag has one"}`);
       }
       return 1;
     }
@@ -87,6 +96,11 @@ async function main(): Promise<number> {
     console.log(`    statement: ${flag.statement}`);
     if (flag.readings.length === 2) flag.readings.forEach((r, i) => console.log(`    reading ${i + 1}: ${r}`));
     console.log(`    source: "${flag.citation.text}"`);
+    const offer = flag.counterOffer;
+    const tied = offer.replaces.start === flag.citation.start && offer.replaces.end === flag.citation.end && offer.replaces.text === flag.citation.text;
+    console.log(`    counter-offer replaces [${offer.replaces.start}, ${offer.replaces.end}) ${tied ? "this flag's sentence" : "ANOTHER SENTENCE"}`);
+    console.log(`      proposed wording: "${offer.replacement}"`);
+    console.log(`      message to the vendor: ${offer.message}`);
   }
   if (analysis.flags.length === 0) console.log("  none");
 
@@ -144,6 +158,9 @@ async function main(): Promise<number> {
   for (const a of diagnostics.wording) {
     console.log(`  wording, attempt ${a.attempt}: ${a.defects.map((d) => `${d.field} "${d.term}"`).join("; ") || "clean"}`);
   }
+  for (const a of diagnostics.counterOffers) {
+    console.log(`  counter-offers, attempt ${a.attempt}: ${a.defects.map((d) => `${d.field} ${d.problem}`).join("; ") || "every flag has one"}`);
+  }
 
   // How the model did against the fixture's labels, for the reader of this output.
   let found = 0;
@@ -178,7 +195,13 @@ async function main(): Promise<number> {
   for (const o of unlabelled) console.log(`  notice obligation not in the labels: ${o.id} "${o.description}"`);
   console.log(`Labelled notice obligations found: ${obligationsFound} of ${sidecar.noticeObligations.length}`);
 
-  const cited = [...analysis.summary, ...analysis.noticeObligations, ...analysis.flags, ...analysis.outsideTerms];
+  const cited = [
+    ...analysis.summary,
+    ...analysis.noticeObligations,
+    ...analysis.flags,
+    ...analysis.flags.map((f) => ({ citation: f.counterOffer.replaces })),
+    ...analysis.outsideTerms,
+  ];
   return cited.every((item) => text.slice(item.citation.start, item.citation.end) === item.citation.text) ? 0 : 1;
 }
 

@@ -66,7 +66,9 @@ describe("analysing a document kept in the browser", () => {
     expect(serialised).not.toContain("model-named-by-env");
     expect(serialised).not.toContain("droppedByReason");
     expect(serialised).not.toContain("exposureDropped");
-    expect(serialised).not.toContain("wording");
+    // Diagnostics keys. The analysis itself can use the word "wording" (a counter-offer's message, say).
+    expect(serialised).not.toContain('"wording"');
+    expect(serialised).not.toContain('"counterOffers"');
   });
 
   it("says the model isn't set up, and calls nothing, when the key is missing", async () => {
@@ -87,6 +89,13 @@ describe("analysing a document kept in the browser", () => {
     const hedged = analysisPayload(sidecar, { map: (item) => ({ ...item, statement: "This might renew.", readings: ["This might renew."] }) });
     answerWith(200, hedged);
     expect(await analyseBrowserDocument(contract)).toEqual({ ok: false, reason: "wording-failed" });
+    expect(calls).toBe(2);
+  });
+
+  it("shows nothing when a flag still has no counter-offer after the retry, and says why", async () => {
+    const bare = analysisPayload(sidecar, { map: ({ counter_offer: _gone, ...item }) => item as never });
+    answerWith(200, bare);
+    expect(await analyseBrowserDocument(contract)).toEqual({ ok: false, reason: "counter-offer-failed" });
     expect(calls).toBe(2);
   });
 

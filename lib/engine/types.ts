@@ -10,8 +10,9 @@
 // every read from the red lines the run used (the analyses.red_lines
 // snapshot), never read from the stored flag, and every version 3 analysis
 // saved before #10 ran with no red lines. #6 added summary and
-// noticeObligations to Analysis (schema version 4). Ticket #8 adds to Flag:
-// counterOffer.
+// noticeObligations to Analysis (schema version 4). #8 added counterOffer to
+// Flag (schema version 5): every flag carries one, so a saved flag without one
+// can't be shown, and an analysis saved before #8 needs a re-run.
 
 /** The renewal-and-exit family (ADR 0004): the only clause types that can become flags. */
 export type ClauseType = "auto_renewal" | "notice_window" | "early_termination_fee" | "rollover" | "multi_year_term";
@@ -89,6 +90,26 @@ export interface Flag {
    * were given. Any breach puts the flag in Negotiate before signing.
    */
   redLineBreaches: RedLineBreach[];
+  /** What the buyer can ask the vendor to change in the cited sentence. Every flag has one. */
+  counterOffer: CounterOffer;
+}
+
+/**
+ * A drafted counter-offer (PRD §3 item 3, §4 check 12): an edit to one flag's
+ * cited sentence, and a message the buyer could send the vendor with light
+ * editing. It lives on its flag, so a flag the citation check drops takes its
+ * counter-offer with it. Outside-terms notices never have one.
+ */
+export interface CounterOffer {
+  /**
+   * The sentence the edit replaces: always its flag's own citation, set in
+   * code, never from the model. The buyer sees it beside the replacement.
+   */
+  replaces: Citation;
+  /** The wording the buyer proposes in place of that sentence. Passed the wording check, and differs from the sentence. */
+  replacement: string;
+  /** A short message to the vendor asking for the change. Passed the wording check. */
+  message: string;
 }
 
 /**
@@ -229,7 +250,7 @@ export interface NoticeObligation {
   citation: Citation;
 }
 
-export const ANALYSIS_SCHEMA_VERSION = 4;
+export const ANALYSIS_SCHEMA_VERSION = 5;
 
 /** What the buyer sees for one analysis run. */
 export interface Analysis {
@@ -299,6 +320,24 @@ export interface WordingDefect {
   term: string;
 }
 
+/**
+ * A kept flag the model gave no usable counter-offer:
+ *  - missing: none, or one without a replacement or a message;
+ *  - unchanged: a replacement that repeats the cited sentence as it is.
+ */
+export interface CounterOfferDefect {
+  /** Which clause, such as "clause 3 (auto_renewal)". */
+  field: string;
+  clauseType: ClauseType;
+  problem: "missing" | "unchanged";
+}
+
+export interface CounterOfferAttempt {
+  /** 1 for the first answer, 2 for the retry. */
+  attempt: number;
+  defects: CounterOfferDefect[];
+}
+
 export interface WordingAttempt {
   /** 1 for the first answer, 2 for the retry. */
   attempt: number;
@@ -366,6 +405,8 @@ export interface AnalysisDiagnostics {
   noticeObligationsDropped: DroppedObligation[];
   /** The wording check on each answer the model gave. */
   wording: WordingAttempt[];
+  /** The counter-offer check on each answer the model gave: kept flags without a usable counter-offer. */
+  counterOffers: CounterOfferAttempt[];
 }
 
 export interface AnalyseResult {

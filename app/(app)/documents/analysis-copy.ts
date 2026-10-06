@@ -4,7 +4,7 @@ import type { RunAnalysisFailure } from "./actions";
 // What the buyer reads in the analysis view. Every line here went through the
 // humanizer skill. Nothing in it says more than the flag does: its clause type,
 // its tier, the exposure its sentence cites, and the sentence itself. The
-// statement and readings on each flag, the document named on each
+// statement, readings and counter-offer on each flag, the document named on each
 // outside-terms notice, the summary points and each notice obligation's
 // description and deadline come from the engine, which has already run them
 // through the wording check.
@@ -122,6 +122,29 @@ export const SUMMARY_COPY = {
 } as const;
 
 /**
+ * The counter-offer in a flag's margin comment: the cited sentence struck
+ * through, the replacement set as a tracked insertion, and the message to the
+ * vendor. The replacement and the message are the engine's, run through the
+ * wording check; this is the frame around them. Notices never get one.
+ */
+export const COUNTER_OFFER_COPY = {
+  label: "Counter-offer",
+  lead: "Counter-offer:",
+  leadRest: "ask for this wording in place of the sentence.",
+  /** Read out before the struck sentence and the insertion, which screen readers don't announce. */
+  now: "Current sentence:",
+  proposed: "Proposed wording:",
+  messageLabel: "Message to the vendor",
+  copy: "Copy message",
+  copyNote: "This copies the message with the current sentence and your proposed wording.",
+  copied: "Copied.",
+  copyFailed: "Couldn’t copy. Select the message and copy it yourself.",
+  /** What goes on the clipboard: the message, then the sentence and the replacement, so the vendor sees exactly what to change. */
+  toSend: (message: string, sentence: string, replacement: string) =>
+    `${message}\n\nThe sentence as it stands:\n“${sentence}”\n\nWhat we propose instead:\n“${replacement}”`,
+} as const;
+
+/**
  * Notice obligations: what the buyer has to do by a date or deadline. Shown,
  * never scheduled (ADR 0002): there is no reminder, no calendar and no date
  * Redline worked out itself. A deadline that depends on another date is shown
@@ -158,6 +181,10 @@ export const FAILURE_COPY: Record<RunAnalysisFailure | "unreachable", { title: s
   "wording-failed": {
     title: "The analysis didn’t pass Redline’s wording check.",
     body: "Both tries hedged or compared this contract with others, so Redline didn’t show it or save it. Try again.",
+  },
+  "counter-offer-failed": {
+    title: "The analysis came back with flags missing their counter-offers.",
+    body: "Both tries left at least one flag without a counter-offer, so Redline didn’t show it or save it. Try again.",
   },
   unreachable: { title: "The analysis didn’t finish.", body: "Redline couldn’t reach the server. Check your connection and try again." },
   "save-failed": {

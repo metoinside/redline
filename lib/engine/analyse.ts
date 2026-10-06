@@ -10,8 +10,14 @@
 //  4. red-line breaches are worked out from the checked exposure
 //     (lib/engine/red-lines.ts), and the tier from what survived and those
 //     breaches (lib/engine/tiers.ts);
-//  5. statements and readings must pass the wording check (lib/engine/wording.ts).
-//     If they don't, the model is asked once more with the defects named; if
+//  5. every kept flag must carry a counter-offer: replacement wording for its
+//     cited sentence that changes it, and a message to the vendor
+//     (lib/engine/counter-offers.ts). The counter-offer is tied in code to the
+//     flag's verified citation, so a flag the citation check drops takes its
+//     counter-offer with it;
+//  6. statements, readings and counter-offers must pass the wording check
+//     (lib/engine/wording.ts).
+//     If 5 or 6 fails, the model is asked once more with the defects named; if
 //     any remain, the analysis fails and nothing is shown or saved.
 // In the same call it asks for every sentence that brings in outside terms,
 // with a description of the document to upload next (ADR 0006). Each one's
@@ -28,6 +34,7 @@
 import { normalizeText } from "@/lib/extraction/normalize";
 import { checkQuote } from "./citations";
 import { decideOutcome } from "./clean";
+import { counterOfferPieces, readCounterOffer } from "./counter-offers";
 import { checkExposure, parseMoneyAmount } from "./exposure";
 import { ModelOutputError, type ChatMessage, type JsonSchema, type ModelClient } from "./model";
 import { describeRedLine, findBreaches } from "./red-lines";
@@ -40,6 +47,8 @@ import {
   type AnalyseResult,
   type AnalysisDiagnostics,
   type ClauseType,
+  type CounterOfferAttempt,
+  type CounterOfferDefect,
   type DropReason,
   type DroppedExposure,
   type DroppedItem,
@@ -61,16 +70,25 @@ export const ALLOWED_CLAUSE_TYPES: readonly ClauseType[] = CLAUSE_TYPES;
 
 export const ANALYSIS_TASK = "analysis";
 
-/** How many answers the engine asks for at most: the first, and one retry when the wording fails. */
+/** How many answers the engine asks for at most: the first, and one retry when the wording or a counter-offer fails. */
 export const MAX_ATTEMPTS = 2;
 
-/** One clause as the model reports it. Later tickets add fields (counter-offer). */
+/** A clause's counter-offer, as the model reports it. */
+export type ModelCounterOffer = {
+  /** The wording the buyer proposes in place of the clause's sentence. */
+  replacement: string;
+  /** A short message to the vendor asking for the change. */
+  message: string;
+};
+
+/** One clause as the model reports it. */
 export type ModelAnalysisItem = {
   clause_type: string;
   sentence: string;
   statement: string;
   exposure: { money: string | null; lock_in: string | null; exit_difficulty: string | null };
   readings: string[];
+  counter_offer: ModelCounterOffer;
 };
 
 /** One sentence that brings in outside terms, as the model reports it. */
@@ -159,8 +177,14 @@ export const ANALYSIS_SCHEMA: JsonSchema = {
             additionalProperties: false,
           },
           readings: { type: "array", items: { type: "string" } },
+          counter_offer: {
+            type: "object",
+            properties: { replacement: { type: "string" }, message: { type: "string" } },
+            required: ["replacement", "message"],
+            additionalProperties: false,
+          },
         },
-        required: ["clause_type", "sentence", "statement", "exposure", "readings"],
+        required: ["clause_type", "sentence", "statement", "exposure", "readings", "counter_offer"],
         additionalProperties: false,
       },
     },
@@ -202,14 +226,18 @@ function systemPrompt(): string {
     "  - exit_difficulty: what makes getting out hard, such as a notice period or method, or a termination fee.",
     "  Never put words in exposure that are not in the cited sentence, and never work out a figure the sentence does not state.",
     "- readings: how the sentence reads. Give one reading when it has one meaning. Give exactly two readings only when the sentence can genuinely be read two ways, each a plain sentence stating one meaning.",
+    "- counter_offer: what the buyer asks the vendor to change in this sentence. Every clause you report needs one.",
+    "  - replacement: the wording the buyer proposes in place of the cited sentence, written as contract text in the contract's own style and defined terms (for example \"Customer\" and \"Provider\"), ready to drop in where the sentence stands. It replaces the whole sentence, so it must read on its own and must differ from it. Change what exposes the buyer in this sentence, such as a shorter term or notice period, renewal only by written agreement, a cap on the renewal fee, a simpler notice method or no fee for ending early, and keep the rest. For a sentence that reads two ways, make the replacement say plainly which meaning applies, the one that protects the buyer.",
+    "  - message: a short message from the buyer to the vendor asking for this change, two to four plain sentences in the first person (\"we\"), polite and direct, that the buyer could send with light editing. Say what the sentence does now and what the buyer is asking for. Do not quote the sentence or the replacement, because Redline shows both beside the message. No threats, no legal advice, and nothing about what other vendors or contracts do.",
+    "  - Write permissions with \"can\" or \"is entitled to\", never with \"may\", in both the replacement and the message.",
     "",
     "Rules:",
     "- Report every sentence that belongs to the family. A sentence can be reported more than once with different clause types.",
     "- Report one whole sentence per item.",
     "- Do not report clauses outside the family, such as liability caps, indemnities, price increases, payment terms, governing law or termination for breach.",
     "- If the document has no clause of a type, report nothing for it. Never invent a sentence.",
-    `- In statements and readings, never hedge: do not use ${HEDGING_TERMS.map((t) => `\"${t}\"`).join(", ")}. State what the sentence says. If it is unclear, give two readings instead of hedging.`,
-    `- In statements and readings, never compare the clause with the market, the industry or other contracts: do not use ${MARKET_TERMS.map((t) => `\"${t}\"`).join(", ")}.`,
+    `- In statements, readings and counter-offers, never hedge: do not use ${HEDGING_TERMS.map((t) => `\"${t}\"`).join(", ")}. State what the sentence says. If it is unclear, give two readings instead of hedging.`,
+    `- In statements, readings and counter-offers, never compare the clause with the market, the industry or other contracts: do not use ${MARKET_TERMS.map((t) => `\"${t}\"`).join(", ")}.`,
     "",
     "Outside terms: separately, in outside_terms, report every sentence that brings in terms from another document the contract does not contain, such as online terms of service, a policy at a URL, an order form, a statement of work or a price list. This is not limited to renewal and exit. For each, report:",
     "- sentence: the whole sentence, copied exactly as it appears in the document, character for character, as for clauses.",
@@ -259,6 +287,7 @@ function userPrompt(text: string, redLines: readonly RedLine[]): string {
     "Red lines are checked in code against the exposure you report, so for every clause of these types, copy into exposure the exact words that state the figure, with its number, whenever the sentence states one:",
     figures,
     "Do not say whether a red line is breached, and still report every clause in the family, not only these types.",
+    "Write each counter-offer so its replacement stays within the buyer's red lines for its clause type.",
     "",
     `<document>\n${text}</document>`,
   ].join("\n");
@@ -295,6 +324,8 @@ type Processed = {
   obligationsDropped: DroppedObligation[];
   /** Generated text in the flags and notices that would be shown, for the wording check. */
   pieces: WordingPiece[];
+  /** Kept flags without a usable counter-offer. Any one makes the answer unusable. */
+  counterOfferDefects: CounterOfferDefect[];
 };
 
 /** Checks each outside-terms sentence the model returned, exactly as a flag's citation is checked. */
@@ -423,6 +454,7 @@ function processAnswer(answer: unknown, text: string, redLines: readonly RedLine
   const kept: (Omit<Flag, "id"> & { index: number })[] = [];
   const dropped: DroppedItem[] = [];
   const exposureDropped: DroppedExposure[] = [];
+  const counterOfferDefects: CounterOfferDefect[] = [];
   const seen = new Set<string>();
 
   items.forEach((item, index) => {
@@ -454,10 +486,29 @@ function processAnswer(answer: unknown, text: string, redLines: readonly RedLine
     );
     for (const d of lost) exposureDropped.push({ index, ...d });
 
+    // Checked only once the flag would be shown: an item that is dropped
+    // takes its counter-offer with it, and nobody sees either.
+    const offer = readCounterOffer(raw.counter_offer, citation);
+    if (!offer.ok) {
+      counterOfferDefects.push({ field: `clause ${index + 1} (${clauseType})`, clauseType, problem: offer.problem });
+      return;
+    }
+
     const moneyAmount = exposure.money ? parseMoneyAmount(exposure.money) : null;
     const redLineBreaches = findBreaches({ clauseType, exposure }, redLines);
     const tier = assignTier({ exposure, readings }, redLineBreaches);
-    kept.push({ index, clauseType, citation, tier, statement, exposure, moneyAmount, readings, redLineBreaches });
+    kept.push({
+      index,
+      clauseType,
+      citation,
+      tier,
+      statement,
+      exposure,
+      moneyAmount,
+      readings,
+      redLineBreaches,
+      counterOffer: offer.counterOffer,
+    });
   });
 
   // Ids follow document order; the list itself is ranked.
@@ -468,6 +519,7 @@ function processAnswer(answer: unknown, text: string, redLines: readonly RedLine
     return [
       { field: `${where} statement`, text: flag.statement },
       ...flag.readings.map((r, i) => ({ field: `${where} reading ${i + 1}`, text: r })),
+      ...counterOfferPieces(flag.counterOffer, where),
     ];
   });
 
@@ -493,18 +545,55 @@ function processAnswer(answer: unknown, text: string, redLines: readonly RedLine
     obligationsReturned: obligationItems.length,
     obligationsDropped,
     pieces: [...summaryPieceList, ...obligationPieceList, ...pieces, ...noticePieces],
+    counterOfferDefects,
   };
 }
 
-function retryMessage(defects: WordingAttempt["defects"]): string {
-  return [
-    "Your answer broke the wording rules. These pieces of your answer use words that are not allowed:",
-    ...defects.map((d) => `- ${d.field}: "${d.term}"`),
-    "",
-    `Rewrite them as plain statements of what the sentence says. Never use any of: ${BANNED_TERMS.map((t) => `"${t}"`).join(", ")}.`,
-    "If a sentence genuinely reads two ways, give both readings instead of hedging.",
+/**
+ * A flag still had no usable counter-offer after one retry, so the analysis
+ * failed: nothing is shown and nothing is saved. A bad answer from the model,
+ * so it is a ModelOutputError.
+ */
+export class CounterOfferDefectsError extends ModelOutputError {
+  readonly attempts: CounterOfferAttempt[];
+  constructor(attempts: CounterOfferAttempt[]) {
+    const last = attempts.at(-1)?.defects ?? [];
+    super(`The analysis had flags without a usable counter-offer after a retry (${last.map((d) => d.field).join(", ")}).`);
+    this.name = "CounterOfferDefectsError";
+    this.attempts = attempts;
+  }
+}
+
+const PROBLEM_TEXT: Record<CounterOfferDefect["problem"], string> = {
+  missing: "has no counter_offer, or one with an empty replacement or message",
+  unchanged: "has a counter_offer whose replacement repeats the sentence without changing it",
+};
+
+function retryMessage(wordingDefects: WordingAttempt["defects"], offerDefects: CounterOfferDefect[]): string {
+  const lines: string[] = [];
+  if (wordingDefects.length > 0) {
+    lines.push(
+      "Your answer broke the wording rules. These pieces of your answer use words that are not allowed:",
+      ...wordingDefects.map((d) => `- ${d.field}: "${d.term}"`),
+      "",
+      `Rewrite them as plain statements of what the sentence says. Never use any of: ${BANNED_TERMS.map((t) => `"${t}"`).join(", ")}.`,
+      "If a sentence genuinely reads two ways, give both readings instead of hedging. In a counter-offer, write permissions with \"can\" or \"is entitled to\".",
+      "",
+    );
+  }
+  if (offerDefects.length > 0) {
+    lines.push(
+      "Every clause needs a counter_offer. These clauses in your answer don't have a usable one:",
+      ...offerDefects.map((d) => `- ${d.field} ${PROBLEM_TEXT[d.problem]}`),
+      "",
+      "Give each of them a counter_offer: a replacement that changes the cited sentence to protect the buyer, and a short message to the vendor asking for that change.",
+      "",
+    );
+  }
+  lines.push(
     "Keep every quoted sentence, exposure fragment and stated date exactly as before, and keep every summary point, notice obligation and outside-terms sentence. Return the whole answer again in the same JSON shape.",
-  ].join("\n");
+  );
+  return lines.join("\n");
 }
 
 export async function analyse({ text, redLines, client }: AnalyseInput): Promise<AnalyseResult> {
@@ -514,16 +603,23 @@ export async function analyse({ text, redLines, client }: AnalyseInput): Promise
 
   const messages = buildAnalysisMessages(text, redLines);
   const wording: WordingAttempt[] = [];
+  const counterOffers: CounterOfferAttempt[] = [];
 
   for (let attempt = 1; ; attempt++) {
     const answer = await client.complete({ task: ANALYSIS_TASK, messages, schema: ANALYSIS_SCHEMA });
     const processed = processAnswer(answer, text, redLines);
     const defects = findWordingDefects(processed.pieces);
+    const offerDefects = processed.counterOfferDefects;
     wording.push({ attempt, defects });
+    counterOffers.push({ attempt, defects: offerDefects });
 
-    if (defects.length > 0) {
-      if (attempt >= MAX_ATTEMPTS) throw new WordingDefectsError(wording);
-      messages.push({ role: "assistant", content: JSON.stringify(answer) }, { role: "user", content: retryMessage(defects) });
+    if (defects.length > 0 || offerDefects.length > 0) {
+      if (attempt >= MAX_ATTEMPTS) {
+        // Hedging is reported first: it has its own words for the buyer.
+        if (defects.length > 0) throw new WordingDefectsError(wording);
+        throw new CounterOfferDefectsError(counterOffers);
+      }
+      messages.push({ role: "assistant", content: JSON.stringify(answer) }, { role: "user", content: retryMessage(defects, offerDefects) });
       continue;
     }
 
@@ -554,6 +650,7 @@ export async function analyse({ text, redLines, client }: AnalyseInput): Promise
         noticeObligationsReturned: obligationsReturned,
         noticeObligationsDropped: obligationsDropped,
         wording,
+        counterOffers,
       },
     };
   }

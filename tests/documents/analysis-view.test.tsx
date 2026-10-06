@@ -5,6 +5,7 @@ import {
   ANALYSIS_COPY,
   CLAUSE_LABEL,
   CLEAN_COPY,
+  COUNTER_OFFER_COPY,
   FAILURE_COPY,
   OBLIGATION_COPY,
   OUTSIDE_COPY,
@@ -16,7 +17,7 @@ import {
 import { analyse } from "@/lib/engine/analyse";
 import type { Analysis, RedLine } from "@/lib/engine/types";
 import { loadFixture } from "../fixtures/index";
-import { analysisPayload, clauseById, scriptedClient } from "../support/model-payloads";
+import { SIDECAR_COUNTER_OFFERS, analysisPayload, clauseById, scriptedClient } from "../support/model-payloads";
 import { CLAUSE_TYPES } from "../fixtures/index";
 
 // What the buyer sees on the document view once an analysis exists: flags as
@@ -206,6 +207,52 @@ const checklistOf = (html: string) =>
     decode(m[1]),
     decode(m[2]),
   ]);
+
+/** A margin comment's raw markup, found by the item id on the mark over its sentence. */
+const rawCommentOf = (html: string, sentence: string) => {
+  const item = html.match(new RegExp(`<mark[^>]*data-items="([fn]\\d+)[^"]*"[^>]*>${escapeHtml(sentence.slice(0, 30)).replace(/[.*+?^${}()|[\]\\$]/g, "\\$&")}`))![1];
+  return html.match(new RegExp(`<aside[^>]*data-item="${item}"[^>]*>([\\s\\S]*?)</aside>`))![1];
+};
+
+describe("counter-offers in each flag's margin comment", () => {
+  it("shows the cited sentence struck through and the proposed wording inserted, then the message, with a control to copy it", async () => {
+    const html = render({ kind: "saved", documentId: "d", latest: { analysis: await savedAnalysis(), ranAt: "2026-10-06T10:00:00Z", redLines: [] } });
+    for (const clause of sidecar.clauses) {
+      const offer = SIDECAR_COUNTER_OFFERS[clause.id];
+      const raw = rawCommentOf(html, clause.sentence);
+      const del = decode(raw.match(/<del>([\s\S]*?)<\/del>/)![1]);
+      const ins = decode(raw.match(/<ins>([\s\S]*?)<\/ins>/)![1]);
+      // The edit answers this flag's own sentence, word for word.
+      expect(del, clause.id).toBe(`${COUNTER_OFFER_COPY.now} ${clause.sentence}`);
+      expect(ins, clause.id).toBe(`${COUNTER_OFFER_COPY.proposed} ${offer.replacement}`);
+      const comment = decode(raw);
+      expect(comment).toContain(`${COUNTER_OFFER_COPY.lead} ${COUNTER_OFFER_COPY.leadRest}`);
+      expect(comment).toContain(`${COUNTER_OFFER_COPY.messageLabel}${offer.message}`);
+      expect(raw).toMatch(new RegExp(`<button type="button" class="text-action">${COUNTER_OFFER_COPY.copy}</button>`));
+    }
+  });
+
+  it("copies the message with the sentence as it stands and the proposed wording", () => {
+    const c2 = clauseById(sidecar, "c2");
+    const offer = SIDECAR_COUNTER_OFFERS.c2;
+    const sent = COUNTER_OFFER_COPY.toSend(offer.message, c2.sentence, offer.replacement);
+    expect(sent.startsWith(offer.message)).toBe(true);
+    expect(sent).toContain(`“${c2.sentence}”`);
+    expect(sent).toContain(`“${offer.replacement}”`);
+    expect(sent.indexOf(c2.sentence)).toBeLessThan(sent.indexOf(offer.replacement));
+  });
+
+  it("has no counter-offer area on an outside-terms notice", async () => {
+    const html = render({ kind: "saved", documentId: "d", latest: { analysis: await savedAnalysis(), ranAt: "2026-10-06T10:00:00Z", redLines: [] } });
+    const raw = rawCommentOf(html, sidecar.outsideTerms[0].sentence);
+    expect(raw).not.toMatch(/counter-offer|<del>|<ins>|<button/);
+    expect(decode(raw)).not.toContain(COUNTER_OFFER_COPY.copy);
+  });
+
+  it("has words for an analysis that came back without its counter-offers twice", () => {
+    expect(FAILURE_COPY["counter-offer-failed"].body).toMatch(/didn’t show it or save it/);
+  });
+});
 
 describe("outside-terms notices on the document view", () => {
   const outside = sidecar.outsideTerms[0];
