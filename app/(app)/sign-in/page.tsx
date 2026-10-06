@@ -9,7 +9,7 @@ import { SignInForm } from "./sign-in-form";
 export const metadata: Metadata = { title: "Sign in" };
 
 const NOTICES: Record<string, string> = {
-  confirm: "That confirmation link has expired or was already used. Sign in, or create the account again to get a new link.",
+  confirm: "That sign-in link has expired or was already used. Enter your email and we’ll send a new one.",
 };
 
 export default async function SignInPage({

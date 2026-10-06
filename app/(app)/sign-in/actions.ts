@@ -13,24 +13,16 @@ export type AuthFormState =
 
 const ACCOUNTS_OFF = "Accounts aren’t set up on this server, so you can’t sign in here.";
 
-function errorMessage(code: string | undefined, fallback: string, intent: "sign-in" | "sign-up"): string {
+function errorMessage(code: string | undefined, fallback: string): string {
   switch (code) {
-    case "invalid_credentials":
-      return "That email and password don’t match an account.";
-    case "email_not_confirmed":
-      return "This account isn’t confirmed yet. Open the link in the email we sent when you signed up, then sign in.";
-    case "user_already_exists":
-    case "email_exists":
-      return "There’s already an account for this email. Sign in instead.";
-    case "weak_password":
-      return `That password is too weak. ${fallback}`;
+    case "email_address_invalid":
+    case "validation_failed":
+      return "That doesn’t look like an email address. Check it and try again.";
     case "over_request_rate_limit":
     case "over_email_send_rate_limit":
       return "Too many attempts. Wait a few minutes and try again.";
     default:
-      return intent === "sign-up"
-        ? `We couldn’t create the account. ${fallback}`
-        : `We couldn’t sign you in. ${fallback}`;
+      return `We couldn’t send the sign-in link. ${fallback}`;
   }
 }
 
@@ -44,38 +36,26 @@ async function siteOrigin(): Promise<string | null> {
   return `${proto}://${host}`;
 }
 
-export async function authenticate(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
-  const intent = formData.get("intent") === "sign-up" ? "sign-up" : "sign-in";
+// Sign-in is by emailed link only. The same link creates the account the first
+// time an email is used, so there is no separate sign-up.
+export async function sendSignInLink(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
   const email = String(formData.get("email") ?? "").trim();
-  const password = String(formData.get("password") ?? "");
   const next = safeNextPath(formData.get("next"));
 
   if (!isSupabaseConfigured()) return { kind: "error", message: ACCOUNTS_OFF, email };
-  if (!email || !password) {
-    return { kind: "error", message: "Enter your email and a password.", email };
-  }
+  if (!email) return { kind: "error", message: "Enter your email.", email };
 
   const supabase = await createServerSupabase();
-
-  if (intent === "sign-in") {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) return { kind: "error", message: errorMessage(error.code, error.message, intent), email };
-    redirect(next);
-  }
-
   const origin = await siteOrigin();
-  const { data, error } = await supabase.auth.signUp({
+  const { error } = await supabase.auth.signInWithOtp({
     email,
-    password,
-    options: origin
-      ? { emailRedirectTo: `${origin}/auth/confirm?next=${encodeURIComponent(next)}` }
-      : undefined,
+    options: {
+      shouldCreateUser: true,
+      emailRedirectTo: origin ? `${origin}/auth/confirm?next=${encodeURIComponent(next)}` : undefined,
+    },
   });
-  if (error) return { kind: "error", message: errorMessage(error.code, error.message, intent), email };
-
-  // With email confirmation on (Supabase's default), there is no session yet.
-  if (!data.session) return { kind: "check-email", email };
-  redirect(next);
+  if (error) return { kind: "error", message: errorMessage(error.code, error.message), email };
+  return { kind: "check-email", email };
 }
 
 export async function signOut(): Promise<void> {

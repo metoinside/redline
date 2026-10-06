@@ -1,19 +1,19 @@
 "use client";
 
 import { useActionState } from "react";
-import { authenticate, type AuthFormState } from "./actions";
+import { sendSignInLink, type AuthFormState } from "./actions";
 
 const INITIAL: AuthFormState = { kind: "idle" };
 
 export function SignInForm({ next, notice }: { next: string; notice: string | null }) {
-  const [state, action, pending] = useActionState(authenticate, INITIAL);
+  const [state, action, pending] = useActionState(sendSignInLink, INITIAL);
 
   if (state.kind === "check-email") {
     return (
       <div className="prose" role="status">
         <p className="message">
           <strong>Check your email.</strong>
-          We sent a confirmation link to {state.email}. Open it to finish creating your account, then sign in here.
+          We sent a sign-in link to {state.email}. Open it on this device, in this browser.
         </p>
       </div>
     );
@@ -32,18 +32,22 @@ export function SignInForm({ next, notice }: { next: string; notice: string | nu
       <input type="hidden" name="next" value={next} />
       <div className="field">
         <label htmlFor="email">Email</label>
-        <input id="email" name="email" type="email" autoComplete="email" required defaultValue={email} />
-      </div>
-      <div className="field">
-        <label htmlFor="password">Password</label>
-        <input id="password" name="password" type="password" autoComplete="current-password" required />
+        <input
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          required
+          defaultValue={email}
+          aria-describedby="email-hint"
+        />
+        <p id="email-hint" className="hint">
+          We’ll email you a link to sign in. If you don’t have an account yet, the link creates one.
+        </p>
       </div>
       <div className="form-actions">
-        <button className="action" type="submit" name="intent" value="sign-in" disabled={pending}>
-          <span>Sign in</span>
-        </button>
-        <button className="text-action" type="submit" name="intent" value="sign-up" disabled={pending}>
-          Create an account
+        <button className="action" type="submit" disabled={pending}>
+          <span>Email me a sign-in link</span>
         </button>
       </div>
     </form>

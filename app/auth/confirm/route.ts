@@ -4,7 +4,7 @@ import { safeNextPath } from "@/lib/auth/next-path";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createServerSupabase } from "@/lib/supabase/server";
 
-// Where the sign-up confirmation email lands. Supabase sends either a PKCE
+// Where the emailed sign-in link lands. Supabase sends either a PKCE
 // `code` or a `token_hash` with its `type`, depending on the email template.
 export async function GET(request: NextRequest) {
   const url = request.nextUrl;
