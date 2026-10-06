@@ -20,7 +20,7 @@ Unattended build, 2026-10-05 23:27 to 2026-10-06. The spec is issue #1 and the t
 |---|---|---|---|
 | Scaffold: Next.js app, landing moved in | done | 18f8000 | |
 | Fixtures | done | 157f676 | |
-| #2 Sign in and an empty library | done except the deploy | 9386235 | The Vercel deploy. Sign-up and sign-in against a live Supabase project |
+| #2 Sign in and an empty library | done | 9386235 | Sign-up and sign-in against a live Supabase project |
 | #3 Upload a contract and see its extracted text | done | f4930ec | Saving to the library against live Supabase. The signed-out path was checked in headless Chrome |
 | #4 First flag with a checked citation | done | 11e43e5 | The real model. Saving analyses against live Supabase |
 | #5 All five clause types, tiers and exposure | done | 462b4cc | The real model |
@@ -82,7 +82,7 @@ No ticket failed verification or was sent back.
 
 - **Model:** every real-model path (analysis, question box, smoke) failed on the 401 key. The OpenRouter request shape (provider pin, low reasoning effort, strict `json_schema`, model from `OPENROUTER_MODEL`) is proven only against a fake network.
 - **Supabase:** sign-up, sign-in, email confirmation, every save and load, and delete. The code uses the real client, but no project exists.
-- **Vercel:** nothing was deployed by hand. Pushing to `main` triggers a deploy, but the project's Root Directory still points at the deleted `landing/` folder, so that deploy will fail until it is changed. The previous deployment stays live.
+- **Vercel:** the first deploy after the build returned 404 on every page, because the project still used the static-site settings. After the owner changed the settings on 2026-10-06, the app is live at https://redline-lemon-three.vercel.app/ and `/`, `/new` and `/sign-in` return 200. Sign-in and analysis there still depend on the Supabase project and the environment variables.
 
 ## Run these first
 
@@ -101,6 +101,6 @@ No ticket failed verification or was sent back.
    supabase/migrations/20261006150000_red_lines.sql
    supabase/migrations/20261006180000_questions.sql
    ```
-   Add `<your site>/auth/confirm` to the project's allowed redirect URLs. Then rebuild (`npm run build && npm start`), because `NEXT_PUBLIC_` values are baked in at build time.
-3. In Vercel, set the Root Directory to the repo root, and add the four variables. `OPENROUTER_*` goes in server-side environment variables only.
+   In Supabase, set the Site URL to `https://redline-lemon-three.vercel.app` and add `https://redline-lemon-three.vercel.app/auth/confirm` (and `http://localhost:3000/auth/confirm` for local work) to the allowed redirect URLs. Then rebuild (`npm run build && npm start`), because `NEXT_PUBLIC_` values are baked in at build time.
+3. In Vercel, add the four variables and redeploy. `OPENROUTER_*` goes in server-side environment variables only. The project settings (Next.js preset, repo root) are already fixed.
 4. Answer the open entries in `QUESTIONS.md` (dependencies, red-line scope, test-set size), then start #12.
