@@ -61,7 +61,7 @@ function render(source: AnalysisSource, modelConfigured = true) {
 
 describe("the question box on a saved document", () => {
   it("offers the box and says it answers only from this document", () => {
-    const html = render({ kind: "saved", documentId: "d", latest: null, questions: [] });
+    const html = render({ kind: "saved", documentId: "d", run: null, questions: [] });
     const box = decode(askBoxOf(html));
     expect(box).toContain(ASK_COPY.heading);
     expect(box).toContain(ASK_COPY.note);
@@ -73,7 +73,7 @@ describe("the question box on a saved document", () => {
 
   it("lists earlier questions newest first, each answer with its sentence, and marks each sentence in the unchanged text", async () => {
     const questions = [await saved(renewal, "22222222-2222-4222-8222-222222222222"), await saved(fee, "11111111-1111-4111-8111-111111111111")];
-    const html = render({ kind: "saved", documentId: "d", latest: null, questions });
+    const html = render({ kind: "saved", documentId: "d", run: null, questions });
 
     expect(docTextOf(html)).toBe(contract);
     const items = itemsOf(html);
@@ -93,7 +93,7 @@ describe("the question box on a saved document", () => {
   });
 
   it("shows the document doesn't say, and marks nothing, for a question the document doesn't answer", async () => {
-    const html = render({ kind: "saved", documentId: "d", latest: null, questions: [await saved(unanswerable, "33333333-3333-4333-8333-333333333333")] });
+    const html = render({ kind: "saved", documentId: "d", run: null, questions: [await saved(unanswerable, "33333333-3333-4333-8333-333333333333")] });
     const [item] = itemsOf(html);
     expect(item).toContain(unanswerable.question);
     expect(item).toContain(`${ASK_COPY.answerLead} ${NOT_SAID}.`);
@@ -110,7 +110,7 @@ describe("the question box on a saved document", () => {
       result: { ...answer, citation: { ...answer.citation, text: answer.citation.text.replace("$42,000", "$40,000") } },
       askedAt: "2026-10-06T11:00:00Z",
     };
-    const html = render({ kind: "saved", documentId: "d", latest: null, questions: [stale] });
+    const html = render({ kind: "saved", documentId: "d", run: null, questions: [stale] });
     const [item] = itemsOf(html);
     expect(item).toContain(NOT_SAID);
     expect(item).not.toContain(fee.answer);
@@ -126,17 +126,17 @@ describe("the question box on a saved document", () => {
       result: { ...answer, text: "It might be $42,000 per year." } as Answer,
       askedAt: "2026-10-06T11:00:00Z",
     };
-    const [item] = itemsOf(render({ kind: "saved", documentId: "d", latest: null, questions: [hedged] }));
+    const [item] = itemsOf(render({ kind: "saved", documentId: "d", run: null, questions: [hedged] }));
     expect(item).toContain(ASK_COPY.rejected);
     expect(item).not.toContain("might");
   });
 
   it("says when the earlier questions couldn't be loaded", () => {
-    expect(decode(render({ kind: "saved", documentId: "d", latest: null, questions: null }))).toContain(ASK_COPY.loadFailed);
+    expect(decode(render({ kind: "saved", documentId: "d", run: null, questions: null }))).toContain(ASK_COPY.loadFailed);
   });
 
   it("says questions aren't set up, with no box, when no model is connected", () => {
-    const html = render({ kind: "saved", documentId: "d", latest: null, questions: [] }, false);
+    const html = render({ kind: "saved", documentId: "d", run: null, questions: [] }, false);
     expect(decode(askBoxOf(html))).toContain(ASK_COPY.modelOff.title);
     expect(html).not.toMatch(/name="question"/);
   });

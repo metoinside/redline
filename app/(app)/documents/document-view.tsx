@@ -21,6 +21,7 @@ export function DocumentView({
   sourceKind,
   addedAt,
   notice,
+  actions,
   analysis,
   marks,
   margin,
@@ -33,6 +34,8 @@ export function DocumentView({
   sourceKind: SourceKind;
   addedAt: string;
   notice?: ReactNode;
+  /** Controls in the heading, such as deleting a saved document. */
+  actions?: ReactNode;
   analysis?: ReactNode;
   marks?: TextMark[];
   margin?: ReactNode;
@@ -52,6 +55,7 @@ export function DocumentView({
           This is the text Redline read, word for word. Check it’s the contract you meant to add.
         </p>
         {notice}
+        {actions}
       </header>
       {analysis}
       {tabs}

@@ -77,6 +77,26 @@ export const ANALYSIS_COPY = {
 } as const;
 
 /**
+ * Opening a past analysis from the library (#11). An older run says so, with
+ * the red lines from its own snapshot, never the buyer's current ones.
+ */
+export const HISTORY_COPY = {
+  older: {
+    title: "You’re looking at an older analysis.",
+    body: "This contract has been analysed again since. Below is the result of this earlier run.",
+    redLines: "It ran with these red lines, as you had them then:",
+    noRedLines: "It ran with no red lines set.",
+    latest: "Go to the latest analysis",
+    all: "See every analysis in your library",
+  },
+  missing: {
+    title: "That analysis isn’t in your library.",
+    body: "It was deleted, or the link is wrong.",
+    bodyLatest: "It was deleted, or the link is wrong. Below is the latest analysis of this contract.",
+  },
+} as const;
+
+/**
  * What the buyer reads about red lines in the analysis view: the ones a run
  * used, and on each flag that crosses one, which. The red lines themselves
  * are put in words by describeRedLine (lib/engine/red-lines.ts).

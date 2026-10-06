@@ -19,7 +19,7 @@ describe("account pages on a server without accounts", () => {
   });
 
   it("the library says accounts are not set up", async () => {
-    const html = renderToStaticMarkup(await LibraryPage());
+    const html = renderToStaticMarkup(await LibraryPage({ searchParams: Promise.resolve({}) }));
     expect(html).toContain("Accounts aren’t set up on this server.");
     expect(html).not.toContain("<form");
   });

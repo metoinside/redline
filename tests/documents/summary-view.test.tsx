@@ -32,7 +32,7 @@ async function savedAnalysis(payload: unknown = analysisPayload(sidecar), text =
 }
 
 function render(analysis: Analysis, body = contract) {
-  const source: AnalysisSource = { kind: "saved", documentId: "d", latest: { analysis, ranAt: ran, redLines: [] } };
+  const source: AnalysisSource = { kind: "saved", documentId: "d", run: { analysis, ranAt: ran, redLines: [] } };
   return renderToStaticMarkup(
     <AnalysedDocument title="Halvard MSA" body={body} sourceKind="pdf" addedAt="2026-10-06T09:00:00Z" source={source} modelConfigured />,
   );

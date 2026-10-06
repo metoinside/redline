@@ -3,8 +3,10 @@
 // Runs an analysis, or answers a question, on the server, where the
 // OpenRouter key lives. The browser calls these by reference and gets back
 // only the analysis or the answer: the key, the model and the model's raw
-// answer never leave the server.
+// answer never leave the server. Deleting a saved document runs here too.
 
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { checkDocumentText } from "@/lib/documents/new-document";
 import { runSavedAnalysis } from "@/lib/documents/saved-run";
 import { runSavedQuestion } from "@/lib/documents/saved-question";
@@ -241,4 +243,37 @@ export async function askBrowserDocument(body: unknown, question: unknown): Prom
   if (!engine.ok) return engine;
   const { value } = engine;
   return { ok: true, asked: { id: null, question: value.question, result: value.answer, askedAt: new Date().toISOString() } };
+}
+
+// ---------- Deleting a document ----------
+
+export type DeleteDocumentFailure = "accounts-off" | "signed-out" | "invalid" | "not-found" | "delete-failed";
+
+export type DeleteDocumentState = { kind: "idle" } | { kind: "error"; reason: DeleteDocumentFailure };
+
+/**
+ * Deletes a document from the signed-in buyer's library, with its analyses
+ * and questions (the foreign keys cascade). The delete runs under row-level
+ * security, so only the owner's own document can go; a document that isn't
+ * theirs, or is already gone, deletes nothing. On success the buyer lands on
+ * the library, which says the document was deleted.
+ */
+export async function deleteDocument(_prev: DeleteDocumentState, formData: FormData): Promise<DeleteDocumentState> {
+  if (!isSupabaseConfigured()) return { kind: "error", reason: "accounts-off" };
+  const documentId = formData.get("documentId");
+  if (typeof documentId !== "string" || !UUID.test(documentId)) return { kind: "error", reason: "invalid" };
+
+  const user = await getCurrentUser();
+  if (!user) return { kind: "error", reason: "signed-out" };
+
+  const supabase = await createServerSupabase();
+  const { data, error } = await supabase.from("documents").delete().eq("id", documentId).eq("user_id", user.id).select("id");
+  if (error) {
+    console.error("[library] could not delete a document", error.code);
+    return { kind: "error", reason: "delete-failed" };
+  }
+  if (!data || data.length === 0) return { kind: "error", reason: "not-found" };
+
+  revalidatePath("/library");
+  redirect("/library?deleted=1");
 }

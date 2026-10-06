@@ -14,7 +14,7 @@ import {
   type ReactNode,
   type RefObject,
 } from "react";
-import { describeRedLine } from "@/lib/engine/red-lines";
+import { describeRedLine, parseRedLines } from "@/lib/engine/red-lines";
 import { checkStoredAnalysis } from "@/lib/engine/stored";
 import {
   EXPOSURE_PARTS,
@@ -38,6 +38,7 @@ import {
   COUNTER_OFFER_COPY,
   EXPOSURE_LABEL,
   FAILURE_COPY,
+  HISTORY_COPY,
   OBLIGATION_COPY,
   OUTSIDE_COPY,
   RED_LINE_COPY,
@@ -96,11 +97,21 @@ import { QuestionBox, answerMarks, showQuestion, type ShownQuestion } from "./qu
 
 export type AnalysisSource =
   /**
-   * A document in the buyer's library: runs and questions are saved, and the
-   * latest run and the earlier questions (newest first) are shown on load.
-   * questions is null when they couldn't be loaded.
+   * A document in the buyer's library: runs and questions are saved, and a
+   * run (the latest, or the one the link names) and the earlier questions
+   * (newest first) are shown on load. older is true when that run isn't the
+   * latest, and the panel says so with the red lines it ran with. missingRun
+   * is true when the link named a run that isn't in the library, and the
+   * latest is shown instead. questions is null when they couldn't be loaded.
    */
-  | { kind: "saved"; documentId: string; latest: AnalysisRun | null; questions?: AskedQuestion[] | null }
+  | {
+      kind: "saved";
+      documentId: string;
+      run: AnalysisRun | null;
+      older?: boolean;
+      missingRun?: boolean;
+      questions?: AskedQuestion[] | null;
+    }
   /** A document kept in this browser tab only: runs and questions are not saved, and runs have no red lines. */
   | { kind: "browser"; accountsConfigured: boolean };
 
@@ -164,6 +175,7 @@ export function AnalysedDocument({
   notice,
   source,
   modelConfigured,
+  headerActions,
 }: {
   title: string;
   body: string;
@@ -172,9 +184,17 @@ export function AnalysedDocument({
   notice?: ReactNode;
   source: AnalysisSource;
   modelConfigured: boolean;
+  /** Controls in the document's heading, such as deleting a saved document. */
+  headerActions?: ReactNode;
 }) {
   const ids = useId();
-  const [initial] = useState(() => checkRun(source.kind === "saved" ? source.latest : null, body));
+  const [initial] = useState(() => checkRun(source.kind === "saved" ? source.run : null, body));
+  // Viewing an older run, or a link to a run that's gone. Both clear once a new run arrives.
+  const [older, setOlder] = useState(source.kind === "saved" && source.older === true && source.run !== null);
+  const [missingRun, setMissingRun] = useState(source.kind === "saved" && source.missingRun === true);
+  const [olderRedLines] = useState<RedLine[] | null>(() =>
+    initial.run ? initial.run.redLines : source.kind === "saved" && source.run ? parseRedLines(source.run.redLines) : null,
+  );
   const [run, setRun] = useState<ShownRun | null>(initial.run);
   const [storedNotice, setStoredNotice] = useState<StoredNotice | null>(initial.notice);
   const [failure, setFailure] = useState<Failure | null>(null);
@@ -225,6 +245,12 @@ export function AnalysedDocument({
         return;
       }
       setStoredNotice(null);
+      if (source.kind === "saved" && (older || missingRun)) {
+        // The new run is the latest, so the address stops naming the old one.
+        window.history.replaceState(null, "", `/documents/${source.documentId}`);
+      }
+      setOlder(false);
+      setMissingRun(false);
       setRun(next);
       setSelected(firstItemId(next.analysis));
     });
@@ -322,6 +348,37 @@ export function AnalysedDocument({
           <strong>{ANALYSIS_COPY.modelOff.title}</strong>
           {ANALYSIS_COPY.modelOff.body}
         </p>
+      )}
+
+      {missingRun && (
+        <p className="message" role="status">
+          <strong>{HISTORY_COPY.missing.title}</strong>
+          {run ? HISTORY_COPY.missing.bodyLatest : HISTORY_COPY.missing.body}
+        </p>
+      )}
+
+      {older && source.kind === "saved" && (
+        <div className="message analysis-older" role="status">
+          <strong>{HISTORY_COPY.older.title}</strong>
+          <p>{HISTORY_COPY.older.body}</p>
+          {olderRedLines &&
+            (olderRedLines.length === 0 ? (
+              <p>{HISTORY_COPY.older.noRedLines}</p>
+            ) : (
+              <>
+                <p>{HISTORY_COPY.older.redLines}</p>
+                <ul>
+                  {olderRedLines.map((redLine, i) => (
+                    <li key={redLine.id ?? i}>{describeRedLine(redLine)}</li>
+                  ))}
+                </ul>
+              </>
+            ))}
+          <p className="analysis-older-links">
+            <a href={`/documents/${source.documentId}`}>{HISTORY_COPY.older.latest}</a>
+            <a href={`/library#doc-${source.documentId}`}>{HISTORY_COPY.older.all}</a>
+          </p>
+        </div>
       )}
 
       {storedCopy && !run && (
@@ -605,6 +662,7 @@ export function AnalysedDocument({
       sourceKind={sourceKind}
       addedAt={addedAt}
       notice={notice}
+      actions={headerActions}
       analysis={
         <>
           {panel}
