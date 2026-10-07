@@ -24,6 +24,11 @@ describe("assignTier", () => {
     expect(assignTier({ ...noExposure, exposure: { exitDifficulty: "by certified mail" } }, [])).toBe("know");
   });
 
+  // FINDINGS.md #1: a Spanish contract's 90-day written notice window landed in Know before signing.
+  it("lifts a notice period written out in Spanish words", () => {
+    expect(assignTier({ ...noExposure, exposure: { exitDifficulty: "con noventa días de antelación" } }, [])).toBe("negotiate");
+  });
+
   it("lifts a clause that reads two ways", () => {
     expect(assignTier({ exposure: {}, readings: ["One way.", "Another way."] }, [])).toBe("negotiate");
   });

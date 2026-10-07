@@ -13,9 +13,14 @@ import { EXPOSURE_PARTS, type Exposure, type ExposureDropReason, type ExposurePa
 
 const NUMBER_WORDS =
   "one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand|million|billion";
-const FIGURE = new RegExp(`\\p{N}|(?<![\\p{L}])(?:${NUMBER_WORDS})(?![\\p{L}])`, "iu");
+// Spanish, for contracts written in it. "un", "uno" and "una" are left out
+// because they are also the article ("una parte"), and "once" because it is
+// an English word.
+const SPANISH_NUMBER_WORDS =
+  "dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|doce|trece|catorce|quince|dieci\\p{L}+|veinte|veinti\\p{L}+|treinta|cuarenta|cincuenta|sesenta|setenta|ochenta|noventa|cien|ciento|cientos|mil|millón|millones";
+const FIGURE = new RegExp(`\\p{N}|(?<![\\p{L}])(?:${NUMBER_WORDS}|${SPANISH_NUMBER_WORDS})(?![\\p{L}])`, "iu");
 
-/** True when `fragment` states a figure, in digits or in words ("90", "ninety", "thirty-six"). */
+/** True when `fragment` states a figure, in digits or in words ("90", "ninety", "thirty-six", "noventa"). */
 export function hasFigure(fragment: string): boolean {
   return FIGURE.test(fragment);
 }
