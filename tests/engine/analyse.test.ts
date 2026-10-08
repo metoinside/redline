@@ -435,4 +435,12 @@ describe("the request the engine makes", () => {
     expect(request.messages.some((m) => m.content.includes(contract))).toBe(true);
     expect(request.schema).toMatchObject({ type: "object" });
   });
+
+  // FINDINGS.md #2: twelve-month renewals after a thirty-six-month term were flagged as a rollover.
+  it("tells the model a rollover renews for a term as long as the original, or longer (PRD §5)", async () => {
+    const { client } = await run(analysisPayload(sidecar));
+    const system = client.requests[0].messages.find((m) => m.role === "system")!.content;
+    const rollover = system.split("\n").find((line) => line.startsWith("- rollover:"));
+    expect(rollover).toMatch(/as long as the original term, or longer/);
+  });
 });

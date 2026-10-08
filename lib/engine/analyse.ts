@@ -206,7 +206,8 @@ const CLAUSE_TYPE_GUIDE: Record<ClauseType, string> = {
   auto_renewal: "the agreement, or any part of it, renews or extends on its own unless someone acts",
   notice_window: "a deadline or method for giving notice to stop a renewal or to end the agreement",
   early_termination_fee: "a fee, charge or payment owed for ending the agreement early",
-  rollover: "a renewal term's length, or something that restarts, extends or merges terms",
+  rollover:
+    "the agreement renews, restarts or is extended for a term as long as the original term, or longer, including when terms are merged into one that long; a renewal shorter than the original term is not a rollover",
   multi_year_term: "a fixed term longer than one year, or a period during which the customer cannot leave",
 };
 
