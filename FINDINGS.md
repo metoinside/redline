@@ -62,3 +62,23 @@
 - The app said this session was signed out; `/red-lines` led to a sign-in page. I did not enter an email. Library persistence and red-line settings could not be reached in signed-out access.
 - On localhost the signed-in Library showed an existing saved contract and its analysis; reopening its URL and refreshing preserved the document and prior analysis. The red-lines page accepted and displayed a saved 30-day notice limit.
 - The empty red-line form showed native required-field validation instead of saving.
+
+## Security review
+
+Reviewed on 2026-10-08: the whole application on branch `fix-notice-window-tier`, every file treated as new, using the method, confidence bar and false-positive rules in `.claude/commands/security-review.md` from `anthropics/claude-code-security-review`. Covered first: all five files in `supabase/migrations`, sign-in and sign-out (`app/(app)/sign-in/*`, `app/auth/confirm/route.ts`, `lib/auth/next-path.ts`, `proxy.ts`, `lib/supabase/*`), every server action and page that reads or writes the database, and every environment variable read (`lib/supabase/config.ts`, `lib/engine/openrouter.ts`). Then the rest of `app/` and `lib/`. Skipped: `node_modules`, tests, fixtures and lock files.
+
+No problem met the bar (more than 80 percent confident someone could exploit it), so there are no numbered findings in this section.
+
+### Held up
+
+- Every table has row-level security with owner-only policies and a `WITH CHECK` on every insert and update. `anon` has no grants and no one has TRUNCATE. Saved analyses and questions cannot be updated, a red line's owner and dates cannot be changed, and inserting an analysis or question requires owning the document. No function is `security definer`.
+- Every server action that touches the database checks the signed-in user, validates ids as UUIDs, and runs under row-level security with the user's own session; reads and deletes also filter on the user's id. No query filter is built from a string. No server key exists in the code.
+- The sign-in redirect (`next`) accepts only a same-site path, and `/auth/confirm` redirects only within its own origin and fails closed.
+- `OPENROUTER_API_KEY` is read only on the server, refused in the browser, and stripped from error text before it is logged. Only the two `NEXT_PUBLIC_` Supabase values reach the browser. No key is in the git history.
+- No user or model text is rendered as raw HTML, every link the code builds points at an internal id, and the only outbound request goes to a fixed OpenRouter address.
+- DOCX files are read as raw text only and PDFs are parsed in the browser. No file is uploaded or stored.
+
+### Below the bar, worth knowing
+
+- The sign-in action builds the link's return address from the request's `Origin` or `Host` header (`app/(app)/sign-in/actions.ts`, lines 29–36 and 54), which a direct caller can forge. Supabase only honours return addresses on its Redirect URLs allowlist, so this is safe while that list names only Redline's own addresses. It would become an account-takeover risk if a broad wildcard such as `https://*.vercel.app/**` were added. About 40 percent confidence, so not a finding.
+- Signed-out visitors can run analyses and questions on pasted text (`analyseBrowserDocument`, `askBrowserDocument` in `app/(app)/documents/actions.ts`), and each one calls OpenRouter on the owner's key with no limit. The rules exclude cost and rate-limit abuse, so this is not a finding, but it can run up the OpenRouter bill.
