@@ -6,6 +6,7 @@
 - **PRD promise (Section 5, My red lines):** “The notice period or method (for example ‘written’) is stated and the deadline falls before the renewal” goes in *Negotiate before signing*.
 - **What happened instead:** Both analyses showed the 90-day written non-renewal window as a “Notice window” flag in *Know before signing*, even though the text says notice must be given ninety days in advance of renewal.
 - **Seriousness:** Misleads a reader.
+- **Retest (8 Oct 2026, localhost):** The saved Spanish contract was reanalyzed twice. Both current analyses placed the 90-day notice window in *Negotiate before signing*. This finding appears fixed in the current localhost build, although the historical production result remains documented above.
 
 ## 2. A renewal shorter than the initial term is flagged as a rollover (misleads a reader)
 
@@ -42,6 +43,13 @@
 - **What happened instead:** Both analysis attempts displayed “The analysis didn’t finish. Nothing was saved.” No summary or flags were produced.
 - **Seriousness:** Stops a reader.
 
+## 7. Double-clicking analysis saves duplicate, conflicting results (misleads a reader)
+
+- **Steps:** Starting at `http://localhost:3000/`, open the saved `Prompt injection localhost` document; double-click “Analyse again”; wait for completion; repeat the same double-click flow a second time; open Library.
+- **PRD promise (Section 3, Summary and Flags; Section 3, Library):** Redline gives “a plain-English summary” with flags and the Library keeps “each analysis you’ve run on it.”
+- **What happened instead:** Each double-click produced two requests and saved multiple analyses. The Library showed four analyses for the same document: one with 4 flags and three with 5 flags. The 5-flag results added a “Rollover” flag for a 12-month renewal even though the initial term is 24 months, so the same document has conflicting saved results.
+- **Seriousness:** Misleads a reader.
+
 ## Seen once
 
 - One production analysis attempt, triggered by double-clicking “Analyse this contract” on the contract containing a reviewer instruction, displayed “The analysis didn’t finish. Nothing was saved.” A later retry completed successfully, so I could not reproduce the failure there.
@@ -62,6 +70,8 @@
 - The app said this session was signed out; `/red-lines` led to a sign-in page. I did not enter an email. Library persistence and red-line settings could not be reached in signed-out access.
 - On localhost the signed-in Library showed an existing saved contract and its analysis; reopening its URL and refreshing preserved the document and prior analysis. The red-lines page accepted and displayed a saved 30-day notice limit.
 - The empty red-line form showed native required-field validation instead of saving.
+- On the 8 Oct 2026 production rerun, the few-word paste failure reproduced twice; the production tab was signed out, so authenticated Library, red-line and saved-work checks were not reachable without requesting a sign-in email.
+- On the 8 Oct 2026 localhost rerun, the embedded reviewer instruction was ignored: the analysis still surfaced renewal, notice and fee clauses, and the saved 30-day red line put the 60-day notice clause in “Negotiate before signing”.
 
 ## Security review
 
